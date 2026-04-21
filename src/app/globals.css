@@ -20,7 +20,7 @@
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
   --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.16);
   --card-bg: #FFFFFF;
-  --sidebar-bg: #FAFAF7;
+  --navbar-bg: rgba(245, 245, 240, 0.8);
   --overlay: rgba(0, 0, 0, 0.4);
   --particle-color: rgba(74, 124, 89, 0.12);
   --particle-line: rgba(74, 124, 89, 0.06);
@@ -55,7 +55,7 @@
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
   --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.6);
   --card-bg: #161616;
-  --sidebar-bg: #0F0F0F;
+  --navbar-bg: rgba(10, 10, 10, 0.8);
   --overlay: rgba(0, 0, 0, 0.7);
   --particle-color: rgba(200, 255, 0, 0.12);
   --particle-line: rgba(200, 255, 0, 0.05);
@@ -83,7 +83,6 @@
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-card-bg: var(--card-bg);
-  --color-sidebar-bg: var(--sidebar-bg);
   --color-overlay: var(--overlay);
   --color-success: var(--success);
   --color-error: var(--error);
@@ -205,7 +204,6 @@ body {
 
 /* ===== TEXT REVEAL ===== */
 .text-reveal-line {
-  overflow: hidden;
   display: block;
 }
 
@@ -221,7 +219,7 @@ body {
   padding: 1rem 0 0.5rem;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--input-border);
+  border-bottom: 2px solid var(--input-border);
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 1rem;
@@ -259,7 +257,7 @@ body {
   bottom: 0;
   left: 50%;
   width: 0;
-  height: 2px;
+  height: 3px;
   background: var(--accent);
   transition: all 0.3s var(--transition-spring);
   transform: translateX(-50%);
@@ -311,21 +309,27 @@ body {
   }
 }
 
-/* ===== RESPONSIVE UTILITIES ===== */
+/* ===== SECTION SCROLL-SNAP ===== */
+html {
+  scroll-snap-type: y proximity;
+}
+
+#hero,
+#trabajos,
+#sobre-mi,
+#contacto {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+}
+
+/* ===== SECTION SEPARATORS ===== */
+section {
+  position: relative;
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .desktop-only {
-    display: none !important;
-  }
-}
-
-@media (min-width: 769px) {
-  .mobile-only {
-    display: none !important;
-  }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  .tablet-hide {
-    display: none !important;
+  html {
+    scroll-snap-type: none;
   }
 }

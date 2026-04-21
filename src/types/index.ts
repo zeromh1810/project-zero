@@ -49,12 +49,4 @@ export interface ContactMessage {
   created_at: string;
 }
 
-export interface NavItem {
-  id: string;
-  label: string;
-  icon: string;
-}
-
-export type ActiveSection = 'works' | 'about' | 'cv' | 'contact';
-
 export type Theme = 'light' | 'dark';

@@ -1,47 +1,39 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import { ReactNode, CSSProperties } from 'react';
 
 interface AnimatedTextProps {
   children: ReactNode;
   className?: string;
   delay?: number;
   as?: 'h1' | 'h2' | 'h3' | 'p' | 'span' | 'div';
+  style?: CSSProperties;
 }
-
-const lineVariants = {
-  hidden: { y: '100%', opacity: 0 },
-  visible: {
-    y: '0%',
-    opacity: 1,
-    transition: {
-      duration: 0.6,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  },
-};
 
 export default function AnimatedText({
   children,
   className = '',
   delay = 0,
   as: Tag = 'div',
+  style,
 }: AnimatedTextProps) {
   const MotionTag = motion.create(Tag);
 
   return (
-    <span className="text-reveal-line inline-block">
-      <MotionTag
-        className={className}
-        variants={lineVariants}
-        initial="hidden"
-        animate="visible"
-        transition={{ delay }}
-      >
-        {children}
-      </MotionTag>
-    </span>
+    <MotionTag
+      className={className}
+      style={{ color: 'var(--text-primary)', ...style }}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.6,
+        delay,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+    >
+      {children}
+    </MotionTag>
   );
 }
 
@@ -50,34 +42,15 @@ interface StaggerTextProps {
   className?: string;
   staggerDelay?: number;
   startDelay?: number;
+  style?: CSSProperties;
 }
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.08,
-    },
-  },
-};
-
-const wordVariants = {
-  hidden: { y: '100%', opacity: 0 },
-  visible: {
-    y: '0%',
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  },
-};
 
 export function StaggerText({
   text,
   className = '',
   staggerDelay = 0.08,
   startDelay = 0,
+  style,
 }: StaggerTextProps) {
   const lines = text.split('\n');
 
@@ -95,13 +68,26 @@ export function StaggerText({
       initial="hidden"
       animate="visible"
       className={className}
+      style={style}
     >
       {lines.map((line, i) => (
-        <span key={i} className="text-reveal-line block">
-          <motion.span className="inline-block" variants={wordVariants}>
-            {line}
-          </motion.span>
-        </span>
+        <motion.span
+          key={i}
+          className="block"
+          variants={{
+            hidden: { opacity: 0, y: 12 },
+            visible: {
+              opacity: 1,
+              y: 0,
+              transition: {
+                duration: 0.5,
+                ease: [0.16, 1, 0.3, 1],
+              },
+            },
+          }}
+        >
+          {line}
+        </motion.span>
       ))}
     </motion.div>
   );
