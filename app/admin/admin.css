@@ -719,37 +719,31 @@
   cursor: pointer;
 }
 
-/* ── TOAST V2 ── */
+/* ── TOAST V2 — token-first, ver docs/toast.md ── */
 .admin-toast-v2 {
   position: fixed;
-  bottom: 28px;
-  right: 28px;
-  z-index: 600;
+  bottom: var(--admin-toast-bottom);
+  right: var(--admin-toast-right);
+  z-index: var(--admin-toast-z-index);
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  min-width: 320px;
-  max-width: 420px;
-  padding: 16px 20px 19px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.07);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.13), 0 2px 8px rgba(0, 0, 0, 0.05);
+  gap: var(--admin-toast-gap);
+  min-width: var(--admin-toast-min-width);
+  max-width: var(--admin-toast-max-width);
+  padding: var(--admin-toast-pt) var(--admin-toast-px) var(--admin-toast-pb);
+  border-radius: var(--admin-toast-radius);
+  background: var(--admin-toast-bg);
+  backdrop-filter: blur(var(--admin-toast-blur));
+  -webkit-backdrop-filter: blur(var(--admin-toast-blur));
+  border: 1px solid var(--admin-toast-border);
+  box-shadow: var(--admin-toast-shadow);
   overflow: hidden;
   font-family: var(--portfolio-font);
-  animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: var(--admin-toast-anim-enter);
 }
 
 .admin-toast-v2.leaving {
-  animation: toastSlideDown 0.2s ease-in forwards;
-}
-
-.dark .admin-toast-v2 {
-  background: rgba(20, 20, 22, 0.9);
-  border-color: rgba(255, 255, 255, 0.09);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+  animation: var(--admin-toast-anim-exit);
 }
 
 /* Left accent bar per state */
@@ -759,16 +753,16 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 3px;
-  border-radius: 16px 0 0 16px;
+  width: var(--admin-toast-accent-bar-w);
+  border-radius: var(--admin-toast-radius) 0 0 var(--admin-toast-radius);
   background: var(--toast-accent);
 }
 
-/* State accent tokens */
-.admin-toast-v2--success { --toast-accent: var(--success); }
-.admin-toast-v2--error   { --toast-accent: var(--error); }
-.admin-toast-v2--warning { --toast-accent: var(--warning); }
-.admin-toast-v2--info    { --toast-accent: var(--accent); }
+/* State accent — usa tokens DS */
+.admin-toast-v2--success { --toast-accent: var(--admin-toast-accent-success); }
+.admin-toast-v2--error   { --toast-accent: var(--admin-toast-accent-error); }
+.admin-toast-v2--warning { --toast-accent: var(--admin-toast-accent-warning); }
+.admin-toast-v2--info    { --toast-accent: var(--admin-toast-accent-info); }
 
 /* Icon */
 .admin-toast-v2__icon {
@@ -788,15 +782,15 @@
 
 .admin-toast-v2__title {
   font-family: var(--portfolio-heading-font);
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--admin-toast-title-size);
+  font-weight: var(--admin-toast-title-weight);
   color: var(--txt);
   letter-spacing: -0.01em;
   line-height: 1.3;
 }
 
 .admin-toast-v2__msg {
-  font-size: 13px;
+  font-size: var(--admin-toast-msg-size);
   color: var(--txt2);
   line-height: 1.4;
 }
@@ -807,9 +801,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: var(--admin-toast-close-size);
+  height: var(--admin-toast-close-size);
+  border-radius: var(--admin-toast-close-radius);
   border: none;
   background: transparent;
   color: var(--txt3);
@@ -819,12 +813,8 @@
 }
 
 .admin-toast-v2__close:hover {
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--glass-hover);
   color: var(--txt);
-}
-
-.dark .admin-toast-v2__close:hover {
-  background: rgba(255, 255, 255, 0.08);
 }
 
 /* Progress bar */
@@ -832,12 +822,12 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 3px;
+  height: var(--admin-toast-bar-h);
   width: 100%;
   background: var(--toast-accent);
-  opacity: 0.4;
+  opacity: var(--admin-toast-bar-opacity);
   transform-origin: left center;
-  animation: toastProgress 4s linear forwards;
+  animation: toastProgress var(--admin-toast-bar-duration) linear forwards;
 }
 
 .admin-toast-v2__bar.paused {

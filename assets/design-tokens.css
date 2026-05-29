@@ -1,7 +1,7 @@
 /* Design Tokens - Auto-generated */
 /* Project: Project Zero Portafolio de trabajos Carlos Felipe Rojas Hickmann */
-/* Author: Carlos Felipe Rojas Hickmann — v1.2.0 */
-/* Do not edit directly - modify tokens.json instead */
+/* Author: Carlos Felipe Rojas Hickmann — v1.3.0 */
+/* Do not edit directly - modify assets/design-tokens.json instead */
 
 /* === PRIMITIVES === */
 :root {
@@ -195,7 +195,7 @@
   /* Design System layout */
   --ds-layout-navbar-offset: 64px;
 
-  /* AdminToast — Feedback / Notification component */
+  /* AdminToast — Feedback / Notification component — docs/toast.md */
   --admin-toast-radius: 16px;
   --admin-toast-min-width: 320px;
   --admin-toast-max-width: 420px;
@@ -207,6 +207,7 @@
   --admin-toast-bottom: 28px;
   --admin-toast-right: 28px;
   --admin-toast-bg: rgba(255, 255, 255, 0.88);
+  --admin-toast-border: rgba(0, 0, 0, 0.07);
   --admin-toast-blur: 12px;
   --admin-toast-shadow: 0 8px 32px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.05);
   --admin-toast-accent-bar-w: 3px;
@@ -219,6 +220,9 @@
   --admin-toast-title-weight: 700;
   --admin-toast-msg-size: 13px;
   --admin-toast-close-size: 24px;
+  --admin-toast-close-radius: 6px;
+  --admin-toast-anim-enter: toastSlideUp 300ms cubic-bezier(0.16,1,0.3,1) both;
+  --admin-toast-anim-exit: toastSlideDown 200ms ease-in forwards;
   --admin-toast-accent-success: #30d158;
   --admin-toast-accent-warning: #f59e0b;
   --admin-toast-accent-error: #ef4444;
@@ -228,6 +232,8 @@
 /* === DARK MODE === */
 .dark {
   --admin-toast-bg: rgba(20, 20, 22, 0.90);
+  --admin-toast-border: rgba(255, 255, 255, 0.09);
+  --admin-toast-shadow: 0 8px 32px rgba(0,0,0,0.50), 0 2px 8px rgba(0,0,0,0.30);
   --admin-toast-accent-info: #2997ff;
   --color-bg: #000000;
   --color-bg2: #0a0a0a;

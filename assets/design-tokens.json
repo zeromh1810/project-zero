@@ -3,9 +3,9 @@
   "$meta": {
     "project": "Project Zero Portafolio de trabajos Carlos Felipe Rojas Hickmann",
     "author": "Carlos Felipe Rojas Hickmann",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "source": "Extracted from portfolio.css — do not edit CSS directly",
-    "changelog": "v1.2.0: AdminToast component (4 estados: success/error/warning/info), token --warning #f59e0b amber, glassmorphism toast con progress bar y animación exit. v1.1.0: hero-title line-height 1.05, anim-enter-translate 16px, scroll-indicator opacity 0.65, card hover shadow + thumb scale, nav-item hover glass bg, theme-toggle 44px touch target, DS layout navbar offset, hardcoded colors → tokens"
+    "changelog": "v1.3.0: AdminToast tokens completados — border/shadow-dark tokenizados, title-size corregido a 14px, close-radius 6px, anim-enter/anim-exit como tokens CSS, admin.css refactorizado a 100% token-first, documentación docs/toast.md. v1.2.0: AdminToast component (4 estados: success/error/warning/info), token --warning #f59e0b amber, glassmorphism toast con progress bar y animación exit. v1.1.0: hero-title line-height 1.05, anim-enter-translate 16px, scroll-indicator opacity 0.65, card hover shadow + thumb scale, nav-item hover glass bg, theme-toggle 44px touch target, DS layout navbar offset, hardcoded colors → tokens"
   },
 
   "primitive": {
@@ -263,7 +263,7 @@
       "navbar-offset": { "$value": "64px", "$type": "dimension", "$description": "padding-top en .ds-layout para que el contenido no quede bajo el navbar fixed" }
     },
     "admin-toast": {
-      "$description": "Toast notification — 4 estados: success / error / warning / info. Glassmorphism, progress bar 4s, animación entrada/salida. Componente: app/admin/_components/admin-toast.tsx",
+      "$description": "Toast notification — 4 estados: success / error / warning / info. Glassmorphism, progress bar 4s, animación entrada/salida. Componente: app/admin/_components/admin-toast.tsx. Docs: docs/toast.md",
       "radius":       { "$value": "{primitive.radius.lg}",           "$type": "dimension", "$description": "16px — border-radius del toast" },
       "min-width":    { "$value": "320px",                           "$type": "dimension" },
       "max-width":    { "$value": "420px",                           "$type": "dimension" },
@@ -274,23 +274,23 @@
       "z-index":      { "$value": "600",                             "$type": "number" },
       "bottom":       { "$value": "{primitive.spacing.7}",           "$type": "dimension", "$description": "28px desde el borde inferior" },
       "right":        { "$value": "{primitive.spacing.7}",           "$type": "dimension", "$description": "28px desde el borde derecho" },
-      "bg-light":     { "$value": "rgba(255, 255, 255, 0.88)",       "$type": "color", "$description": "Fondo glassmorphism modo claro" },
-      "bg-dark":      { "$value": "rgba(20, 20, 22, 0.90)",          "$type": "color", "$description": "Fondo glassmorphism modo oscuro" },
+      "bg":           { "$value": "rgba(255, 255, 255, 0.88)",       "$type": "color", "$description": "Fondo glassmorphism modo claro; override dark en sección dark" },
+      "border":       { "$value": "rgba(0, 0, 0, 0.07)",            "$type": "color", "$description": "Borde sutil modo claro; override dark en sección dark" },
       "blur":         { "$value": "{primitive.blur.md}",             "$type": "dimension", "$description": "backdrop-filter: blur(12px)" },
-      "shadow":       { "$value": "0 8px 32px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.05)", "$type": "shadow" },
+      "shadow":       { "$value": "0 8px 32px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.05)", "$type": "shadow", "$description": "Sombra modo claro; override dark en sección dark" },
       "accent-bar-w": { "$value": "3px",                             "$type": "dimension", "$description": "Ancho de la barra de acento izquierda" },
       "bar-h":        { "$value": "3px",                             "$type": "dimension", "$description": "Altura de la barra de progreso" },
       "bar-opacity":  { "$value": "0.4",                             "$type": "number" },
       "bar-duration": { "$value": "4s",                              "$type": "duration", "$description": "Auto-dismiss en 4 segundos" },
       "icon-size":    { "$value": "20px",                            "$type": "dimension", "$description": "SVG stroke icons 20×20" },
       "icon-stroke":  { "$value": "1.75",                            "$type": "number" },
-      "title-size":   { "$value": "{primitive.fontSize.base}",       "$type": "dimension", "$description": "14px — Plus Jakarta Sans 700" },
+      "title-size":   { "$value": "14px",                            "$type": "dimension", "$description": "14px — Plus Jakarta Sans 700 (menor que base 15px por densidad de UI admin)" },
       "title-weight": { "$value": "700",                             "$type": "number" },
       "msg-size":     { "$value": "{primitive.fontSize.sm}",         "$type": "dimension", "$description": "13px — DM Sans, opcional" },
       "close-size":   { "$value": "24px",                            "$type": "dimension", "$description": "Botón X hit area" },
-      "close-radius": { "$value": "{primitive.radius.sm}",           "$type": "dimension", "$description": "6px" },
-      "anim-enter":   { "$value": "toastSlideUp 300ms cubic-bezier(0.16,1,0.3,1) both", "$type": "string" },
-      "anim-exit":    { "$value": "toastSlideDown 200ms ease-in forwards",               "$type": "string" },
+      "close-radius": { "$value": "6px",                             "$type": "dimension", "$description": "6px — más cerrado que radius.sm=8px para estar proporcional en 24×24" },
+      "anim-enter":   { "$value": "toastSlideUp 300ms cubic-bezier(0.16,1,0.3,1) both",  "$type": "string", "$description": "Animación de entrada" },
+      "anim-exit":    { "$value": "toastSlideDown 200ms ease-in forwards",                "$type": "string", "$description": "Animación de salida (clase .leaving)" },
       "accent-success": { "$value": "{semantic.color.success}", "$type": "color" },
       "accent-warning": { "$value": "{semantic.color.warning}", "$type": "color" },
       "accent-error":   { "$value": "{semantic.color.error}",   "$type": "color" },
@@ -317,6 +317,14 @@
         "card-hover":  { "$value": "rgba(255, 255, 255, 0.08)",      "$type": "color" },
         "navbar-bg":   { "$value": "rgba(0, 0, 0, 0.75)",           "$type": "color" },
         "shadow":      { "$value": "rgba(0, 0, 0, 0.60)",           "$type": "color" }
+      }
+    },
+    "component": {
+      "admin-toast": {
+        "bg":     { "$value": "rgba(20, 20, 22, 0.90)",                                       "$type": "color",  "$description": "Fondo glassmorphism modo oscuro" },
+        "border": { "$value": "rgba(255, 255, 255, 0.09)",                                    "$type": "color",  "$description": "Borde sutil modo oscuro" },
+        "shadow": { "$value": "0 8px 32px rgba(0,0,0,0.50), 0 2px 8px rgba(0,0,0,0.30)",     "$type": "shadow", "$description": "Sombra modo oscuro" },
+        "accent-info": { "$value": "{primitive.color.blue.400}",                              "$type": "color",  "$description": "Info accent dark — Apple blue 400" }
       }
     }
   }
