@@ -18,17 +18,15 @@ async function uploadSvg(file: File): Promise<string> {
   if (!file.name.toLowerCase().endsWith(".svg") && file.type !== "image/svg+xml") {
     throw new Error("Solo se aceptan archivos .svg")
   }
-  if (file.size > 2 * 1024 * 1024) {
-    throw new Error("El SVG supera el límite de 2 MB")
+  if (file.size > 500 * 1024) {
+    throw new Error("El SVG supera el límite de 500 KB")
   }
-  const fd = new FormData()
-  fd.append("file", file)
-  const res = await fetch("/api/admin/upload", { method: "POST", body: fd })
-  if (!res.ok) {
-    const err = await res.json()
-    throw new Error(err.error || "Error al subir")
-  }
-  return (await res.json()).url
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(new Error("No se pudo leer el archivo SVG"))
+    reader.readAsDataURL(file)
+  })
 }
 
 /* ── Zona de upload individual ── */
@@ -163,7 +161,7 @@ function UploadZone({
               <div style={{ fontSize: 13, fontWeight: 600, color: "var(--txt)", marginBottom: 2 }}>
                 Subir SVG
               </div>
-              <div style={{ fontSize: 11 }}>Arrastra o haz click · máx. 2 MB</div>
+              <div style={{ fontSize: 11 }}>Arrastra o haz click · máx. 500 KB</div>
             </div>
           )}
         </div>

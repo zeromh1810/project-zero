@@ -27,9 +27,6 @@ tsconfig.tsbuildinfo
 # Local image reference folder
 imagenes/
 
-# User-uploaded files (managed at runtime, not versioned)
-public/uploads/*
-!public/uploads/.gitkeep
 
 # OS files
 Thumbs.db
