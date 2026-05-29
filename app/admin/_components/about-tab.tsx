@@ -1,0 +1,193 @@
+"use client"
+
+import { useState, useEffect, useRef, KeyboardEvent } from "react"
+
+interface Stat { value: string; label: string }
+interface AboutData {
+  bio1: string
+  bio2: string
+  skills: string[]
+  stats: Stat[]
+  badge: string
+  available: boolean
+}
+
+const DEFAULT: AboutData = {
+  bio1: "Soy <strong>diseñador de producto y desarrollador frontend</strong> con base en Santiago, Chile.",
+  bio2: "Mi proceso combina investigación profunda con ejecución meticulosa.",
+  skills: ["Figma", "Prototyping", "User Research", "Design Systems", "React", "TypeScript"],
+  stats: [
+    { value: "5+", label: "Años exp." },
+    { value: "40+", label: "Proyectos" },
+    { value: "18", label: "Clientes" },
+  ],
+  badge: "Disponible para freelance",
+  available: true,
+}
+
+interface Props {
+  onToast: (msg: string, type: "ok" | "err") => void
+}
+
+export default function AboutTab({ onToast }: Props) {
+  const [data, setData] = useState<AboutData>(DEFAULT)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [skillInput, setSkillInput] = useState("")
+  const skillRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    fetch("/api/admin/about", { cache: "no-store" })
+      .then(r => r.json())
+      .then(d => setData({ ...DEFAULT, ...d }))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  function set<K extends keyof AboutData>(field: K, value: AboutData[K]) {
+    setData(prev => ({ ...prev, [field]: value }))
+  }
+
+  function setStat(i: number, field: keyof Stat, value: string) {
+    const stats = [...data.stats]
+    stats[i] = { ...stats[i], [field]: value }
+    set("stats", stats)
+  }
+
+  function addSkill() {
+    const s = skillInput.trim()
+    if (s && !data.skills.includes(s)) set("skills", [...data.skills, s])
+    setSkillInput("")
+  }
+
+  function removeSkill(skill: string) {
+    set("skills", data.skills.filter(s => s !== skill))
+  }
+
+  function onSkillKey(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addSkill() }
+    if (e.key === "Backspace" && !skillInput && data.skills.length) {
+      set("skills", data.skills.slice(0, -1))
+    }
+  }
+
+  async function save() {
+    setSaving(true)
+    try {
+      await fetch("/api/admin/about", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      onToast("Sección actualizada", "ok")
+    } catch {
+      onToast("Error al guardar", "err")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="admin-loading">
+        <div className="admin-spinner" /> Cargando…
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="admin-section-header">
+        <div>
+          <div className="admin-section-title">Sobre mí</div>
+          <div className="admin-section-sub">Biografía, habilidades y estadísticas</div>
+        </div>
+        <button className="btn-p" onClick={save} disabled={saving}>
+          {saving ? "Guardando…" : "Guardar cambios"}
+        </button>
+      </div>
+
+      {/* Bio */}
+      <div className="admin-card">
+        <div className="admin-card-title">Biografía</div>
+        <div className="admin-input-hint" style={{ marginBottom: 12, marginTop: -8 }}>
+          Puedes usar <code>&lt;strong&gt;texto&lt;/strong&gt;</code> para negritas
+        </div>
+        <div className="admin-field">
+          <label className="admin-label">Párrafo 1</label>
+          <textarea className="admin-textarea" value={data.bio1}
+            onChange={e => set("bio1", e.target.value)} style={{ minHeight: 88 }} />
+        </div>
+        <div className="admin-field">
+          <label className="admin-label">Párrafo 2</label>
+          <textarea className="admin-textarea" value={data.bio2}
+            onChange={e => set("bio2", e.target.value)} style={{ minHeight: 88 }} />
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="admin-card">
+        <div className="admin-card-title">Estadísticas</div>
+        <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+          <span className="admin-kpi-col-label" style={{ flex: 1, fontSize: 10 }}>Número</span>
+          <span className="admin-kpi-col-label" style={{ flex: 2, fontSize: 10 }}>Etiqueta</span>
+        </div>
+        <div className="admin-stats-grid">
+          {data.stats.map((stat, i) => (
+            <div key={i} style={{ display: "flex", gap: 8 }}>
+              <input className="admin-input" style={{ flex: 1 }} value={stat.value}
+                onChange={e => setStat(i, "value", e.target.value)} placeholder="5+" />
+              <input className="admin-input" style={{ flex: 2 }} value={stat.label}
+                onChange={e => setStat(i, "label", e.target.value)} placeholder="Años exp." />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Skills */}
+      <div className="admin-card">
+        <div className="admin-card-title">Stack & Herramientas</div>
+        <div className="admin-field">
+          <div className="admin-chips-wrap" onClick={() => skillRef.current?.focus()}>
+            {data.skills.map(skill => (
+              <span key={skill} className="admin-chip">
+                {skill}
+                <button className="admin-chip-x" onClick={() => removeSkill(skill)}>✕</button>
+              </span>
+            ))}
+            <input
+              ref={skillRef}
+              className="admin-chip-input"
+              value={skillInput}
+              onChange={e => setSkillInput(e.target.value)}
+              onKeyDown={onSkillKey}
+              onBlur={addSkill}
+              placeholder={data.skills.length === 0 ? "Escribe una habilidad y presiona Enter" : ""}
+            />
+          </div>
+          <div className="admin-input-hint">Presiona Enter o coma para agregar</div>
+        </div>
+      </div>
+
+      {/* Badge */}
+      <div className="admin-card">
+        <div className="admin-card-title">Badge de disponibilidad</div>
+        <div className="admin-field">
+          <label className="admin-label">Texto del badge</label>
+          <input className="admin-input" value={data.badge}
+            onChange={e => set("badge", e.target.value)} placeholder="Disponible para freelance" />
+        </div>
+        <div className="admin-toggle-row">
+          <label className="admin-toggle">
+            <input type="checkbox" checked={data.available}
+              onChange={e => set("available", e.target.checked)} />
+            <div className="admin-toggle-track" />
+          </label>
+          <span className="admin-toggle-label">
+            {data.available ? "Disponible" : "No disponible"} — controla el punto verde pulsante
+          </span>
+        </div>
+      </div>
+    </>
+  )
+}

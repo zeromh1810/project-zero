@@ -1,0 +1,149 @@
+export interface ProjectKPI {
+  val: string
+  lbl: string
+}
+
+export interface Project {
+  id: number
+  slug: string
+  title: string
+  category: string
+  year: number
+  desc: string
+  kpis: ProjectKPI[]
+  intro: string
+  process: string
+  result: string
+  tags: string[]
+  gradient: string
+  lightGradient: string
+  accentColor: string
+  emoji: string
+  stat: string
+  thumbnail?: string
+  gallery?: string[]
+}
+
+export const PROJECTS: Project[] = [
+  {
+    id: 1,
+    slug: "ecommerce-redesign",
+    title: "Redesign E-commerce",
+    category: "UX/UI Design",
+    year: 2024,
+    desc: "Rediseño completo de plataforma de comercio electrónico con foco en conversión.",
+    kpis: [
+      { val: "+34%", lbl: "Conversión" },
+      { val: "−18%", lbl: "Abandono carrito" },
+      { val: "4 meses", lbl: "Duración" },
+    ],
+    intro:
+      "Una marca de moda premium con 8 años de historia acumulaba deuda técnica y de diseño que estaba frenando su crecimiento online. La tasa de conversión era de 1.2%, muy por debajo del benchmark del sector (2.8%), y el abandono del carrito superaba el 72%.",
+    process:
+      "Comencé con 3 semanas de investigación: entrevistas con 18 compradores habituales, análisis de heatmaps y grabaciones de sesiones. El problema principal no era el checkout — era la confianza. Los usuarios no encontraban suficiente información del producto antes de añadirlo al carrito. Rediseñé la arquitectura de información completa, creé un design system de 240 componentes y prototipé 6 variantes del flujo de compra que validamos con A/B testing.",
+    result:
+      "En los 60 días posteriores al lanzamiento, la conversión subió de 1.2% a 1.98% (+34%), el abandono bajó 18 puntos y el ticket promedio aumentó un 12% gracias a la nueva sección de «completa el look».",
+    tags: ["Figma", "User Research", "Prototyping", "Design System", "A/B Testing"],
+    gradient: "linear-gradient(135deg, #001428 0%, #002050 40%, #0a1a60 100%)",
+    lightGradient: "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 40%, #93c5fd 100%)",
+    accentColor: "#2997ff",
+    emoji: "🛍",
+    stat: "+34% conversión",
+  },
+  {
+    id: 2,
+    slug: "finance-app",
+    title: "App Finanzas Personales",
+    category: "Mobile Design",
+    year: 2024,
+    desc: "Aplicación móvil para seguimiento de gastos, ahorros y metas financieras.",
+    kpis: [
+      { val: "12k", lbl: "Usuarios mes 1" },
+      { val: "4.8★", lbl: "App Store" },
+      { val: "3 meses", lbl: "Duración" },
+    ],
+    intro:
+      "Una fintech chilena quería democratizar el manejo del dinero para personas entre 22 y 35 años que nunca habían usado una app de finanzas. El desafío: el 68% de los millennials en Chile no tiene hábito de registro de gastos porque «es demasiado complicado».",
+    process:
+      "Realizamos 12 entrevistas de descubrimiento y encontramos un insight clave: el problema no era técnico, era emocional. Las personas asocian revisar sus gastos con angustia. El diseño debía cambiar esa relación. Introduje un sistema de celebraciones micro (confetti cuando alcanzas una meta) y visualizaciones que dan orgullo en lugar de culpa. El onboarding fue rediseñado 4 veces hasta bajar el tiempo de activación a 4 minutos.",
+    result:
+      "El lanzamiento en Product Hunt alcanzó el puesto #3 del día. En el primer mes: 12,000 usuarios activos, retención a 30 días del 61% (benchmark del sector: 25%), rating de 4.8 estrellas en App Store.",
+    tags: ["iOS / Android", "Data Viz", "Motion Design", "Figma", "SwiftUI"],
+    gradient: "linear-gradient(135deg, #001a0e 0%, #003d20 40%, #00522a 100%)",
+    lightGradient: "linear-gradient(135deg, #dcfce7 0%, #bbf7d0 40%, #86efac 100%)",
+    accentColor: "#30d158",
+    emoji: "💰",
+    stat: "12k usuarios / mes 1",
+  },
+  {
+    id: 3,
+    slug: "biotech-brand",
+    title: "Branding Startup Biotech",
+    category: "Brand Identity",
+    year: 2023,
+    desc: "Identidad visual completa para startup de biotecnología.",
+    kpis: [
+      { val: "$2.4M", lbl: "Funding seed" },
+      { val: "80 págs", lbl: "Brand book" },
+      { val: "6 sem.", lbl: "Duración" },
+    ],
+    intro:
+      "GenPath, una startup de diagnósticos moleculares fundada por tres científicos de la U. de Chile, estaba lista para su primera ronda de inversión pero carecía de identidad visual. Su presentación a inversores se veía igual que una tesis universitaria.",
+    process:
+      "El reto era doble: crear algo que le diera seriedad científica ante inversores técnicos, y que a la vez fuera accesible para médicos y pacientes no especializados. Desarrollé la marca en torno al concepto «precisión que cuida» — tipografía geométrica y precisa para la dimensión técnica, paleta con calor humano para la dimensión clínica. El logo representa una cadena de ADN estilizada que también evoca un camino.",
+    result:
+      "La startup cerró su ronda seed de $2.4M USD dos meses después del rebrand. Tres de los cinco inversores mencionaron que la presentación visual transmitía «madurez de empresa» que los convenció de tomar la reunión.",
+    tags: ["Brand Strategy", "Logo Design", "Typography", "Ilustración", "Print"],
+    gradient: "linear-gradient(135deg, #130020 0%, #2a0040 40%, #380055 100%)",
+    lightGradient: "linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 40%, #d8b4fe 100%)",
+    accentColor: "#bf5af2",
+    emoji: "🧬",
+    stat: "Funding $2.4M seed",
+  },
+  {
+    id: 4,
+    slug: "analytics-dashboard",
+    title: "Dashboard Analytics",
+    category: "Web App",
+    year: 2023,
+    desc: "Dashboard de métricas en tiempo real con más de 40 visualizaciones.",
+    kpis: [
+      { val: "200+", lbl: "Empresas" },
+      { val: "40+", lbl: "Viz types" },
+      { val: "5 meses", lbl: "Duración" },
+    ],
+    intro:
+      "Una SaaS de marketing necesitaba reemplazar su dashboard interno construido en Excel y Google Data Studio. El equipo perdía 6 horas semanales exportando datos manualmente y los clientes pedían cada vez más tipos de visualizaciones.",
+    process:
+      "Audité 3 meses de tickets de soporte para identificar las 15 visualizaciones más solicitadas. Diseñé un sistema de «bloques» componibles donde cada gráfica tiene las mismas interacciones (zoom, filtro, exportar) pero diferente representación visual. La paleta fue diseñada para ser legible con daltonismo (probada con 4 tipos). Implementé el frontend en React + D3.js con renderizado a 60fps incluso con 500k puntos de datos.",
+    result:
+      "Reducción del 94% en tiempo dedicado a reportes manuales. Churn mensual bajó de 4.2% a 1.8% en el primer trimestre post-lanzamiento. Net Promoter Score subió 28 puntos.",
+    tags: ["React", "D3.js", "Figma", "Design System", "Real-time Data"],
+    gradient: "linear-gradient(135deg, #1a0900 0%, #3d1500 40%, #521e00 100%)",
+    lightGradient: "linear-gradient(135deg, #fff7ed 0%, #fed7aa 40%, #fdba74 100%)",
+    accentColor: "#ff9f0a",
+    emoji: "📊",
+    stat: "200+ empresas",
+  },
+]
+
+export const SKILLS = [
+  "Figma",
+  "Prototyping",
+  "User Research",
+  "Design Systems",
+  "React",
+  "TypeScript",
+  "Motion Design",
+  "Framer",
+  "Three.js",
+  "GSAP",
+  "Brand Identity",
+  "UI/UX",
+]
+
+export const STATS = [
+  { value: "5+", label: "Años exp." },
+  { value: "40+", label: "Proyectos" },
+  { value: "18", label: "Clientes" },
+]

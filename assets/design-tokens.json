@@ -1,0 +1,285 @@
+{
+  "$schema": "https://design-tokens.org/schema.json",
+  "$meta": {
+    "project": "Project Zero Portafolio de trabajos Carlos Felipe Rojas Hickmann",
+    "author": "Carlos Felipe Rojas Hickmann",
+    "version": "1.1.0",
+    "source": "Extracted from portfolio.css — do not edit CSS directly",
+    "changelog": "v1.1.0: hero-title line-height 1.05, anim-enter-translate 16px, scroll-indicator opacity 0.65, card hover shadow + thumb scale, nav-item hover glass bg, theme-toggle 44px touch target, DS layout navbar offset, hardcoded colors → tokens"
+  },
+
+  "primitive": {
+    "color": {
+      "blue": {
+        "700": { "$value": "#0062cc", "$type": "color", "$description": "Apple blue — primary accent light mode" },
+        "500": { "$value": "#1a7fd4", "$type": "color", "$description": "Apple blue hover light mode" },
+        "400": { "$value": "#2997ff", "$type": "color", "$description": "Apple blue dark mode accent" },
+        "300": { "$value": "#3aabff", "$type": "color", "$description": "Apple blue lighter" },
+        "200": { "$value": "#5ac8fa", "$type": "color", "$description": "Apple blue dark mode hover" },
+        "100": { "$value": "#81d8ff", "$type": "color", "$description": "Apple blue lightest" },
+        "highlight": { "$value": "#3b82f6", "$type": "color", "$description": "Tailwind blue-500 — used in detail page" }
+      },
+      "green": {
+        "400": { "$value": "#30d158", "$type": "color", "$description": "Apple green — success / availability" }
+      },
+      "red": {
+        "500": { "$value": "#ef4444", "$type": "color", "$description": "Error state" }
+      },
+      "neutral": {
+        "950": { "$value": "#000000", "$type": "color", "$description": "Dark mode bg" },
+        "900": { "$value": "#0a0a0a", "$type": "color", "$description": "Dark mode bg elevated" },
+        "800": { "$value": "#141414", "$type": "color", "$description": "Dark mode bg surface" },
+        "50":  { "$value": "#f8f8f8", "$type": "color", "$description": "Light mode bg" },
+        "0":   { "$value": "#ffffff", "$type": "color", "$description": "Light mode bg elevated" },
+        "100": { "$value": "#f0f0f0", "$type": "color", "$description": "Light mode bg surface" }
+      },
+      "text": {
+        "dark-900": { "$value": "#1d1d1f", "$type": "color", "$description": "Primary text light mode" },
+        "dark-700": { "$value": "#3a3a40", "$type": "color", "$description": "Secondary text light mode" },
+        "dark-500": { "$value": "#5e5e64", "$type": "color", "$description": "Muted text light mode" },
+        "light-50":  { "$value": "#f5f5f7", "$type": "color", "$description": "Primary text dark mode" },
+        "light-300": { "$value": "#b0b0b5", "$type": "color", "$description": "Secondary text dark mode" },
+        "light-500": { "$value": "#8e8e93", "$type": "color", "$description": "Muted text dark mode" }
+      }
+    },
+
+    "spacing": {
+      "1":  { "$value": "4px",  "$type": "dimension", "$description": "4px — micro" },
+      "2":  { "$value": "8px",  "$type": "dimension", "$description": "8px — base unit" },
+      "3":  { "$value": "12px", "$type": "dimension", "$description": "12px" },
+      "4":  { "$value": "16px", "$type": "dimension", "$description": "16px — standard" },
+      "5":  { "$value": "20px", "$type": "dimension" },
+      "6":  { "$value": "24px", "$type": "dimension" },
+      "7":  { "$value": "28px", "$type": "dimension" },
+      "8":  { "$value": "32px", "$type": "dimension" },
+      "10": { "$value": "40px", "$type": "dimension" },
+      "12": { "$value": "48px", "$type": "dimension" },
+      "14": { "$value": "56px", "$type": "dimension" },
+      "16": { "$value": "64px", "$type": "dimension" },
+      "20": { "$value": "80px", "$type": "dimension" },
+      "24": { "$value": "96px", "$type": "dimension", "$description": "Navbar offset" }
+    },
+
+    "fontSize": {
+      "xs":   { "$value": "11px", "$type": "dimension", "$description": "Labels uppercase, stat labels" },
+      "sm":   { "$value": "13px", "$type": "dimension", "$description": "Skill tags, metadata" },
+      "base": { "$value": "15px", "$type": "dimension", "$description": "Body, buttons" },
+      "md":   { "$value": "16px", "$type": "dimension", "$description": "Bio text, inputs" },
+      "lg":   { "$value": "17px", "$type": "dimension", "$description": "Section subtitles" },
+      "xl":   { "$value": "20px", "$type": "dimension" },
+      "2xl":  { "$value": "22px", "$type": "dimension" },
+      "3xl":  { "$value": "28px", "$type": "dimension", "$description": "Stat numbers" }
+    },
+
+    "lineHeight": {
+      "tight":      { "$value": "1.05", "$type": "number", "$description": "Hero display title — Plus Jakarta Sans 800" },
+      "snug":       { "$value": "1.1",  "$type": "number" },
+      "condensed":  { "$value": "1.25", "$type": "number" },
+      "normal":     { "$value": "1.5",  "$type": "number" },
+      "relaxed":    { "$value": "1.65", "$type": "number" },
+      "loose":      { "$value": "1.8",  "$type": "number" }
+    },
+
+    "letterSpacing": {
+      "tightest": { "$value": "-0.045em", "$type": "number", "$description": "Hero title" },
+      "tight":    { "$value": "-0.03em",  "$type": "number", "$description": "Section titles" },
+      "normal":   { "$value": "0",        "$type": "number" },
+      "wide":     { "$value": "0.04em",   "$type": "number" },
+      "wider":    { "$value": "0.08em",   "$type": "number", "$description": "Uppercase labels" },
+      "widest":   { "$value": "0.12em",   "$type": "number", "$description": "Section labels" }
+    },
+
+    "radius": {
+      "sm":   { "$value": "8px",    "$type": "dimension", "$description": "Nav items, tags" },
+      "md":   { "$value": "12px",   "$type": "dimension", "$description": "Form inputs" },
+      "lg":   { "$value": "16px",   "$type": "dimension", "$description": "Stats cards" },
+      "xl":   { "$value": "20px",   "$type": "dimension", "$description": "Project cards" },
+      "2xl":  { "$value": "24px",   "$type": "dimension", "$description": "Form card, photo" },
+      "full": { "$value": "9999px", "$type": "dimension", "$description": "Pills, badges" }
+    },
+
+    "duration": {
+      "instant":  { "$value": "80ms",  "$type": "duration", "$description": "Card tilt" },
+      "fast":     { "$value": "160ms", "$type": "duration", "$description": "Section crossfade" },
+      "normal":   { "$value": "200ms", "$type": "duration", "$description": "Hover states" },
+      "slow":     { "$value": "300ms", "$type": "duration", "$description": "Overlays" },
+      "slower":   { "$value": "400ms", "$type": "duration" },
+      "entrance": { "$value": "650ms", "$type": "duration", "$description": "Scroll animations" }
+    },
+
+    "easing": {
+      "spring":  { "$value": "cubic-bezier(0.16, 1, 0.3, 1)",      "$type": "cubicBezier", "$description": "Spring — entradas y expansiones" },
+      "out":     { "$value": "cubic-bezier(0.25, 0.46, 0.45, 0.94)", "$type": "cubicBezier", "$description": "Out — botones hover" },
+      "snap":    { "$value": "cubic-bezier(0.34, 1.56, 0.64, 1)",  "$type": "cubicBezier", "$description": "Snap — pop animations" },
+      "linear":  { "$value": "linear",                              "$type": "cubicBezier" }
+    },
+
+    "blur": {
+      "sm":   { "$value": "8px",  "$type": "dimension" },
+      "md":   { "$value": "12px", "$type": "dimension" },
+      "lg":   { "$value": "16px", "$type": "dimension" },
+      "xl":   { "$value": "20px", "$type": "dimension" },
+      "2xl":  { "$value": "24px", "$type": "dimension" },
+      "3xl":  { "$value": "48px", "$type": "dimension", "$description": "Navbar blur" }
+    }
+  },
+
+  "semantic": {
+    "color": {
+      "bg":           { "$value": "{primitive.color.neutral.50}",    "$type": "color", "$description": "Page background" },
+      "bg2":          { "$value": "{primitive.color.neutral.0}",     "$type": "color", "$description": "Elevated surface" },
+      "bg3":          { "$value": "{primitive.color.neutral.100}",   "$type": "color", "$description": "Depressed surface" },
+      "txt":          { "$value": "{primitive.color.text.dark-900}", "$type": "color", "$description": "Primary text" },
+      "txt2":         { "$value": "{primitive.color.text.dark-700}", "$type": "color", "$description": "Secondary text" },
+      "txt3":         { "$value": "{primitive.color.text.dark-500}", "$type": "color", "$description": "Muted text" },
+      "accent":       { "$value": "{primitive.color.blue.700}",      "$type": "color", "$description": "Primary interactive" },
+      "accent-h":     { "$value": "{primitive.color.blue.500}",      "$type": "color", "$description": "Accent hover" },
+      "highlight":    { "$value": "{primitive.color.blue.highlight}", "$type": "color", "$description": "Detail page accent" },
+      "success":      { "$value": "{primitive.color.green.400}",     "$type": "color" },
+      "error":        { "$value": "{primitive.color.red.500}",       "$type": "color" },
+      "border":       { "$value": "rgba(0, 0, 0, 0.08)",            "$type": "color" },
+      "border-h":     { "$value": "rgba(0, 0, 0, 0.18)",            "$type": "color" },
+      "glass":        { "$value": "rgba(0, 0, 0, 0.03)",            "$type": "color" },
+      "glass-hover":  { "$value": "rgba(0, 0, 0, 0.06)",            "$type": "color" },
+      "card":         { "$value": "rgba(0, 0, 0, 0.03)",            "$type": "color" },
+      "card-hover":   { "$value": "rgba(0, 0, 0, 0.06)",            "$type": "color" },
+      "navbar-bg":    { "$value": "rgba(248, 248, 248, 0.82)",      "$type": "color" },
+      "shadow":       { "$value": "rgba(0, 0, 0, 0.12)",            "$type": "color" }
+    },
+    "spacing": {
+      "component":  { "$value": "{primitive.spacing.4}", "$type": "dimension" },
+      "section-x":  { "$value": "{primitive.spacing.12}", "$type": "dimension" },
+      "section-y":  { "$value": "{primitive.spacing.20}", "$type": "dimension" },
+      "nav-offset": { "$value": "{primitive.spacing.24}", "$type": "dimension" }
+    },
+    "layout": {
+      "max-width":   { "$value": "1160px", "$type": "dimension" },
+      "navbar-height": { "$value": "64px", "$type": "dimension" }
+    },
+    "font": {
+      "body":    { "$value": "'DM Sans', 'Helvetica Neue', sans-serif",       "$type": "fontFamily" },
+      "heading": { "$value": "'Plus Jakarta Sans', sans-serif",                "$type": "fontFamily" }
+    }
+  },
+
+  "component": {
+    "btn-primary": {
+      "bg":     { "$value": "{semantic.color.accent}",   "$type": "color" },
+      "bg-h":   { "$value": "{semantic.color.accent-h}", "$type": "color" },
+      "fg":     { "$value": "#ffffff",                   "$type": "color" },
+      "radius": { "$value": "{primitive.radius.full}",   "$type": "dimension" },
+      "px":     { "$value": "26px",                      "$type": "dimension" },
+      "py":     { "$value": "12px",                      "$type": "dimension" },
+      "size":   { "$value": "{primitive.fontSize.base}", "$type": "dimension" },
+      "weight": { "$value": "500",                       "$type": "number" }
+    },
+    "btn-secondary": {
+      "bg":     { "$value": "transparent",               "$type": "color" },
+      "border": { "$value": "{semantic.color.border}",   "$type": "color" },
+      "border-h": { "$value": "{semantic.color.border-h}", "$type": "color" },
+      "fg":     { "$value": "{semantic.color.txt}",      "$type": "color" },
+      "radius": { "$value": "{primitive.radius.full}",   "$type": "dimension" },
+      "px":     { "$value": "22px",                      "$type": "dimension" },
+      "py":     { "$value": "10px",                      "$type": "dimension" }
+    },
+    "navbar": {
+      "height":     { "$value": "{semantic.layout.navbar-height}", "$type": "dimension" },
+      "bg":         { "$value": "{semantic.color.navbar-bg}",      "$type": "color" },
+      "blur":       { "$value": "{primitive.blur.3xl}",            "$type": "dimension" },
+      "border":     { "$value": "{semantic.color.border}",         "$type": "color" },
+      "px":         { "$value": "32px",                            "$type": "dimension" }
+    },
+    "project-card": {
+      "radius":     { "$value": "{primitive.radius.xl}",  "$type": "dimension" },
+      "gap":        { "$value": "16px",                   "$type": "dimension" },
+      "aspect-featured": { "$value": "16 / 10",           "$type": "number" }
+    },
+    "section": {
+      "max-width":  { "$value": "{semantic.layout.max-width}", "$type": "dimension" },
+      "px":         { "$value": "48px",                        "$type": "dimension" },
+      "py":         { "$value": "{semantic.spacing.section-y}", "$type": "dimension" }
+    },
+    "form-input": {
+      "bg":         { "$value": "rgba(0, 0, 0, 0.04)",   "$type": "color" },
+      "border":     { "$value": "rgba(0, 0, 0, 0.12)",   "$type": "color" },
+      "focus-ring": { "$value": "{semantic.color.accent}", "$type": "color" },
+      "radius":     { "$value": "{primitive.radius.md}",  "$type": "dimension" },
+      "py":         { "$value": "20px",                   "$type": "dimension" },
+      "px":         { "$value": "16px",                   "$type": "dimension" }
+    },
+    "form-card": {
+      "bg":     { "$value": "rgba(255, 255, 255, 0.85)", "$type": "color" },
+      "border": { "$value": "rgba(0, 0, 0, 0.08)",       "$type": "color" },
+      "radius": { "$value": "{primitive.radius.2xl}",     "$type": "dimension" },
+      "p":      { "$value": "32px",                       "$type": "dimension" }
+    },
+    "stat-card": {
+      "radius":  { "$value": "{primitive.radius.lg}",   "$type": "dimension" },
+      "p-x":     { "$value": "16px",                    "$type": "dimension" },
+      "p-y":     { "$value": "20px",                    "$type": "dimension" },
+      "num-size": { "$value": "{primitive.fontSize.3xl}", "$type": "dimension" }
+    },
+    "skill-tag": {
+      "px":     { "$value": "14px",                        "$type": "dimension" },
+      "py":     { "$value": "6px",                         "$type": "dimension" },
+      "radius": { "$value": "{primitive.radius.full}",     "$type": "dimension" },
+      "size":   { "$value": "{primitive.fontSize.sm}",     "$type": "dimension" },
+      "border": { "$value": "{semantic.color.border}",     "$type": "color" }
+    },
+    "scroll-indicator": {
+      "width":   { "$value": "24px",  "$type": "dimension" },
+      "height":  { "$value": "38px",  "$type": "dimension" },
+      "radius":  { "$value": "12px",  "$type": "dimension" },
+      "opacity": { "$value": "0.65",  "$type": "number", "$description": "Visible sobre fondos claros y oscuros — mínimo legible" }
+    },
+    "theme-toggle": {
+      "width":         { "$value": "38px",  "$type": "dimension", "$description": "Visual width" },
+      "height":        { "$value": "22px",  "$type": "dimension", "$description": "Visual height" },
+      "touch-target":  { "$value": "44px",  "$type": "dimension", "$description": "Hit area via ::before pseudo-element (inset: -11px -3px)" },
+      "radius":        { "$value": "11px",  "$type": "dimension" }
+    },
+    "nav-item": {
+      "hover-bg":    { "$value": "{semantic.color.glass}", "$type": "color", "$description": "Fondo sutil en hover — feedback visual sin competir con la pill activa" },
+      "active-bg":   { "$value": "{semantic.color.glass-hover}", "$type": "color" },
+      "px":          { "$value": "16px", "$type": "dimension" },
+      "py":          { "$value": "7px",  "$type": "dimension" },
+      "min-height":  { "$value": "44px", "$type": "dimension", "$description": "Touch target mínimo WCAG" },
+      "radius":      { "$value": "{primitive.radius.sm}", "$type": "dimension" }
+    },
+    "project-card-hover": {
+      "shadow":      { "$value": "0 24px 64px rgba(0,0,0,0.28), 0 4px 16px rgba(0,0,0,0.14)", "$type": "shadow", "$description": "Elevación en hover — profundidad sin ser intrusivo" },
+      "thumb-scale": { "$value": "1.05", "$type": "number", "$description": "Zoom suave del thumbnail en hover" }
+    },
+    "anim-enter": {
+      "translate-y": { "$value": "16px",  "$type": "dimension", "$description": "Distancia de entrada scroll animations — estándar industria (Vercel, Linear)" },
+      "duration":    { "$value": "{primitive.duration.entrance}", "$type": "duration" },
+      "easing":      { "$value": "{primitive.easing.spring}", "$type": "cubicBezier" }
+    },
+    "ds-layout": {
+      "navbar-offset": { "$value": "64px", "$type": "dimension", "$description": "padding-top en .ds-layout para que el contenido no quede bajo el navbar fixed" }
+    }
+  },
+
+  "dark": {
+    "semantic": {
+      "color": {
+        "bg":          { "$value": "{primitive.color.neutral.950}",  "$type": "color" },
+        "bg2":         { "$value": "{primitive.color.neutral.900}",  "$type": "color" },
+        "bg3":         { "$value": "{primitive.color.neutral.800}",  "$type": "color" },
+        "txt":         { "$value": "{primitive.color.text.light-50}",  "$type": "color" },
+        "txt2":        { "$value": "{primitive.color.text.light-300}", "$type": "color" },
+        "txt3":        { "$value": "{primitive.color.text.light-500}", "$type": "color" },
+        "accent":      { "$value": "{primitive.color.blue.400}",     "$type": "color" },
+        "accent-h":    { "$value": "{primitive.color.blue.200}",     "$type": "color" },
+        "border":      { "$value": "rgba(255, 255, 255, 0.11)",      "$type": "color" },
+        "border-h":    { "$value": "rgba(255, 255, 255, 0.18)",      "$type": "color" },
+        "glass":       { "$value": "rgba(255, 255, 255, 0.04)",      "$type": "color" },
+        "glass-hover": { "$value": "rgba(255, 255, 255, 0.07)",      "$type": "color" },
+        "card":        { "$value": "rgba(255, 255, 255, 0.04)",      "$type": "color" },
+        "card-hover":  { "$value": "rgba(255, 255, 255, 0.08)",      "$type": "color" },
+        "navbar-bg":   { "$value": "rgba(0, 0, 0, 0.75)",           "$type": "color" },
+        "shadow":      { "$value": "rgba(0, 0, 0, 0.60)",           "$type": "color" }
+      }
+    }
+  }
+}

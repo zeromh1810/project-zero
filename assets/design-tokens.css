@@ -1,0 +1,215 @@
+/* Design Tokens - Auto-generated */
+/* Project: Project Zero Portafolio de trabajos Carlos Felipe Rojas Hickmann */
+/* Author: Carlos Felipe Rojas Hickmann — v1.1.0 */
+/* Do not edit directly - modify tokens.json instead */
+
+/* === PRIMITIVES === */
+:root {
+  --primitive-color-blue-100: #81d8ff;
+  --primitive-color-blue-200: #5ac8fa;
+  --primitive-color-blue-300: #3aabff;
+  --primitive-color-blue-400: #2997ff;
+  --primitive-color-blue-500: #1a7fd4;
+  --primitive-color-blue-700: #0062cc;
+  --primitive-color-blue-highlight: #3b82f6;
+  --primitive-color-green-400: #30d158;
+  --primitive-color-red-500: #ef4444;
+  --primitive-color-neutral-0: #ffffff;
+  --primitive-color-neutral-50: #f8f8f8;
+  --primitive-color-neutral-100: #f0f0f0;
+  --primitive-color-neutral-800: #141414;
+  --primitive-color-neutral-900: #0a0a0a;
+  --primitive-color-neutral-950: #000000;
+  --primitive-color-text-dark-900: #1d1d1f;
+  --primitive-color-text-dark-700: #3a3a40;
+  --primitive-color-text-dark-500: #5e5e64;
+  --primitive-color-text-light-50: #f5f5f7;
+  --primitive-color-text-light-300: #b0b0b5;
+  --primitive-color-text-light-500: #8e8e93;
+  --primitive-spacing-1: 4px;
+  --primitive-spacing-2: 8px;
+  --primitive-spacing-3: 12px;
+  --primitive-spacing-4: 16px;
+  --primitive-spacing-5: 20px;
+  --primitive-spacing-6: 24px;
+  --primitive-spacing-7: 28px;
+  --primitive-spacing-8: 32px;
+  --primitive-spacing-10: 40px;
+  --primitive-spacing-12: 48px;
+  --primitive-spacing-14: 56px;
+  --primitive-spacing-16: 64px;
+  --primitive-spacing-20: 80px;
+  --primitive-spacing-24: 96px;
+  --primitive-fontSize-xs: 11px;
+  --primitive-fontSize-sm: 13px;
+  --primitive-fontSize-base: 15px;
+  --primitive-fontSize-md: 16px;
+  --primitive-fontSize-lg: 17px;
+  --primitive-fontSize-xl: 20px;
+  --primitive-fontSize-2xl: 22px;
+  --primitive-fontSize-3xl: 28px;
+  --primitive-lineHeight-tight: 1.05;
+  --primitive-lineHeight-snug: 1.1;
+  --primitive-lineHeight-condensed: 1.25;
+  --primitive-lineHeight-normal: 1.5;
+  --primitive-lineHeight-relaxed: 1.65;
+  --primitive-lineHeight-loose: 1.8;
+  --primitive-letterSpacing-tightest: -0.045em;
+  --primitive-letterSpacing-tight: -0.03em;
+  --primitive-letterSpacing-normal: 0;
+  --primitive-letterSpacing-wide: 0.04em;
+  --primitive-letterSpacing-wider: 0.08em;
+  --primitive-letterSpacing-widest: 0.12em;
+  --primitive-radius-sm: 8px;
+  --primitive-radius-md: 12px;
+  --primitive-radius-lg: 16px;
+  --primitive-radius-xl: 20px;
+  --primitive-radius-2xl: 24px;
+  --primitive-radius-full: 9999px;
+  --primitive-duration-instant: 80ms;
+  --primitive-duration-fast: 160ms;
+  --primitive-duration-normal: 200ms;
+  --primitive-duration-slow: 300ms;
+  --primitive-duration-slower: 400ms;
+  --primitive-duration-entrance: 650ms;
+  --primitive-easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --primitive-easing-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --primitive-easing-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --primitive-easing-linear: linear;
+  --primitive-blur-sm: 8px;
+  --primitive-blur-md: 12px;
+  --primitive-blur-lg: 16px;
+  --primitive-blur-xl: 20px;
+  --primitive-blur-2xl: 24px;
+  --primitive-blur-3xl: 48px;
+}
+
+/* === SEMANTIC === */
+:root {
+  --color-bg: #f8f8f8;
+  --color-bg2: #ffffff;
+  --color-bg3: #f0f0f0;
+  --color-txt: #1d1d1f;
+  --color-txt2: #3a3a40;
+  --color-txt3: #5e5e64;
+  --color-accent: #0062cc;
+  --color-accent-h: #1a7fd4;
+  --color-highlight: #3b82f6;
+  --color-success: #30d158;
+  --color-error: #ef4444;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-h: rgba(0, 0, 0, 0.18);
+  --color-glass: rgba(0, 0, 0, 0.03);
+  --color-glass-hover: rgba(0, 0, 0, 0.06);
+  --color-card: rgba(0, 0, 0, 0.03);
+  --color-card-hover: rgba(0, 0, 0, 0.06);
+  --color-navbar-bg: rgba(248, 248, 248, 0.82);
+  --color-shadow: rgba(0, 0, 0, 0.12);
+  --spacing-component: 16px;
+  --spacing-section-x: 48px;
+  --spacing-section-y: 80px;
+  --spacing-nav-offset: 96px;
+  --layout-max-width: 1160px;
+  --layout-navbar-height: 64px;
+  --font-body: 'DM Sans', 'Helvetica Neue', sans-serif;
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* === COMPONENTS === */
+:root {
+  --btn-primary-bg: #0062cc;
+  --btn-primary-bg-h: #1a7fd4;
+  --btn-primary-fg: #ffffff;
+  --btn-primary-radius: 9999px;
+  --btn-primary-px: 26px;
+  --btn-primary-py: 12px;
+  --btn-primary-size: 15px;
+  --btn-primary-weight: 500;
+  --btn-secondary-bg: transparent;
+  --btn-secondary-border: rgba(0, 0, 0, 0.08);
+  --btn-secondary-border-h: rgba(0, 0, 0, 0.18);
+  --btn-secondary-fg: #1d1d1f;
+  --btn-secondary-radius: 9999px;
+  --btn-secondary-px: 22px;
+  --btn-secondary-py: 10px;
+  --navbar-height: 64px;
+  --navbar-bg: rgba(248, 248, 248, 0.82);
+  --navbar-blur: 48px;
+  --navbar-border: rgba(0, 0, 0, 0.08);
+  --navbar-px: 32px;
+  --project-card-radius: 20px;
+  --project-card-gap: 16px;
+  --project-card-aspect-featured: 16 / 10;
+  --section-max-width: 1160px;
+  --section-px: 48px;
+  --section-py: 80px;
+  --form-input-bg: rgba(0, 0, 0, 0.04);
+  --form-input-border: rgba(0, 0, 0, 0.12);
+  --form-input-focus-ring: #0062cc;
+  --form-input-radius: 12px;
+  --form-input-py: 20px;
+  --form-input-px: 16px;
+  --form-card-bg: rgba(255, 255, 255, 0.85);
+  --form-card-border: rgba(0, 0, 0, 0.08);
+  --form-card-radius: 24px;
+  --form-card-p: 32px;
+  --stat-card-radius: 16px;
+  --stat-card-p-x: 16px;
+  --stat-card-p-y: 20px;
+  --stat-card-num-size: 28px;
+  --skill-tag-px: 14px;
+  --skill-tag-py: 6px;
+  --skill-tag-radius: 9999px;
+  --skill-tag-size: 13px;
+  --skill-tag-border: rgba(0, 0, 0, 0.08);
+  --scroll-indicator-width: 24px;
+  --scroll-indicator-height: 38px;
+  --scroll-indicator-radius: 12px;
+  --scroll-indicator-opacity: 0.65;
+
+  /* Theme toggle */
+  --theme-toggle-width: 38px;
+  --theme-toggle-height: 22px;
+  --theme-toggle-touch-target: 44px;
+  --theme-toggle-radius: 11px;
+
+  /* Nav item */
+  --nav-item-hover-bg: rgba(0, 0, 0, 0.03);
+  --nav-item-active-bg: rgba(0, 0, 0, 0.06);
+  --nav-item-px: 16px;
+  --nav-item-py: 7px;
+  --nav-item-min-height: 44px;
+  --nav-item-radius: 8px;
+
+  /* Project card hover */
+  --project-card-hover-shadow: 0 24px 64px rgba(0,0,0,0.28), 0 4px 16px rgba(0,0,0,0.14);
+  --project-card-thumb-scale-hover: 1.05;
+
+  /* Scroll entrance animation */
+  --anim-enter-translate-y: 16px;
+  --anim-enter-duration: 650ms;
+  --anim-enter-easing: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Design System layout */
+  --ds-layout-navbar-offset: 64px;
+}
+
+/* === DARK MODE === */
+.dark {
+  --color-bg: #000000;
+  --color-bg2: #0a0a0a;
+  --color-bg3: #141414;
+  --color-txt: #f5f5f7;
+  --color-txt2: #b0b0b5;
+  --color-txt3: #8e8e93;
+  --color-accent: #2997ff;
+  --color-accent-h: #5ac8fa;
+  --color-border: rgba(255, 255, 255, 0.11);
+  --color-border-h: rgba(255, 255, 255, 0.18);
+  --color-glass: rgba(255, 255, 255, 0.04);
+  --color-glass-hover: rgba(255, 255, 255, 0.07);
+  --color-card: rgba(255, 255, 255, 0.04);
+  --color-card-hover: rgba(255, 255, 255, 0.08);
+  --color-navbar-bg: rgba(0, 0, 0, 0.75);
+  --color-shadow: rgba(0, 0, 0, 0.60);
+}

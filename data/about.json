@@ -1,0 +1,34 @@
+{
+  "bio1": "Soy <strong>diseñador de producto y desarrollador frontend</strong> con base en Santiago, Chile. Me especializo en interfaces digitales que no solo se ven bien, sino que <strong>funcionan de manera intuitiva y elegante</strong>.",
+  "bio2": "Mi proceso combina investigación profunda con ejecución meticulosa. Creo que los mejores productos nacen de la <strong>tensión entre simplicidad y profundidad</strong> — fáciles de usar a primera vista, ricos en detalle cuando los exploras.",
+  "skills": [
+    "Figma",
+    "Prototyping",
+    "User Research",
+    "Design Systems",
+    "React",
+    "TypeScript",
+    "Motion Design",
+    "Framer",
+    "Three.js",
+    "GSAP",
+    "Brand Identity",
+    "UI/UX"
+  ],
+  "stats": [
+    {
+      "value": "5+",
+      "label": "Años exp."
+    },
+    {
+      "value": "40+",
+      "label": "Proyectos"
+    },
+    {
+      "value": "18",
+      "label": "Clientes"
+    }
+  ],
+  "badge": "Disponible para freelance",
+  "available": true
+}
