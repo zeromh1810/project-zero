@@ -399,24 +399,6 @@ export default function LogoTab({ onToast }: Props) {
         </div>
       )}
 
-      {/* ── Estado guardado ── */}
-      {(saved.lightUrl || saved.darkUrl) && (
-        <div style={{
-          padding: "10px 14px",
-          borderRadius: 10,
-          background: "rgba(48,209,88,0.06)",
-          border: "1px solid rgba(48,209,88,0.2)",
-          fontSize: 12,
-          color: "var(--success)",
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-        }}>
-          <div style={{ fontWeight: 600 }}>✓ Logo activo en el sitio</div>
-          {saved.lightUrl && <div style={{ opacity: 0.8 }}>Claro: <code style={{ fontFamily: "monospace" }}>{saved.lightUrl}</code></div>}
-          {saved.darkUrl  && <div style={{ opacity: 0.8 }}>Oscuro: <code style={{ fontFamily: "monospace" }}>{saved.darkUrl}</code></div>}
-        </div>
-      )}
 
       {/* ── Estado sin logo ── */}
       {!activeUrl && !uploadingLight && !uploadingDark && (
