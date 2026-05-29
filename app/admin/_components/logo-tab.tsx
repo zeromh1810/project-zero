@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, ChangeEvent } from "react"
 
 import type { ToastType } from "./admin-toast"
+import { invalidateLogo } from "@/lib/hooks/use-logo"
 
 interface Props {
   onToast: (title: string, type: ToastType, msg?: string) => void
@@ -223,6 +224,7 @@ export default function LogoTab({ onToast }: Props) {
       })
       if (!res.ok) throw new Error()
       setSaved({ ...form })
+      invalidateLogo()
       onToast("Logo guardado correctamente", "success")
     } catch {
       onToast("Error al guardar", "error")

@@ -34,12 +34,26 @@ function fetchLogo(): Promise<LogoData> {
   return pending!
 }
 
+// Call this after saving logos in admin so all useLogo() instances re-fetch
+export function invalidateLogo() {
+  cache = null
+  pending = null
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("logo-updated"))
+  }
+}
+
 export function useLogo(): LogoData {
   const [data, setData] = useState<LogoData>(cache ?? DEFAULT)
 
   useEffect(() => {
-    if (cache) return
-    fetchLogo().then(setData)
+    if (!cache) fetchLogo().then(setData)
+
+    function onUpdate() {
+      fetchLogo().then(setData)
+    }
+    window.addEventListener("logo-updated", onUpdate)
+    return () => window.removeEventListener("logo-updated", onUpdate)
   }, [])
 
   return data
