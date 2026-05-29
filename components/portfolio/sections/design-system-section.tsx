@@ -7,7 +7,7 @@ import { EmailIcon } from "../icons"
 // ── Types ────────────────────────────────────────────────────────────────────
 type DSPageId =
   | "overview" | "colors" | "typography"
-  | "buttons" | "cards" | "forms" | "navigation" | "badges" | "patterns"
+  | "buttons" | "cards" | "forms" | "navigation" | "badges" | "toast" | "patterns"
 
 const DS_GROUPS: { label: string; items: { id: DSPageId; label: string }[] }[] = [
   {
@@ -26,6 +26,7 @@ const DS_GROUPS: { label: string; items: { id: DSPageId; label: string }[] }[] =
       { id: "forms", label: "Formularios" },
       { id: "navigation", label: "Navegación" },
       { id: "badges", label: "Badges & Tags" },
+      { id: "toast", label: "Toast" },
     ],
   },
   {
@@ -84,7 +85,7 @@ function PageOverview() {
   return (
     <div className="ds-page-body">
       <div className="ds-page-header">
-        <div className="ds-page-badge">v1.1</div>
+        <div className="ds-page-badge">v1.3</div>
         <h2 className="ds-page-title">Project Zero Design System</h2>
         <p className="ds-page-desc">
           Sistema de diseño del portafolio de <strong>Carlos Felipe Rojas Hickmann</strong>. Arquitectura de tokens de 3 capas
@@ -95,8 +96,8 @@ function PageOverview() {
 
       <div className="ds-overview-grid">
         {[
-          { label: "Tokens", value: "63", desc: "Variables CSS documentadas" },
-          { label: "Componentes", value: "12", desc: "UI components en el sistema" },
+          { label: "Tokens", value: "70+", desc: "Variables CSS documentadas" },
+          { label: "Componentes", value: "13", desc: "UI components en el sistema" },
           { label: "WCAG", value: "AA", desc: "Nivel de accesibilidad mínimo" },
           { label: "Modos", value: "2", desc: "Light & Dark mode" },
         ].map(({ label, value, desc }) => (
@@ -176,7 +177,8 @@ function PageColors() {
     {
       group: "Feedback", tokens: [
         { name: "--success", light: "#30d158", dark: "#30d158", usage: "Éxito, disponibilidad, confirmación" },
-        { name: "--error", light: "#ef4444", dark: "#ef4444", usage: "Error, formularios inválidos" },
+        { name: "--warning", light: "#f59e0b", dark: "#f59e0b", usage: "Advertencia, acciones destructivas — toast warning" },
+        { name: "--error", light: "#ef4444", dark: "#ef4444", usage: "Error, formularios inválidos — toast error" },
       ],
     },
     {
@@ -827,6 +829,334 @@ function getBentoVariant(i: number): "featured" | "compact" {
   )
 }
 
+// ── Page: Toast ───────────────────────────────────────────────────────────────
+function PageToast() {
+  const { isDark } = useTheme()
+  const [activeType, setActiveType] = useState<"success" | "error" | "warning" | "info">("success")
+
+  const STATES = [
+    {
+      type: "success" as const,
+      label: "Éxito",
+      hex: "#30d158",
+      accent: "var(--admin-toast-accent-success, #30d158)",
+      title: "Cambios guardados",
+      msg: "El proyecto se actualizó correctamente.",
+      tokenName: "--admin-toast-accent-success",
+      semanticAlias: "--success",
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="10" cy="10" r="8" /><path d="M6.5 10.5l2.5 2.5 4.5-5" />
+        </svg>
+      ),
+    },
+    {
+      type: "error" as const,
+      label: "Error",
+      hex: "#ef4444",
+      accent: "var(--admin-toast-accent-error, #ef4444)",
+      title: "Error al guardar",
+      msg: "No se pudo conectar con el servidor.",
+      tokenName: "--admin-toast-accent-error",
+      semanticAlias: "--error",
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="10" cy="10" r="8" /><path d="M7.5 7.5l5 5M12.5 7.5l-5 5" />
+        </svg>
+      ),
+    },
+    {
+      type: "warning" as const,
+      label: "Advertencia",
+      hex: "#f59e0b",
+      accent: "var(--admin-toast-accent-warning, #f59e0b)",
+      title: "Acción irreversible",
+      msg: "Esta operación no se puede deshacer.",
+      tokenName: "--admin-toast-accent-warning",
+      semanticAlias: "--warning",
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M10 3.5L17.5 16.5H2.5L10 3.5z" /><path d="M10 9v3M10 13.5v.5" />
+        </svg>
+      ),
+    },
+    {
+      type: "info" as const,
+      label: "Información",
+      hex: isDark ? "#2997ff" : "#0062cc",
+      accent: "var(--admin-toast-accent-info, #0062cc)",
+      title: "Sin cambios",
+      msg: "No hay cambios pendientes para guardar.",
+      tokenName: "--admin-toast-accent-info",
+      semanticAlias: "--accent",
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="10" cy="10" r="8" /><path d="M10 9.5V14" /><circle cx="10" cy="6.5" r="0.5" fill="currentColor" />
+        </svg>
+      ),
+    },
+  ]
+
+  const active = STATES.find(s => s.type === activeType)!
+
+  const TOKEN_GROUPS = [
+    {
+      label: "Estructura",
+      tokens: [
+        { name: "--admin-toast-radius",    val: "16px",  desc: "border-radius del contenedor" },
+        { name: "--admin-toast-min-width", val: "320px", desc: "Ancho mínimo" },
+        { name: "--admin-toast-max-width", val: "420px", desc: "Ancho máximo" },
+        { name: "--admin-toast-z-index",   val: "600",   desc: "Sobre modales (z 500) y navbar (z 100)" },
+        { name: "--admin-toast-bottom",    val: "28px",  desc: "Posición desde borde inferior" },
+        { name: "--admin-toast-right",     val: "28px",  desc: "Posición desde borde derecho" },
+      ],
+    },
+    {
+      label: "Espaciado interno",
+      tokens: [
+        { name: "--admin-toast-px", val: "20px", desc: "Padding horizontal" },
+        { name: "--admin-toast-pt", val: "16px", desc: "Padding top" },
+        { name: "--admin-toast-pb", val: "19px", desc: "16px + 3px para barra de progreso" },
+        { name: "--admin-toast-gap", val: "12px", desc: "Gap entre icono, cuerpo y botón X" },
+      ],
+    },
+    {
+      label: "Glassmorphism",
+      tokens: [
+        { name: "--admin-toast-bg",     val: "rgba(255,255,255,0.88)", desc: "Light · dark: rgba(20,20,22,0.90)" },
+        { name: "--admin-toast-border", val: "rgba(0,0,0,0.07)",       desc: "Light · dark: rgba(255,255,255,0.09)" },
+        { name: "--admin-toast-blur",   val: "12px",                   desc: "backdrop-filter blur" },
+        { name: "--admin-toast-shadow", val: "0 8px 32px …",           desc: "Sombra light · amplificada en dark" },
+      ],
+    },
+    {
+      label: "Barra de progreso",
+      tokens: [
+        { name: "--admin-toast-accent-bar-w", val: "3px", desc: "Ancho de la barra de acento lateral" },
+        { name: "--admin-toast-bar-h",        val: "3px", desc: "Altura de la barra bottom" },
+        { name: "--admin-toast-bar-opacity",  val: "0.4", desc: "Opacidad sobre el color de acento" },
+        { name: "--admin-toast-bar-duration", val: "4s",  desc: "Duración hasta auto-dismiss" },
+      ],
+    },
+    {
+      label: "Tipografía e íconos",
+      tokens: [
+        { name: "--admin-toast-title-size",   val: "14px",  desc: "Plus Jakarta Sans — título" },
+        { name: "--admin-toast-title-weight", val: "700",   desc: "Peso del título" },
+        { name: "--admin-toast-msg-size",     val: "13px",  desc: "DM Sans — mensaje opcional" },
+        { name: "--admin-toast-icon-size",    val: "20px",  desc: "SVG 20×20" },
+        { name: "--admin-toast-icon-stroke",  val: "1.75",  desc: "strokeWidth del SVG" },
+        { name: "--admin-toast-close-size",   val: "24px",  desc: "Hit area del botón X" },
+        { name: "--admin-toast-close-radius", val: "6px",   desc: "Radio proporcional a 24×24" },
+      ],
+    },
+    {
+      label: "Animaciones",
+      tokens: [
+        { name: "--admin-toast-anim-enter", val: "toastSlideUp 300ms spring both", desc: "Animación de entrada (montado)" },
+        { name: "--admin-toast-anim-exit",  val: "toastSlideDown 200ms ease-in",   desc: "Animación de salida (clase .leaving)" },
+      ],
+    },
+  ]
+
+  return (
+    <div className="ds-page-body">
+      <div className="ds-page-header">
+        <h2 className="ds-page-title">Toast — Notificaciones</h2>
+        <p className="ds-page-desc">
+          Componente de feedback glassmorphism con <strong>4 estados semánticos</strong>, barra de progreso
+          auto-dismiss a los 4s, pausa al hover y accesibilidad ARIA. Exclusivo del panel <code>/admin</code>.
+          Todas las propiedades visuales están tokenizadas en <code>--admin-toast-*</code>.
+        </p>
+      </div>
+
+      {/* ── Estado selector ── */}
+      <SectionHeading title="Estados" />
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
+        {STATES.map(({ type, label, accent }) => (
+          <button
+            key={type}
+            onClick={() => setActiveType(type)}
+            style={{
+              padding: "6px 16px",
+              borderRadius: 9999,
+              border: `1.5px solid ${activeType === type ? accent : "var(--border)"}`,
+              background: activeType === type ? "var(--glass-hover)" : "transparent",
+              color: activeType === type ? accent : "var(--txt3)",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 150ms ease",
+              fontFamily: "var(--portfolio-font)",
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Vista previa interactiva ── */}
+      <PreviewBox label="Vista previa">
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "var(--admin-toast-gap, 12px)",
+            minWidth: "min(var(--admin-toast-min-width, 320px), 100%)",
+            maxWidth: "var(--admin-toast-max-width, 420px)",
+            padding: "var(--admin-toast-pt, 16px) var(--admin-toast-px, 20px) var(--admin-toast-pb, 19px)",
+            borderRadius: "var(--admin-toast-radius, 16px)",
+            background: "var(--admin-toast-bg, rgba(255,255,255,0.88))",
+            backdropFilter: "blur(var(--admin-toast-blur, 12px))",
+            WebkitBackdropFilter: "blur(var(--admin-toast-blur, 12px))",
+            border: "1px solid var(--admin-toast-border, rgba(0,0,0,0.07))",
+            boxShadow: "var(--admin-toast-shadow, 0 8px 32px rgba(0,0,0,0.13))",
+            overflow: "hidden",
+            fontFamily: "var(--portfolio-font)",
+            width: "100%",
+          }}
+        >
+          {/* Barra acento lateral */}
+          <div style={{
+            position: "absolute", left: 0, top: 0, bottom: 0,
+            width: "var(--admin-toast-accent-bar-w, 3px)",
+            borderRadius: "var(--admin-toast-radius, 16px) 0 0 var(--admin-toast-radius, 16px)",
+            background: active.accent,
+          }} />
+          {/* Ícono */}
+          <div style={{ color: active.accent, flexShrink: 0, marginTop: 1 }}>
+            {active.icon}
+          </div>
+          {/* Cuerpo */}
+          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
+            <span style={{
+              fontFamily: "var(--portfolio-heading-font)",
+              fontSize: "var(--admin-toast-title-size, 14px)",
+              fontWeight: 700,
+              color: "var(--txt)",
+              letterSpacing: "-0.01em",
+              lineHeight: 1.3,
+            }}>
+              {active.title}
+            </span>
+            <span style={{
+              fontSize: "var(--admin-toast-msg-size, 13px)",
+              color: "var(--txt2)",
+              lineHeight: 1.4,
+            }}>
+              {active.msg}
+            </span>
+          </div>
+          {/* Botón cerrar */}
+          <div style={{
+            flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
+            width: "var(--admin-toast-close-size, 24px)",
+            height: "var(--admin-toast-close-size, 24px)",
+            borderRadius: "var(--admin-toast-close-radius, 6px)",
+            color: "var(--txt3)", marginTop: -2,
+          }}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M2 2l10 10M12 2L2 12" />
+            </svg>
+          </div>
+          {/* Barra de progreso (estática en 60%) */}
+          <div style={{
+            position: "absolute", bottom: 0, left: 0,
+            height: "var(--admin-toast-bar-h, 3px)",
+            width: "60%",
+            background: active.accent,
+            opacity: 0.4,
+          }} />
+        </div>
+      </PreviewBox>
+
+      {/* ── Tokens de color de feedback ── */}
+      <SectionHeading title="Tokens de feedback" />
+      <div className="ds-color-grid">
+        {STATES.map(({ tokenName, semanticAlias, label, hex }) => (
+          <div key={tokenName} className="ds-color-card">
+            <div className="ds-color-swatch" style={{ background: hex }} />
+            <div className="ds-color-info">
+              <div className="ds-color-name">{tokenName}</div>
+              <div className="ds-color-value">{hex}</div>
+              <div className="ds-color-usage">
+                Alias: <code>{semanticAlias}</code> · {label}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Tokens del componente ── */}
+      <SectionHeading title="Tokens del componente" />
+      {TOKEN_GROUPS.map(({ label, tokens }) => (
+        <div key={label} style={{ marginBottom: 20 }}>
+          <div style={{
+            fontSize: 11, fontWeight: 700, letterSpacing: "0.08em",
+            textTransform: "uppercase", color: "var(--txt3)", marginBottom: 8,
+          }}>
+            {label}
+          </div>
+          <div className="ds-spec-table">
+            {tokens.map(({ name, val, desc }) => (
+              <div key={name} className="ds-spec-row">
+                <span className="ds-spec-name">{name}</span>
+                <span className="ds-spec-val">{val}</span>
+                <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {/* ── Código de uso ── */}
+      <SectionHeading title="Uso" />
+      <CodeBlock code={`// app/admin/page.tsx — estado del toast
+const [toast, setToast]       = useState<ToastState>(null)
+const [toastLeaving, setToastLeaving] = useState(false)
+
+function showToast(title: string, type: ToastType, msg?: string) {
+  setToast({ title, type, msg })
+  setToastLeaving(false)
+  leavingTimer.current = setTimeout(() => setToastLeaving(true), 3800)
+  dismissTimer.current = setTimeout(() => {
+    setToast(null)
+    setToastLeaving(false)
+  }, 4000)
+}
+
+// Render en el layout del admin
+{toast && (
+  <AdminToast
+    type={toast.type}       // "success" | "error" | "warning" | "info"
+    title={toast.title}
+    message={toast.msg}     // opcional
+    onClose={closeToast}
+    isLeaving={toastLeaving}
+  />
+)}
+
+// Dispatch desde cualquier tab
+onToast("Cambios guardados",   "success", "El hero se actualizó.")
+onToast("Error al guardar",    "error",   error.message)
+onToast("Acción irreversible", "warning")
+onToast("Sin cambios",         "info")`} />
+
+      {/* ── Reglas de uso ── */}
+      <SectionHeading title="Reglas" />
+      <div className="ds-rules">
+        <RuleChip rule="success → operación completada: guardar, subir, crear" variant="do" />
+        <RuleChip rule="error → el usuario debe actuar; no para advertencias menores" variant="do" />
+        <RuleChip rule="warning → acción destructiva o con consecuencias irreversibles" variant="do" />
+        <RuleChip rule="info → confirmación neutral o estado esperado" variant="do" />
+        <RuleChip rule='Mostrar success cuando la operación realmente falló' variant="dont" />
+        <RuleChip rule="Apilar varios toasts simultáneos (el sistema no tiene queue)" variant="dont" />
+      </div>
+    </div>
+  )
+}
+
 // ── Page map ──────────────────────────────────────────────────────────────────
 const PAGE_MAP: Record<DSPageId, React.ComponentType> = {
   overview: PageOverview,
@@ -837,6 +1167,7 @@ const PAGE_MAP: Record<DSPageId, React.ComponentType> = {
   forms: PageForms,
   navigation: PageNavigation,
   badges: PageBadges,
+  toast: PageToast,
   patterns: PagePatterns,
 }
 
@@ -866,7 +1197,7 @@ export function DesignSystemSection() {
           </div>
           <div className="ds-brand-info">
             <div className="ds-brand-title">Project Zero DS</div>
-            <div className="ds-brand-version">v1.0</div>
+            <div className="ds-brand-version">v1.3</div>
           </div>
         </div>
         <nav className="ds-nav">
