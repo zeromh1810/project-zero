@@ -16,8 +16,10 @@ const DEFAULT: HeroData = {
   subtitle: "Product Designer & Frontend Developer. Cinco años creando productos que equilibran estética refinada con funcionalidad real.",
 }
 
+import type { ToastType } from "./admin-toast"
+
 interface Props {
-  onToast: (msg: string, type: "ok" | "err") => void
+  onToast: (title: string, type: ToastType, msg?: string) => void
 }
 
 export default function HeroTab({ onToast }: Props) {
@@ -45,9 +47,9 @@ export default function HeroTab({ onToast }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
-      onToast("Hero actualizado", "ok")
+      onToast("Hero actualizado", "success")
     } catch {
-      onToast("Error al guardar", "err")
+      onToast("Error al guardar", "error")
     } finally {
       setSaving(false)
     }

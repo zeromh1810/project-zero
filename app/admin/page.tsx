@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useTheme } from "@/lib/context/theme-context"
 import { useLogo } from "@/lib/hooks/use-logo"
 import dynamic from "next/dynamic"
+import AdminToast, { type ToastType } from "./_components/admin-toast"
 
 const ProjectsTab = dynamic(() => import("./_components/projects-tab"), { ssr: false })
 const HeroTab     = dynamic(() => import("./_components/hero-tab"),     { ssr: false })
@@ -12,7 +13,7 @@ const CVTab       = dynamic(() => import("./_components/cv-tab"),       { ssr: f
 const LogoTab     = dynamic(() => import("./_components/logo-tab"),     { ssr: false })
 
 type Tab = "proyectos" | "hero" | "sobre" | "cv" | "logo"
-type ToastState = { msg: string; type: "ok" | "err" } | null
+type ToastState = { title: string; msg?: string; type: ToastType } | null
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "proyectos", label: "Proyectos" },
@@ -32,8 +33,12 @@ export default function AdminPage() {
   const [pass, setPass] = useState("")
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [tab, setTab]   = useState<Tab>("proyectos")
-  const [toast, setToast] = useState<ToastState>(null)
+  const [tab, setTab]       = useState<Tab>("proyectos")
+  const [toast, setToast]   = useState<ToastState>(null)
+  const [toastLeaving, setToastLeaving] = useState(false)
+
+  const dismissTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const leavingTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     fetch("/api/admin/auth")
@@ -48,9 +53,20 @@ export default function AdminPage() {
     else document.documentElement.classList.remove("dark")
   }, [isDark])
 
-  function showToast(msg: string, type: "ok" | "err") {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
+  function showToast(title: string, type: ToastType, msg?: string) {
+    if (dismissTimer.current)  clearTimeout(dismissTimer.current)
+    if (leavingTimer.current)  clearTimeout(leavingTimer.current)
+    setToast({ title, type, msg })
+    setToastLeaving(false)
+    leavingTimer.current = setTimeout(() => setToastLeaving(true), 3800)
+    dismissTimer.current = setTimeout(() => { setToast(null); setToastLeaving(false) }, 4000)
+  }
+
+  function closeToast() {
+    if (dismissTimer.current) clearTimeout(dismissTimer.current)
+    if (leavingTimer.current) clearTimeout(leavingTimer.current)
+    setToastLeaving(true)
+    dismissTimer.current = setTimeout(() => { setToast(null); setToastLeaving(false) }, 200)
   }
 
   async function login() {
@@ -193,9 +209,13 @@ export default function AdminPage() {
 
       {/* Toast */}
       {toast && (
-        <div className={`admin-toast ${toast.type}`}>
-          {toast.type === "ok" ? "✓" : "✕"} {toast.msg}
-        </div>
+        <AdminToast
+          type={toast.type}
+          title={toast.title}
+          message={toast.msg}
+          onClose={closeToast}
+          isLeaving={toastLeaving}
+        />
       )}
     </div>
   )

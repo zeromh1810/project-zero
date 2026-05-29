@@ -25,8 +25,10 @@ const DEFAULT: AboutData = {
   available: true,
 }
 
+import type { ToastType } from "./admin-toast"
+
 interface Props {
-  onToast: (msg: string, type: "ok" | "err") => void
+  onToast: (title: string, type: ToastType, msg?: string) => void
 }
 
 export default function AboutTab({ onToast }: Props) {
@@ -79,9 +81,9 @@ export default function AboutTab({ onToast }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
-      onToast("Sección actualizada", "ok")
+      onToast("Sección actualizada", "success")
     } catch {
-      onToast("Error al guardar", "err")
+      onToast("Error al guardar", "error")
     } finally {
       setSaving(false)
     }

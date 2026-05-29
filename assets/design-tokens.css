@@ -1,6 +1,6 @@
 /* Design Tokens - Auto-generated */
 /* Project: Project Zero Portafolio de trabajos Carlos Felipe Rojas Hickmann */
-/* Author: Carlos Felipe Rojas Hickmann — v1.1.0 */
+/* Author: Carlos Felipe Rojas Hickmann — v1.2.0 */
 /* Do not edit directly - modify tokens.json instead */
 
 /* === PRIMITIVES === */
@@ -13,6 +13,7 @@
   --primitive-color-blue-700: #0062cc;
   --primitive-color-blue-highlight: #3b82f6;
   --primitive-color-green-400: #30d158;
+  --primitive-color-amber-500: #f59e0b;
   --primitive-color-red-500: #ef4444;
   --primitive-color-neutral-0: #ffffff;
   --primitive-color-neutral-50: #f8f8f8;
@@ -96,6 +97,7 @@
   --color-accent-h: #1a7fd4;
   --color-highlight: #3b82f6;
   --color-success: #30d158;
+  --color-warning: #f59e0b;
   --color-error: #ef4444;
   --color-border: rgba(0, 0, 0, 0.08);
   --color-border-h: rgba(0, 0, 0, 0.18);
@@ -192,10 +194,41 @@
 
   /* Design System layout */
   --ds-layout-navbar-offset: 64px;
+
+  /* AdminToast — Feedback / Notification component */
+  --admin-toast-radius: 16px;
+  --admin-toast-min-width: 320px;
+  --admin-toast-max-width: 420px;
+  --admin-toast-px: 20px;
+  --admin-toast-pt: 16px;
+  --admin-toast-pb: 19px;
+  --admin-toast-gap: 12px;
+  --admin-toast-z-index: 600;
+  --admin-toast-bottom: 28px;
+  --admin-toast-right: 28px;
+  --admin-toast-bg: rgba(255, 255, 255, 0.88);
+  --admin-toast-blur: 12px;
+  --admin-toast-shadow: 0 8px 32px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.05);
+  --admin-toast-accent-bar-w: 3px;
+  --admin-toast-bar-h: 3px;
+  --admin-toast-bar-opacity: 0.4;
+  --admin-toast-bar-duration: 4s;
+  --admin-toast-icon-size: 20px;
+  --admin-toast-icon-stroke: 1.75;
+  --admin-toast-title-size: 14px;
+  --admin-toast-title-weight: 700;
+  --admin-toast-msg-size: 13px;
+  --admin-toast-close-size: 24px;
+  --admin-toast-accent-success: #30d158;
+  --admin-toast-accent-warning: #f59e0b;
+  --admin-toast-accent-error: #ef4444;
+  --admin-toast-accent-info: #0062cc;
 }
 
 /* === DARK MODE === */
 .dark {
+  --admin-toast-bg: rgba(20, 20, 22, 0.90);
+  --admin-toast-accent-info: #2997ff;
   --color-bg: #000000;
   --color-bg2: #0a0a0a;
   --color-bg3: #141414;

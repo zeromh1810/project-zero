@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef, ChangeEvent } from "react"
 
+import type { ToastType } from "./admin-toast"
+
 interface Props {
-  onToast: (msg: string, type: "ok" | "err") => void
+  onToast: (title: string, type: ToastType, msg?: string) => void
 }
 
 interface LogoForm {
@@ -198,7 +200,7 @@ export default function LogoTab({ onToast }: Props) {
       const url = await uploadSvg(file)
       setForm(prev => ({ ...prev, [variant === "light" ? "lightUrl" : "darkUrl"]: url }))
     } catch (err) {
-      onToast(err instanceof Error ? err.message : "Error al subir", "err")
+      onToast(err instanceof Error ? err.message : "Error al subir", "error")
     } finally {
       if (variant === "light") setUploadingLight(false)
       else setUploadingDark(false)
@@ -215,9 +217,9 @@ export default function LogoTab({ onToast }: Props) {
       })
       if (!res.ok) throw new Error()
       setSaved({ ...form })
-      onToast("Logo guardado correctamente", "ok")
+      onToast("Logo guardado correctamente", "success")
     } catch {
-      onToast("Error al guardar", "err")
+      onToast("Error al guardar", "error")
     } finally {
       setSaving(false)
     }
@@ -397,24 +399,6 @@ export default function LogoTab({ onToast }: Props) {
         </div>
       )}
 
-      {/* ── Estado guardado ── */}
-      {(saved.lightUrl || saved.darkUrl) && (
-        <div style={{
-          padding: "10px 14px",
-          borderRadius: 10,
-          background: "rgba(48,209,88,0.06)",
-          border: "1px solid rgba(48,209,88,0.2)",
-          fontSize: 12,
-          color: "var(--success)",
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-        }}>
-          <div style={{ fontWeight: 600 }}>✓ Logo activo en el sitio</div>
-          {saved.lightUrl && <div style={{ opacity: 0.8 }}>Claro: <code style={{ fontFamily: "monospace" }}>{saved.lightUrl}</code></div>}
-          {saved.darkUrl  && <div style={{ opacity: 0.8 }}>Oscuro: <code style={{ fontFamily: "monospace" }}>{saved.darkUrl}</code></div>}
-        </div>
-      )}
 
       {/* ── Estado sin logo ── */}
       {!activeUrl && !uploadingLight && !uploadingDark && (
