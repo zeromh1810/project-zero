@@ -16,8 +16,10 @@ const DEFAULT: CVData = {
   updatedAt: "Enero 2025",
 }
 
+import type { ToastType } from "./admin-toast"
+
 interface Props {
-  onToast: (msg: string, type: "ok" | "err") => void
+  onToast: (title: string, type: ToastType, msg?: string) => void
 }
 
 export default function CVTab({ onToast }: Props) {
@@ -45,9 +47,9 @@ export default function CVTab({ onToast }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
-      onToast("CV actualizado", "ok")
+      onToast("CV actualizado", "success")
     } catch {
-      onToast("Error al guardar", "err")
+      onToast("Error al guardar", "error")
     } finally {
       setSaving(false)
     }

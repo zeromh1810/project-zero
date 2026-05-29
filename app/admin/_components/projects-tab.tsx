@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react"
 import ProjectForm, { type ProjectData } from "./project-form"
 
+import type { ToastType } from "./admin-toast"
+
 interface Props {
-  onToast: (msg: string, type: "ok" | "err") => void
+  onToast: (title: string, type: ToastType, msg?: string) => void
 }
 
 export default function ProjectsTab({ onToast }: Props) {
@@ -19,7 +21,7 @@ export default function ProjectsTab({ onToast }: Props) {
       const res = await fetch("/api/admin/projects", { cache: "no-store" })
       setProjects(await res.json())
     } catch {
-      onToast("Error cargando proyectos", "err")
+      onToast("Error cargando proyectos", "error")
     } finally {
       setLoading(false)
     }
@@ -36,19 +38,19 @@ export default function ProjectsTab({ onToast }: Props) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         })
-        onToast("Proyecto actualizado", "ok")
+        onToast("Proyecto actualizado", "success")
       } else {
         await fetch("/api/admin/projects", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         })
-        onToast("Proyecto creado", "ok")
+        onToast("Proyecto creado", "success")
       }
       setEditing(undefined)
       load()
     } catch {
-      onToast("Error al guardar", "err")
+      onToast("Error al guardar", "error")
     } finally {
       setSaving(false)
     }
@@ -57,11 +59,11 @@ export default function ProjectsTab({ onToast }: Props) {
   async function handleDelete(id: number) {
     try {
       await fetch(`/api/admin/projects/${id}`, { method: "DELETE" })
-      onToast("Proyecto eliminado", "ok")
+      onToast("Proyecto eliminado", "success")
       setConfirmDelete(null)
       load()
     } catch {
-      onToast("Error al eliminar", "err")
+      onToast("Error al eliminar", "error")
     }
   }
 
