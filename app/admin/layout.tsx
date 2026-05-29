@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { ThemeProvider } from "@/lib/context/theme-context"
 import "@/styles/portfolio.css"
+import "@/assets/design-tokens.css"
 import "./admin.css"
 
 export const metadata: Metadata = {
