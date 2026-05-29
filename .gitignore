@@ -21,8 +21,12 @@ node_modules/
 tsconfig.tsbuildinfo
 *.tsbuildinfo
 
-# Claude Code internal (skills, memory, sessions)
-.claude/
+# Claude Code internal runtime files (no trackear)
+.claude/settings.json
+.claude/settings.local.json
+.claude/sessions/
+.claude/memory/
+# .claude/skills/ sí se trackea — es parte del proyecto
 
 # Local image reference folder
 imagenes/
