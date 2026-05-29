@@ -7,11 +7,13 @@ export const dynamic = "force-dynamic"
 
 const FILE = path.join(process.cwd(), "data", "logo.json")
 
+const EMPTY_LOGO = { lightUrl: "", darkUrl: "", fallbackText: "Project Zero" }
+
 function read() {
   try {
     return JSON.parse(fs.readFileSync(FILE, "utf-8"))
   } catch {
-    return { svgUrl: "" }
+    return { ...EMPTY_LOGO }
   }
 }
 

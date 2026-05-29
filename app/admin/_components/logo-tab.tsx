@@ -179,18 +179,24 @@ export default function LogoTab({ onToast }: Props) {
   const [uploadingLight, setUploadingLight] = useState(false)
   const [uploadingDark, setUploadingDark]  = useState(false)
   const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const hasChanges = JSON.stringify(form) !== JSON.stringify(saved)
 
   useEffect(() => {
+    setLoading(true)
     fetch("/api/admin/logo", { cache: "no-store" })
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
       .then(d => {
         const loaded: LogoForm = { ...EMPTY, ...d }
         setForm(loaded)
         setSaved(loaded)
       })
-      .catch(() => {})
+      .catch(() => onToast("Error cargando logo", "error"))
+      .finally(() => setLoading(false))
   }, [])
 
   async function handleUpload(file: File, variant: "light" | "dark") {
@@ -226,6 +232,15 @@ export default function LogoTab({ onToast }: Props) {
   }
 
   const activeUrl = form.lightUrl || form.darkUrl
+
+  if (loading) {
+    return (
+      <div style={{ padding: "48px 0", display: "flex", justifyContent: "center", alignItems: "center", gap: 10, color: "var(--txt3)", fontSize: 14 }}>
+        <div className="admin-spinner" />
+        Cargando logo…
+      </div>
+    )
+  }
 
   return (
     <>
