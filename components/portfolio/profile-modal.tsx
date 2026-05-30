@@ -5,7 +5,11 @@ interface ProfileModalProps {
   onNavigateContact: () => void
 }
 
-const SOCIAL_LINKS = ["GitHub", "LinkedIn", "Email"]
+const SOCIAL_LINKS = [
+  { label: "GitHub",   href: "https://github.com/zeromh1810",               target: "_blank" },
+  { label: "LinkedIn", href: "https://linkedin.com/in/carlos-rojas-hickmann", target: "_blank" },
+  { label: "Email",    href: "mailto:c.hickmann86@gmail.com",                target: undefined },
+]
 
 export function ProfileModal({ onClose, onNavigateContact }: ProfileModalProps) {
   const handleContact = () => {
@@ -24,14 +28,20 @@ export function ProfileModal({ onClose, onNavigateContact }: ProfileModalProps) 
         <button className="modal-x" onClick={onClose} aria-label="Cerrar">
           ✕
         </button>
-        <div className="m-av">A</div>
-        <div className="m-name">Alejandro Silva</div>
-        <div className="m-role">Product Designer & Frontend Dev · Santiago</div>
+        <div className="m-av">C</div>
+        <div className="m-name">Carlos Felipe Rojas Hickmann</div>
+        <div className="m-role">Product Designer & Frontend Developer · Santiago</div>
         <div className="m-links">
-          {SOCIAL_LINKS.map((link) => (
-            <span key={link} className="m-link">
-              {link}
-            </span>
+          {SOCIAL_LINKS.map(({ label, href, target }) => (
+            <a
+              key={label}
+              href={href}
+              target={target}
+              rel={target === "_blank" ? "noopener noreferrer" : undefined}
+              className="m-link"
+            >
+              {label}
+            </a>
           ))}
         </div>
         <button

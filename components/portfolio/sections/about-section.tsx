@@ -1,8 +1,21 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Fragment } from "react"
 import { useTheme } from "@/lib/context/theme-context"
 import { SKILLS, STATS } from "@/lib/data/projects"
+
+// Safe renderer: only allows <strong> tags, strips everything else
+function SafeBio({ html }: { html: string }) {
+  const parts = html.split(/(<strong>.*?<\/strong>)/g)
+  return (
+    <>
+      {parts.map((part, i) => {
+        const match = part.match(/^<strong>(.*?)<\/strong>$/)
+        return match ? <strong key={i}>{match[1]}</strong> : <Fragment key={i}>{part}</Fragment>
+      })}
+    </>
+  )
+}
 
 interface Stat { value: string; label: string }
 interface AboutData {
@@ -94,10 +107,8 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
             ))}
           </div>
 
-          <p className="about-bio anim-up"
-            dangerouslySetInnerHTML={{ __html: data.bio1 }} />
-          <p className="about-bio anim-up"
-            dangerouslySetInnerHTML={{ __html: data.bio2 }} />
+          <p className="about-bio anim-up"><SafeBio html={data.bio1} /></p>
+          <p className="about-bio anim-up"><SafeBio html={data.bio2} /></p>
 
           <div className="skills-label anim-up">Stack & Herramientas</div>
           <div className="skills-wrap anim-up">

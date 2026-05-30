@@ -223,9 +223,14 @@ export default function LogoTab({ onToast }: Props) {
         body: JSON.stringify(form),
       })
       if (!res.ok) throw new Error()
+      const data = await res.json()
       setSaved({ ...form })
       invalidateLogo()
-      onToast("Logo guardado correctamente", "success")
+      if (data._githubWarning) {
+        onToast("Logo guardado localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
+      } else {
+        onToast("Logo guardado correctamente", "success")
+      }
     } catch {
       onToast("Error al guardar", "error")
     } finally {

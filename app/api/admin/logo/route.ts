@@ -74,13 +74,15 @@ export async function PUT(request: Request) {
     const updated = { ...read(), ...body }
     write(updated)
 
+    let githubWarning = false
     try {
       await commitToGitHub(updated)
     } catch (err) {
       console.warn("[logo] GitHub commit failed (datos guardados localmente):", err)
+      githubWarning = true
     }
 
-    return NextResponse.json(updated)
+    return NextResponse.json({ ...updated, _githubWarning: githubWarning })
   } catch {
     return NextResponse.json({ error: "Error al guardar" }, { status: 500 })
   }

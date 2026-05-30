@@ -18,6 +18,7 @@ const DEFAULT: CVData = {
 
 export function CVSection() {
   const [cv, setCv] = useState<CVData>(DEFAULT)
+  const [noLinkMsg, setNoLinkMsg] = useState(false)
 
   useEffect(() => {
     fetch("/api/admin/cv", { cache: "no-store" })
@@ -30,7 +31,8 @@ export function CVSection() {
     if (cv.link) {
       window.open(cv.link, "_blank", "noreferrer")
     } else {
-      alert("El link del CV aún no ha sido configurado. Accede al administrador para agregarlo.")
+      setNoLinkMsg(true)
+      setTimeout(() => setNoLinkMsg(false), 3500)
     }
   }
 
@@ -55,6 +57,17 @@ export function CVSection() {
         >
           {cv.link ? "Abrir PDF ↗" : "Descargar PDF ↓"}
         </button>
+        {noLinkMsg && (
+          <p
+            role="status"
+            style={{
+              marginTop: 10, fontSize: 13, textAlign: "center",
+              color: "var(--warning)", lineHeight: 1.4,
+            }}
+          >
+            El CV aún no está configurado. Accede al administrador para añadirlo.
+          </p>
+        )}
       </div>
     </div>
   )
