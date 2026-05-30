@@ -38,7 +38,10 @@ export function invalidateSocial() {
   }
 }
 
-export function useSocial(): SocialData {
+export function useSocial(initial?: SocialData): SocialData {
+  // Seed module cache from server-provided initial data (only once, before any fetch)
+  if (initial && !cache) cache = { ...DEFAULT, ...initial }
+
   const [data, setData] = useState<SocialData>(cache ?? DEFAULT)
 
   useEffect(() => {

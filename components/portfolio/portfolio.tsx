@@ -13,14 +13,14 @@ import { CVSection } from "./sections/cv-section"
 import { ContactSection } from "./sections/contact-section"
 import { DesignSystemSection } from "./sections/design-system-section"
 import type { Project } from "@/lib/data/projects"
-import { useSocial } from "@/lib/hooks/use-social"
+import { useSocial, type SocialData } from "@/lib/hooks/use-social"
 import { LinkedInIcon, InstagramIcon, GitHubIcon } from "./icons"
 
 type Section = "trabajos" | "sobre" | "cv" | "contacto" | "design-system"
 
-export function Portfolio() {
+export function Portfolio({ initialSocial }: { initialSocial?: SocialData }) {
   const router  = useRouter()
-  const social  = useSocial()
+  const social  = useSocial(initialSocial)
   const [section, setSection] = useState<Section>("trabajos")
   const [displaySection, setDisplaySection] = useState<Section>("trabajos")
   const [transitioning, setTransitioning] = useState(false)
