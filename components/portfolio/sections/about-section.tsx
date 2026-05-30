@@ -3,6 +3,8 @@
 import { useState, useEffect, Fragment } from "react"
 import { useTheme } from "@/lib/context/theme-context"
 import { SKILLS, STATS } from "@/lib/data/projects"
+import { useSocial } from "@/lib/hooks/use-social"
+import { LinkedInIcon, InstagramIcon } from "@/components/portfolio/icons"
 
 // Safe renderer: only allows <strong> tags, strips everything else
 function SafeBio({ html }: { html: string }) {
@@ -43,6 +45,7 @@ interface AboutSectionProps {
 
 export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionProps) {
   const { isDark } = useTheme()
+  const social = useSocial()
   const [data, setData] = useState<AboutData>(DEFAULT)
 
   useEffect(() => {
@@ -81,6 +84,22 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
               {data.available && <span className="badge-pulse" />}
               {data.badge}
             </div>
+            {(social.linkedin || social.instagram) && (
+              <div className="about-social">
+                {social.linkedin && (
+                  <a href={social.linkedin} target="_blank" rel="noopener noreferrer"
+                     aria-label="LinkedIn" className="about-social-link">
+                    <LinkedInIcon />
+                  </a>
+                )}
+                {social.instagram && (
+                  <a href={social.instagram} target="_blank" rel="noopener noreferrer"
+                     aria-label="Instagram" className="about-social-link">
+                    <InstagramIcon />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Stats col — tablet/mobile */}

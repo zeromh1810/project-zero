@@ -13,11 +13,14 @@ import { CVSection } from "./sections/cv-section"
 import { ContactSection } from "./sections/contact-section"
 import { DesignSystemSection } from "./sections/design-system-section"
 import type { Project } from "@/lib/data/projects"
+import { useSocial } from "@/lib/hooks/use-social"
+import { LinkedInIcon, InstagramIcon, GitHubIcon } from "./icons"
 
 type Section = "trabajos" | "sobre" | "cv" | "contacto" | "design-system"
 
 export function Portfolio() {
-  const router = useRouter()
+  const router  = useRouter()
+  const social  = useSocial()
   const [section, setSection] = useState<Section>("trabajos")
   const [displaySection, setDisplaySection] = useState<Section>("trabajos")
   const [transitioning, setTransitioning] = useState(false)
@@ -98,7 +101,30 @@ export function Portfolio() {
         {displaySection === "design-system" && <DesignSystemSection />}
       </div>
 
-      <footer className="footer">© 2026 A·Studio — Diseñado con obsesión por los detalles</footer>
+      <footer className="footer">
+        <span className="footer-brand">A·Studio</span>
+        <span className="footer-copy">© 2026 A·Studio — Diseñado con obsesión por los detalles</span>
+        <div className="footer-social">
+          {social.linkedin && (
+            <a href={social.linkedin} target="_blank" rel="noopener noreferrer"
+               aria-label="LinkedIn" className="footer-social-link">
+              <LinkedInIcon />
+            </a>
+          )}
+          {social.instagram && (
+            <a href={social.instagram} target="_blank" rel="noopener noreferrer"
+               aria-label="Instagram" className="footer-social-link">
+              <InstagramIcon />
+            </a>
+          )}
+          {social.github && (
+            <a href={social.github} target="_blank" rel="noopener noreferrer"
+               aria-label="GitHub" className="footer-social-link">
+              <GitHubIcon />
+            </a>
+          )}
+        </div>
+      </footer>
 
       {showProfile && (
         <ProfileModal

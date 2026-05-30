@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { EmailIcon, LinkedInIcon, GitHubIcon } from "../icons"
+import { EmailIcon, LinkedInIcon, GitHubIcon, InstagramIcon } from "../icons"
 import { sendContactEmail } from "@/app/actions/contact"
+import { useSocial } from "@/lib/hooks/use-social"
 
 type FormStatus = "idle" | "loading" | "success" | "error"
 
@@ -12,31 +13,22 @@ interface FormState {
   msg: string
 }
 
-const CONTACT_LINKS = [
-  {
-    Icon: EmailIcon,
-    label: "Email",
-    value: "c.hickmann86@gmail.com",
-    href: "mailto:c.hickmann86@gmail.com",
-  },
-  {
-    Icon: LinkedInIcon,
-    label: "LinkedIn",
-    value: "linkedin.com/in/alejandro",
-    href: "https://linkedin.com/in/alejandro",
-  },
-  {
-    Icon: GitHubIcon,
-    label: "GitHub",
-    value: "github.com/alejandro",
-    href: "https://github.com/alejandro",
-  },
-]
+function displayUrl(url: string): string {
+  return url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")
+}
 
 export function ContactSection() {
+  const social = useSocial()
   const [formState, setFormState] = useState<FormState>({ name: "", email: "", msg: "" })
   const [formStatus, setFormStatus] = useState<FormStatus>("idle")
   const [errorMessage, setErrorMessage] = useState<string>("")
+
+  const contactLinks = [
+    social.email    && { Icon: EmailIcon,     label: "Email",     value: social.email,    href: `mailto:${social.email}` },
+    social.linkedin && { Icon: LinkedInIcon,  label: "LinkedIn",  value: displayUrl(social.linkedin),  href: social.linkedin },
+    social.instagram && { Icon: InstagramIcon, label: "Instagram", value: displayUrl(social.instagram), href: social.instagram },
+    social.github   && { Icon: GitHubIcon,    label: "GitHub",    value: displayUrl(social.github),   href: social.github },
+  ].filter(Boolean) as { Icon: React.ComponentType<{className?: string}>; label: string; value: string; href: string }[]
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
@@ -88,7 +80,7 @@ export function ContactSection() {
 
           {/* Direct contact links — proper anchors for accessibility */}
           <div className="contact-links">
-            {CONTACT_LINKS.map(({ Icon, label, value, href }) => (
+            {contactLinks.map(({ Icon, label, value, href }) => (
               <a
                 key={label}
                 href={href}

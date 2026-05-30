@@ -11,8 +11,9 @@ const HeroTab     = dynamic(() => import("./_components/hero-tab"),     { ssr: f
 const AboutTab    = dynamic(() => import("./_components/about-tab"),    { ssr: false })
 const CVTab       = dynamic(() => import("./_components/cv-tab"),       { ssr: false })
 const LogoTab     = dynamic(() => import("./_components/logo-tab"),     { ssr: false })
+const SocialTab   = dynamic(() => import("./_components/social-tab"),   { ssr: false })
 
-type Tab = "proyectos" | "hero" | "sobre" | "cv" | "logo"
+type Tab = "proyectos" | "hero" | "sobre" | "cv" | "logo" | "redes"
 type ToastState = { title: string; msg?: string; type: ToastType } | null
 
 const TABS: { id: Tab; label: string }[] = [
@@ -21,6 +22,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "sobre",     label: "Sobre mí" },
   { id: "cv",        label: "CV" },
   { id: "logo",      label: "Logo" },
+  { id: "redes",     label: "Redes" },
 ]
 
 export default function AdminPage() {
@@ -205,6 +207,7 @@ export default function AdminPage() {
         {tab === "sobre"     && <AboutTab    onToast={showToast} />}
         {tab === "cv"        && <CVTab       onToast={showToast} />}
         {tab === "logo"      && <LogoTab     onToast={showToast} />}
+        {tab === "redes"     && <SocialTab   onToast={showToast} />}
       </div>
 
       {/* Toast */}
