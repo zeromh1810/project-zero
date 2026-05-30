@@ -1,9 +1,11 @@
 /**
- * WEBGL GRADIENT v4.1 — FBM domain warping + click/touch water ripple pool
- * Base: FBM 6 octavas + domain warping + mouse interaction (v4)
- * Added: 4-slot ripple pool triggered by click/touch anywhere on the page.
- *        Aspect-ratio corrected expanding rings, Gaussian bell front,
- *        secondary trailing waves, radial UV distortion, crest highlight.
+ * WEBGL GRADIENT v5.0
+ * Base: v4.1 (FBM domain warping + click/touch ripple pool)
+ * v5.0 adds:
+ *   [3] Aurora chromatic flow bands — teal + violet, slow drift
+ *   [1] Velocity-responsive directional ripple deformation
+ *   [4] Idle breathing pulse + Lissajous luminous nodes
+ *   [5] Position-sampled ripple tint + variable amplitude
  */
 
 const VERTEX_SHADER = `precision mediump float;
@@ -18,7 +20,11 @@ const FRAGMENT_SHADER = `precision mediump float;
   uniform vec2  mouse;
   uniform float mouseTime;
   uniform float mouseActive;
-  uniform vec4  r0, r1, r2, r3; // xy=uv pos, z=age secs (-1=inactive), w=amplitude
+  uniform vec4  r0, r1, r2, r3;
+  uniform vec2  rV0, rV1, rV2, rV3;
+  uniform vec3  rTint0, rTint1, rTint2, rTint3;
+  uniform float idleGlow;
+  uniform vec2  node0, node1;
 
   vec3 m289(vec3 x){ return x - floor(x*(1./289.))*289.; }
   vec4 m289(vec4 x){ return x - floor(x*(1./289.))*289.; }
@@ -79,7 +85,20 @@ const FRAGMENT_SHADER = `precision mediump float;
     return v;
   }
 
-  // Continuous mouse ripple (original v4 behaviour — unchanged)
+  // [3] Aurora chromatic bands
+  float aurora(vec2 uv, float time) {
+    float b1y = 0.33 + sin(uv.x * 2.8 + time * 0.07) * 0.09
+                     + sin(uv.x * 1.3 + time * 0.04) * 0.04;
+    float band1 = exp(-pow((uv.y - b1y) * 12.0, 2.0));
+    float b2y = 0.67 - sin(uv.x * 2.1 + time * 0.055) * 0.08
+                     - sin(uv.x * 1.0 - time * 0.030) * 0.04;
+    float band2 = exp(-pow((uv.y - b2y) * 14.0, 2.0));
+    float sh1 = sin(uv.x * 14.0 + time * 0.36) * 0.35 + 0.65;
+    float sh2 = sin(uv.x *  9.0 - time * 0.24) * 0.30 + 0.70;
+    return band1 * sh1 * 0.82 + band2 * sh2 * 0.60;
+  }
+
+  // Continuous mouse ripple (unchanged)
   float ripple(vec2 uv, vec2 center, float time, float speed, float frequency) {
     float dist = length(uv - center);
     float wave = sin(dist * frequency - time * speed) * 0.5 + 0.5;
@@ -88,34 +107,32 @@ const FRAGMENT_SHADER = `precision mediump float;
     return wave * fadeDistance * fadeTime;
   }
 
-  // Expanding ring ripple — aspect-ratio corrected (circles, not ellipses)
-  // No out-params: safe on all GLSL ES 1.00 drivers
-  float ringRipple(vec2 uv, vec4 rp) {
+  // [1] Ring ripple with velocity-driven elliptical stretch
+  float ringRipple(vec2 uv, vec4 rp, vec2 stretch) {
     if (rp.z < 0.0) return 0.0;
-
     float aspect = res.x / res.y;
-    // Scale X by aspect so distance is measured in screen-space, giving true circles
-    vec2  diff = (uv - rp.xy) * vec2(aspect, 1.0);
-    float dist = length(diff);
+    vec2  diff   = (uv - rp.xy) * vec2(aspect, 1.0);
 
+    // Stretch decays with age so ring becomes circular over ~1.5s
+    float stretchFade = exp(-rp.z * 2.0);
+    float strMag = length(stretch) * stretchFade;
+    if (strMag > 0.01) {
+      vec2  sDir    = stretch / length(stretch);
+      float proj    = dot(diff, sDir);
+      float compress = clamp(strMag * 0.55, 0.0, 0.45);
+      diff -= sDir * proj * compress;
+    }
+
+    float dist = length(diff);
     float age  = rp.z;
     float fade = exp(-age * 1.5);
     if (fade < 0.005) return 0.0;
-
-    // Ring front expands at 0.25 UV/s — natural water speed
     float ringFront = age * 0.25;
-
-    // Gaussian bell at ring front; narrows over time (ring sharpens as it expands)
     float ringWidth = max(20.0 - age * 1.8, 4.0);
     float ring = exp(-pow((dist - ringFront) * ringWidth, 2.0));
-
-    // Primary oscillation on the ring surface
     float wave = sin(dist * 30.0 - age * 8.0);
-
-    // Secondary trailing ripples inside the ring
     float inner     = sin(dist * 16.0 - age * 4.5) * 0.28;
     float innerMask = smoothstep(ringFront + 0.025, ringFront * 0.08, dist);
-
     return (ring * wave + inner * innerMask) * fade * rp.w;
   }
 
@@ -123,40 +140,33 @@ const FRAGMENT_SHADER = `precision mediump float;
     vec2 uv = gl_FragCoord.xy / res;
     uv.y = 1. - uv.y;
 
-    // ── POOL RIPPLES ──────────────────────────────────────────────────────────
-    // Compute each slot's scalar value once; reuse for colour AND distortion
-    float rv0 = ringRipple(uv, r0);
-    float rv1 = ringRipple(uv, r1);
-    float rv2 = ringRipple(uv, r2);
-    float rv3 = ringRipple(uv, r3);
-
+    // Pool ripples
+    float rv0 = ringRipple(uv, r0, rV0);
+    float rv1 = ringRipple(uv, r1, rV1);
+    float rv2 = ringRipple(uv, r2, rV2);
+    float rv3 = ringRipple(uv, r3, rV3);
     float poolRipple = clamp(rv0 + rv1 + rv2 + rv3, -1.0, 1.0);
 
-    // Radial distortion per slot — step(0, z) zeroes out inactive slots safely
-    // (no branching, no out-params, GLSL ES 1.00 compatible)
-    vec2 dir0 = uv - r0.xy;  vec2 dir1 = uv - r1.xy;
-    vec2 dir2 = uv - r2.xy;  vec2 dir3 = uv - r3.xy;
+    vec2 dir0 = uv - r0.xy; vec2 dir1 = uv - r1.xy;
+    vec2 dir2 = uv - r2.xy; vec2 dir3 = uv - r3.xy;
     vec2 poolDistort =
       (dir0 / max(length(dir0), 0.001)) * rv0 * step(0.0, r0.z) * 0.014 +
       (dir1 / max(length(dir1), 0.001)) * rv1 * step(0.0, r1.z) * 0.014 +
       (dir2 / max(length(dir2), 0.001)) * rv2 * step(0.0, r2.z) * 0.014 +
       (dir3 / max(length(dir3), 0.001)) * rv3 * step(0.0, r3.z) * 0.014;
 
-    // ── MOUSE RIPPLE (continuous, original) ───────────────────────────────────
-    vec2  mouseUV    = mouse;
+    // Mouse ripple
+    vec2  mouseUV     = mouse;
     float rippleEffect = ripple(uv, mouseUV, mouseTime, 3.0, 25.0) * mouseActive;
-
-    vec2  toMouse    = uv - mouseUV;
+    vec2  toMouse     = uv - mouseUV;
     float distToMouse = length(toMouse);
-    float influence  = smoothstep(0.5, 0.0, distToMouse) * mouseActive * 0.08;
+    float influence   = smoothstep(0.5, 0.0, distToMouse) * mouseActive * 0.08;
     vec2  distortedUV = uv + normalize(toMouse + 0.001)
                           * sin(distToMouse * 20.0 - mouseTime * 4.0) * influence;
 
-    // ── FBM ───────────────────────────────────────────────────────────────────
+    // FBM
     float spd = dark > .5 ? 0.18 : 0.12;
     float s   = t * spd;
-
-    // Mouse distortion + pool ripple radial distortion applied to sample UV
     vec2 sampleUV = mix(uv, distortedUV, mouseActive * 0.5) + poolDistort;
 
     vec3 q = vec3(
@@ -165,7 +175,7 @@ const FRAGMENT_SHADER = `precision mediump float;
       fbm(vec3(sampleUV*1.4 + vec2(1.7, 9.2), s*.7))
     );
     q += vec3(rippleEffect * 0.15);
-    q += vec3(poolRipple   * 0.10);  // pool ripples modulate fluid surface
+    q += vec3(poolRipple   * 0.10);
 
     vec3 r = vec3(
       fbm(vec3(sampleUV + 3.8*q.xy + vec2(1.7, 9.2), s*.6)),
@@ -176,33 +186,53 @@ const FRAGMENT_SHADER = `precision mediump float;
     f = f*.5 + .5;
     f += rippleEffect * 0.1;
 
-    // ── COLOUR ────────────────────────────────────────────────────────────────
+    // Base colour mix
     vec3 col = mix(ca, cb, clamp(f*1.3, 0., 1.));
     col = mix(col, cc, clamp(length(q)*.4, 0., 1.));
     col = mix(col, cd, clamp(r.x*.5+.5, 0., 1.)*.55);
     col = mix(col, ce, clamp(f*f*.8, 0., 1.)*.35);
 
-    // Mouse glow (original)
+    // [3] Aurora chromatic bands
+    float aurVal   = aurora(uv, t);
+    vec3  aurColorA = dark > .5 ? vec3(0.12, 0.92, 0.68) : vec3(0.22, 0.80, 0.92);
+    vec3  aurColorB = dark > .5 ? vec3(0.58, 0.18, 0.96) : vec3(0.48, 0.20, 0.82);
+    vec3  aurColor  = mix(aurColorA, aurColorB, smoothstep(0.35, 0.65, uv.y));
+    col += aurColor * aurVal * (dark > .5 ? 0.13 : 0.055);
+
+    // Mouse glow
     float mouseGlow = smoothstep(0.4, 0.0, distToMouse) * mouseActive * 0.15;
     vec3  glowColor = dark > .5 ? vec3(0.3, 0.5, 1.0) : vec3(0.4, 0.6, 1.0);
     col = mix(col, col + glowColor, mouseGlow);
 
-    // Water surface: crests brighten (light focusing), troughs darken (shadow)
+    // [5] Ripple crests with positional color tint
     float rippleCrest  = clamp( poolRipple, 0.0, 1.0);
     float rippleTrough = clamp(-poolRipple, 0.0, 1.0);
-    vec3  crestColor   = dark > .5 ? vec3(0.38, 0.62, 1.0) : vec3(0.08, 0.22, 0.68);
-    col += crestColor         * rippleCrest  * 0.24;
-    col -= vec3(0.05, 0.07, 0.10) * rippleTrough * 0.14;
+    float totalW    = abs(rv0) + abs(rv1) + abs(rv2) + abs(rv3) + 0.001;
+    vec3  tintBlend = (rTint0*abs(rv0) + rTint1*abs(rv1)
+                     + rTint2*abs(rv2) + rTint3*abs(rv3)) / totalW;
+    vec3  baseCrest = dark > .5 ? vec3(0.38, 0.62, 1.0) : vec3(0.08, 0.22, 0.68);
+    col += mix(baseCrest, tintBlend, 0.45) * rippleCrest  * 0.26;
+    col -= vec3(0.05, 0.07, 0.10)          * rippleTrough * 0.14;
 
-    // ── VIGNETTE & ALPHA ─────────────────────────────────────────────────────
+    // [4] Idle breathing + luminous nodes
+    col *= (1.0 + sin(t * 1.22) * 0.055 * idleGlow);
+    float aspec = res.x / res.y;
+    float dN0   = length((uv - node0) * vec2(aspec, 1.0));
+    float dN1   = length((uv - node1) * vec2(aspec, 1.0));
+    float ng0   = smoothstep(0.22, 0.0, dN0) * idleGlow * 0.22;
+    float ng1   = smoothstep(0.18, 0.0, dN1) * idleGlow * 0.17;
+    col += ce * ng0 + cc * ng1 * 0.70;
+
+    // Vignette & alpha
     vec2  uvc = uv*2. - 1.;
     float vig = 1. - smoothstep(.4, 1.2, length(uvc));
-
     float base_alpha = dark > .5 ? 0.82 : 0.50;
     float alpha = base_alpha * (0.5 + 0.5*vig);
     alpha += mouseGlow    * 0.10;
     alpha += rippleCrest  * 0.07;
     alpha -= rippleTrough * 0.03;
+    alpha += aurVal       * (dark > .5 ? 0.04 : 0.02);
+    alpha += ng0 * 0.07   + ng1 * 0.05;
 
     gl_FragColor = vec4(col, clamp(alpha, 0.0, 1.0));
   }`
@@ -232,11 +262,21 @@ function createShader(gl: WebGLRenderingContext, type: number, src: string): Web
   return shader
 }
 
+// [5] Map click UV position to one of the 5 palette colors
+function sampleTint(x: number, y: number, isDark: boolean): [number, number, number] {
+  const pal = PALETTES[isDark ? "dark" : "light"]
+  const nx  = Math.min(Math.floor(x * 2.5), 2)
+  const ny  = Math.min(Math.floor(y * 2),   1)
+  return hexToVec3(pal[(nx + ny * 3) % 5])
+}
+
 const MAX_RIPPLES    = 4
 const MAX_RIPPLE_AGE = 3.5
 
 interface RippleSlot {
   x: number; y: number; startTime: number; amp: number; active: boolean
+  vx: number; vy: number                      // velocity stretch for [1]
+  tint: [number, number, number]              // color tint for [5]
 }
 
 export function buildGradientGL(
@@ -245,17 +285,14 @@ export function buildGradientGL(
 ): (() => void) | null {
   const glNullable = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false })
   if (!glNullable) return null
-  const gl: WebGLRenderingContext = glNullable
+  const gl = glNullable
 
   const prog = gl.createProgram()
   if (!prog) return null
-
-  const vs = createShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER)
+  const vs = createShader(gl, gl.VERTEX_SHADER,   VERTEX_SHADER)
   const fs = createShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER)
   if (!vs || !fs) return null
-
-  gl.attachShader(prog, vs)
-  gl.attachShader(prog, fs)
+  gl.attachShader(prog, vs); gl.attachShader(prog, fs)
   gl.linkProgram(prog)
   if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
     console.error("Program link error:", gl.getProgramInfoLog(prog))
@@ -265,8 +302,7 @@ export function buildGradientGL(
 
   const vbuf = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, vbuf)
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW)
-
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW)
   const aPos = gl.getAttribLocation(prog, "pos")
   gl.enableVertexAttribArray(aPos)
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0)
@@ -285,40 +321,79 @@ export function buildGradientGL(
     mouse:       gl.getUniformLocation(prog, "mouse"),
     mouseTime:   gl.getUniformLocation(prog, "mouseTime"),
     mouseActive: gl.getUniformLocation(prog, "mouseActive"),
-    r0:          gl.getUniformLocation(prog, "r0"),
-    r1:          gl.getUniformLocation(prog, "r1"),
-    r2:          gl.getUniformLocation(prog, "r2"),
-    r3:          gl.getUniformLocation(prog, "r3"),
+    r0: gl.getUniformLocation(prog, "r0"), r1: gl.getUniformLocation(prog, "r1"),
+    r2: gl.getUniformLocation(prog, "r2"), r3: gl.getUniformLocation(prog, "r3"),
+    rV0: gl.getUniformLocation(prog, "rV0"), rV1: gl.getUniformLocation(prog, "rV1"),
+    rV2: gl.getUniformLocation(prog, "rV2"), rV3: gl.getUniformLocation(prog, "rV3"),
+    rTint0: gl.getUniformLocation(prog, "rTint0"), rTint1: gl.getUniformLocation(prog, "rTint1"),
+    rTint2: gl.getUniformLocation(prog, "rTint2"), rTint3: gl.getUniformLocation(prog, "rTint3"),
+    idleGlow: gl.getUniformLocation(prog, "idleGlow"),
+    node0:    gl.getUniformLocation(prog, "node0"),
+    node1:    gl.getUniformLocation(prog, "node1"),
   }
-  const rippleUniforms = [U.r0, U.r1, U.r2, U.r3]
+  const rippleUniforms     = [U.r0,     U.r1,     U.r2,     U.r3    ]
+  const rippleVelUniforms  = [U.rV0,    U.rV1,    U.rV2,    U.rV3   ]
+  const rippleTintUniforms = [U.rTint0, U.rTint1, U.rTint2, U.rTint3]
 
-  // ── Mouse state ────────────────────────────────────────────────────────────
-  let mouseX = 0.5, mouseY = 0.5, lastMoveTime = 0, mouseActive = 0
+  // Mouse state
+  let mouseX = 0.5, mouseY = 0.5
+  let prevMouseX = 0.5, prevMouseY = 0.5, prevMoveTime = 0
+  let velX = 0, velY = 0
+  let lastMoveTime = 0, mouseActive = 0
+  let lastInteractionTime = 0
   const MOUSE_FADE = 3000
+
+  // [4] Idle glow
+  let idleGlowSmoothed = 0
 
   function handleMouseMove(e: MouseEvent) {
     const rect = canvas.getBoundingClientRect()
-    mouseX = (e.clientX - rect.left) / rect.width
-    mouseY = (e.clientY - rect.top)  / rect.height
-    lastMoveTime = performance.now()
-    mouseActive  = 1
+    const nx = (e.clientX - rect.left) / rect.width
+    const ny = (e.clientY - rect.top)  / rect.height
+    const now = performance.now()
+    const dt  = Math.max((now - prevMoveTime) * 0.001, 0.002)
+    // [1] Smooth velocity — scale so a full-screen swipe in 0.3s ≈ velMag 0.4
+    const rawVX = (nx - prevMouseX) / dt * 0.08
+    const rawVY = (ny - prevMouseY) / dt * 0.08
+    velX = velX * 0.6 + rawVX * 0.4
+    velY = velY * 0.6 + rawVY * 0.4
+    const spd = Math.hypot(velX, velY)
+    if (spd > 0.6) { velX *= 0.6/spd; velY *= 0.6/spd }
+
+    prevMouseX = mouseX; prevMouseY = mouseY; prevMoveTime = now
+    mouseX = nx; mouseY = ny
+    lastMoveTime = now
+    lastInteractionTime = now
+    mouseActive = 1
   }
+
   function handleMouseLeave() {
     lastMoveTime = performance.now() - MOUSE_FADE * 0.5
+    velX = 0; velY = 0
   }
 
-  // ── Ripple pool ────────────────────────────────────────────────────────────
+  // Ripple pool
   const ripples: RippleSlot[] = Array.from({ length: MAX_RIPPLES }, () => ({
     x: 0.5, y: 0.5, startTime: 0, amp: 0, active: false,
+    vx: 0, vy: 0, tint: [0.5, 0.5, 1.0] as [number, number, number],
   }))
 
+  function findSlot(): number {
+    const free = ripples.findIndex(r => !r.active)
+    if (free !== -1) return free
+    let oldest = Infinity, slot = 0
+    ripples.forEach((r, i) => { if (r.startTime < oldest) { oldest = r.startTime; slot = i } })
+    return slot
+  }
+
   function addRipple(x: number, y: number, amp: number) {
-    let slot = ripples.findIndex(r => !r.active)
-    if (slot === -1) {
-      let oldest = Infinity
-      ripples.forEach((r, i) => { if (r.startTime < oldest) { oldest = r.startTime; slot = i } })
+    const isDark = getIsDark()
+    const slot = findSlot()
+    ripples[slot] = {
+      x, y, startTime: performance.now(), amp, active: true,
+      vx: velX, vy: velY,
+      tint: sampleTint(x, y, isDark),
     }
-    ripples[slot] = { x, y, startTime: performance.now(), amp, active: true }
   }
 
   function getCanvasUV(clientX: number, clientY: number) {
@@ -331,34 +406,35 @@ export function buildGradientGL(
 
   function handleClick(e: MouseEvent) {
     const uv = getCanvasUV(e.clientX, e.clientY)
-    if (uv) addRipple(uv.x, uv.y, 1.0)
+    if (!uv) return
+    // [5] Variable amplitude based on velocity + randomness
+    const speed = Math.hypot(velX, velY)
+    addRipple(uv.x, uv.y, Math.min(0.65 + speed * 1.2 + Math.random() * 0.35, 1.8))
+    lastInteractionTime = performance.now()
   }
 
   function handleTouchStart(e: TouchEvent) {
     for (let i = 0; i < Math.min(e.changedTouches.length, 2); i++) {
       const touch = e.changedTouches[i]
       const uv = getCanvasUV(touch.clientX, touch.clientY)
-      if (uv) addRipple(uv.x, uv.y, 1.0)
+      if (uv) addRipple(uv.x, uv.y, 0.75 + Math.random() * 0.55)
     }
+    lastInteractionTime = performance.now()
   }
 
-  // ── Event listeners ────────────────────────────────────────────────────────
-  canvas.addEventListener("mousemove", handleMouseMove)
+  canvas.addEventListener("mousemove",  handleMouseMove)
   canvas.addEventListener("mouseleave", handleMouseLeave)
   const parent = canvas.parentElement
   if (parent) parent.addEventListener("mousemove", handleMouseMove)
   document.addEventListener("click",      handleClick)
   document.addEventListener("touchstart", handleTouchStart, { passive: true })
 
-  // ── Render loop ────────────────────────────────────────────────────────────
   let raf: number
 
   function render(ts: number) {
     const W = canvas.offsetWidth
     const H = canvas.offsetHeight
-    if (canvas.width !== W || canvas.height !== H) {
-      canvas.width = W; canvas.height = H
-    }
+    if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H }
     gl.viewport(0, 0, W, H)
 
     const isDark = getIsDark()
@@ -371,7 +447,23 @@ export function buildGradientGL(
     mouseActive = Math.max(0, 1 - timeSinceMove / MOUSE_FADE)
     const mouseTime = Math.min(timeSinceMove * 0.001, 5.0)
 
-    // Age ripples and upload uniforms
+    // [4] Idle glow — ramp up 3s after last interaction, ramp down on interaction
+    const IDLE_DELAY = 3000
+    const IDLE_RAMP  = 2000
+    const timeSinceInteraction = ts - lastInteractionTime
+    const idleTarget = timeSinceInteraction > IDLE_DELAY
+      ? Math.min((timeSinceInteraction - IDLE_DELAY) / IDLE_RAMP, 1.0)
+      : 0.0
+    idleGlowSmoothed += (idleTarget - idleGlowSmoothed) * 0.025
+
+    // [4] Lissajous node positions
+    const lt = ts * 0.001
+    const n0x = 0.5 + Math.sin(lt * 0.29) * 0.24
+    const n0y = 0.40 + Math.sin(lt * 0.17) * 0.20
+    const n1x = 0.5 + Math.sin(lt * 0.23 + 1.5) * 0.28
+    const n1y = 0.60 + Math.sin(lt * 0.13 + 0.8) * 0.15
+
+    // Upload ripple uniforms
     for (let i = 0; i < MAX_RIPPLES; i++) {
       const rp  = ripples[i]
       let   age = -1.0
@@ -379,7 +471,9 @@ export function buildGradientGL(
         age = (ts - rp.startTime) * 0.001
         if (age > MAX_RIPPLE_AGE) { rp.active = false; age = -1.0 }
       }
-      gl.uniform4f(rippleUniforms[i], rp.x, rp.y, age, rp.active ? rp.amp : 0.0)
+      gl.uniform4f(rippleUniforms[i],    rp.x, rp.y, age, rp.active ? rp.amp : 0.0)
+      gl.uniform2f(rippleVelUniforms[i], rp.active ? rp.vx : 0, rp.active ? rp.vy : 0)
+      gl.uniform3fv(rippleTintUniforms[i], rp.active ? rp.tint : [0.38, 0.62, 1.0])
     }
 
     gl.uniform1f(U.t,           ts * 0.001)
@@ -393,8 +487,11 @@ export function buildGradientGL(
     gl.uniform3fv(U.cc, hexToVec3(pal[2]))
     gl.uniform3fv(U.cd, hexToVec3(pal[3]))
     gl.uniform3fv(U.ce, hexToVec3(pal[4]))
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+    gl.uniform1f(U.idleGlow, idleGlowSmoothed)
+    gl.uniform2f(U.node0,    n0x, n0y)
+    gl.uniform2f(U.node1,    n1x, n1y)
 
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
     raf = requestAnimationFrame(render)
   }
 
