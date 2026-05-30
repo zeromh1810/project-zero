@@ -102,8 +102,11 @@ export function Portfolio({ initialSocial }: { initialSocial?: SocialData }) {
       </div>
 
       <footer className="footer">
-        <span className="footer-brand">A·Studio</span>
-        <span className="footer-copy">© 2026 A·Studio — Diseñado con obsesión por los detalles</span>
+        <div className="footer-mark">✦</div>
+        <div className="footer-brand">Project Zero</div>
+        <div className="footer-tagline">
+          Product Designer & Frontend Developer · Santiago
+        </div>
         <div className="footer-social">
           {social.linkedin && (
             <a href={social.linkedin} target="_blank" rel="noopener noreferrer"
@@ -124,6 +127,7 @@ export function Portfolio({ initialSocial }: { initialSocial?: SocialData }) {
             </a>
           )}
         </div>
+        <div className="footer-copy">© 2026 Carlos Felipe Rojas Hickmann</div>
       </footer>
 
       {showProfile && (
