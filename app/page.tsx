@@ -1,6 +1,8 @@
 import fs from "fs"
 import path from "path"
 import { ThemeProvider } from "@/lib/context/theme-context"
+
+export const dynamic = "force-dynamic"
 import { Portfolio } from "@/components/portfolio/portfolio"
 import type { SocialData } from "@/lib/hooks/use-social"
 import type { FooterData } from "@/lib/hooks/use-footer"

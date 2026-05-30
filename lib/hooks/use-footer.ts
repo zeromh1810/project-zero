@@ -42,12 +42,10 @@ export function invalidateFooter() {
 }
 
 export function useFooter(initial?: FooterData): FooterData {
-  if (initial && !cache) cache = { ...DEFAULT, ...initial }
-
-  const [data, setData] = useState<FooterData>(cache ?? DEFAULT)
+  const [data, setData] = useState<FooterData>(cache ?? (initial ? { ...DEFAULT, ...initial } : DEFAULT))
 
   useEffect(() => {
-    if (!cache) fetchFooter().then(setData)
+    fetchFooter().then(setData)
 
     function onUpdate() { fetchFooter().then(setData) }
     window.addEventListener("footer-updated", onUpdate)

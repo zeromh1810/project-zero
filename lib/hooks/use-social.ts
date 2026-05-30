@@ -39,13 +39,12 @@ export function invalidateSocial() {
 }
 
 export function useSocial(initial?: SocialData): SocialData {
-  // Seed module cache from server-provided initial data (only once, before any fetch)
-  if (initial && !cache) cache = { ...DEFAULT, ...initial }
-
-  const [data, setData] = useState<SocialData>(cache ?? DEFAULT)
+  // Use initial only for the first render (no loading flash).
+  // Always revalidate on mount — initial comes from build-time SSR and may be stale.
+  const [data, setData] = useState<SocialData>(cache ?? (initial ? { ...DEFAULT, ...initial } : DEFAULT))
 
   useEffect(() => {
-    if (!cache) fetchSocial().then(setData)
+    fetchSocial().then(setData)
 
     function onUpdate() { fetchSocial().then(setData) }
     window.addEventListener("social-updated", onUpdate)
