@@ -236,46 +236,102 @@ export default function SocialTab({ onToast }: Props) {
       {/* Preview */}
       <div className="admin-card">
         <div className="admin-card-title">Vista previa — Footer</div>
+
+        {/* Replica fiel del .footer real */}
         <div style={{
-          padding: "16px 24px",
-          background: "var(--bg3)",
-          borderRadius: 10,
-          display: "grid",
-          gridTemplateColumns: "1fr auto 1fr",
+          display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          gap: 16,
+          padding: "40px 32px 36px",
+          background: "var(--bg3)",
+          borderRadius: 16,
+          borderTop: "1px solid var(--border)",
+          boxShadow: "inset 0 1px 0 var(--border)",
+          overflow: "hidden",
         }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "var(--txt2)", fontFamily: "var(--portfolio-heading-font)" }}>
-            {footer.brand || "Project Zero"}
-          </span>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 11, color: "var(--txt3)", marginBottom: 2 }}>
-              {footer.tagline || "Product Designer & Frontend Developer · Santiago"}
-            </div>
-            <div style={{ fontSize: 11, color: "var(--txt3)" }}>
-              {footer.copy || "© 2026 Carlos Felipe Rojas Hickmann"}
-            </div>
+          {/* ✦ mark */}
+          <div style={{
+            fontSize: 18,
+            color: "var(--accent)",
+            opacity: 0.8,
+            marginBottom: 16,
+          }}>
+            ✦
           </div>
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-            {[
-              { key: "linkedin" as const, label: "in" },
-              { key: "instagram" as const, label: "IG" },
-              { key: "github" as const, label: "GH" },
-            ].filter(({ key }) => social[key]).map(({ key, label }) => (
-              <div key={key} style={{
-                width: 28, height: 28, borderRadius: "50%",
-                border: "1px solid var(--border)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 10, fontWeight: 700, color: "var(--txt3)",
-              }}>
-                {label}
-              </div>
-            ))}
-            {!social.linkedin && !social.instagram && !social.github && (
-              <span style={{ fontSize: 12, color: "var(--txt3)", fontStyle: "italic" }}>
-                Sin redes configuradas
-              </span>
-            )}
+
+          {/* Brand */}
+          <div style={{
+            fontFamily: "var(--portfolio-heading-font)",
+            fontSize: 22,
+            fontWeight: 700,
+            color: "var(--txt)",
+            letterSpacing: "-0.03em",
+            marginBottom: 8,
+          }}>
+            {footer.brand || "Project Zero"}
+          </div>
+
+          {/* Tagline */}
+          <div style={{
+            fontSize: 13,
+            color: "var(--txt3)",
+            textAlign: "center",
+            lineHeight: 1.5,
+            marginBottom: 28,
+          }}>
+            {footer.tagline || "Product Designer & Frontend Developer · Santiago"}
+          </div>
+
+          {/* Social icons */}
+          {(social.linkedin || social.instagram || social.github) ? (
+            <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
+              {social.linkedin && (
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  width: 40, height: 40, borderRadius: "9999px",
+                  border: "1px solid var(--border)", color: "var(--txt3)",
+                }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 17, height: 17 }}>
+                    <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z" />
+                    <rect x="2" y="9" width="4" height="12" />
+                    <circle cx="4" cy="4" r="2" />
+                  </svg>
+                </div>
+              )}
+              {social.instagram && (
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  width: 40, height: 40, borderRadius: "9999px",
+                  border: "1px solid var(--border)", color: "var(--txt3)",
+                }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 17, height: 17 }}>
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                  </svg>
+                </div>
+              )}
+              {social.github && (
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  width: 40, height: 40, borderRadius: "9999px",
+                  border: "1px solid var(--border)", color: "var(--txt3)",
+                }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 17, height: 17 }}>
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ fontSize: 12, color: "var(--txt3)", fontStyle: "italic", marginBottom: 28 }}>
+              Sin redes configuradas
+            </div>
+          )}
+
+          {/* Copyright */}
+          <div style={{ fontSize: 12, color: "var(--txt3)", opacity: 0.7 }}>
+            {footer.copy || "© 2026 Carlos Felipe Rojas Hickmann"}
           </div>
         </div>
       </div>
