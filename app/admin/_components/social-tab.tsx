@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import type { ToastType } from "./admin-toast"
 import { invalidateSocial } from "@/lib/hooks/use-social"
+import { invalidateFooter } from "@/lib/hooks/use-footer"
 
 interface Props {
   onToast: (title: string, type: ToastType, msg?: string) => void
@@ -15,76 +16,105 @@ interface SocialForm {
   email:     string
 }
 
-const EMPTY: SocialForm = { linkedin: "", instagram: "", github: "", email: "" }
+interface FooterForm {
+  brand:   string
+  tagline: string
+  copy:    string
+}
 
-const FIELDS: { key: keyof SocialForm; label: string; placeholder: string; prefix: string }[] = [
-  {
-    key: "linkedin",
-    label: "LinkedIn",
-    placeholder: "https://linkedin.com/in/tu-perfil",
-    prefix: "in",
-  },
-  {
-    key: "instagram",
-    label: "Instagram",
-    placeholder: "https://instagram.com/tu-usuario",
-    prefix: "IG",
-  },
-  {
-    key: "github",
-    label: "GitHub",
-    placeholder: "https://github.com/tu-usuario",
-    prefix: "GH",
-  },
-  {
-    key: "email",
-    label: "Email",
-    placeholder: "tu@email.com",
-    prefix: "✉",
-  },
+const SOCIAL_EMPTY: SocialForm = { linkedin: "", instagram: "", github: "", email: "" }
+const FOOTER_EMPTY: FooterForm = {
+  brand:   "Project Zero",
+  tagline: "Product Designer & Frontend Developer · Santiago",
+  copy:    "© 2026 Carlos Felipe Rojas Hickmann",
+}
+
+const SOCIAL_FIELDS: { key: keyof SocialForm; label: string; placeholder: string; prefix: string }[] = [
+  { key: "linkedin",  label: "LinkedIn",  placeholder: "https://linkedin.com/in/tu-perfil", prefix: "in" },
+  { key: "instagram", label: "Instagram", placeholder: "https://instagram.com/tu-usuario",  prefix: "IG" },
+  { key: "github",    label: "GitHub",    placeholder: "https://github.com/tu-usuario",     prefix: "GH" },
+  { key: "email",     label: "Email",     placeholder: "tu@email.com",                      prefix: "✉"  },
 ]
 
 export default function SocialTab({ onToast }: Props) {
-  const [form, setForm]     = useState<SocialForm>(EMPTY)
-  const [saved, setSaved]   = useState<SocialForm>(EMPTY)
-  const [saving, setSaving] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [social, setSocial]         = useState<SocialForm>(SOCIAL_EMPTY)
+  const [savedSocial, setSavedSocial] = useState<SocialForm>(SOCIAL_EMPTY)
+  const [savingSocial, setSavingSocial] = useState(false)
+  const [loadingSocial, setLoadingSocial] = useState(true)
 
-  const hasChanges = JSON.stringify(form) !== JSON.stringify(saved)
+  const [footer, setFooter]         = useState<FooterForm>(FOOTER_EMPTY)
+  const [savedFooter, setSavedFooter] = useState<FooterForm>(FOOTER_EMPTY)
+  const [savingFooter, setSavingFooter] = useState(false)
+  const [loadingFooter, setLoadingFooter] = useState(true)
+
+  const hasSocialChanges = JSON.stringify(social) !== JSON.stringify(savedSocial)
+  const hasFooterChanges = JSON.stringify(footer) !== JSON.stringify(savedFooter)
 
   useEffect(() => {
-    setLoading(true)
+    setLoadingSocial(true)
     fetch("/api/admin/social", { cache: "no-store" })
       .then(r => r.json())
       .then(d => {
-        const loaded = { ...EMPTY, ...d }
-        setForm(loaded)
-        setSaved(loaded)
+        const loaded = { ...SOCIAL_EMPTY, ...d }
+        setSocial(loaded)
+        setSavedSocial(loaded)
       })
       .catch(() => onToast("Error cargando redes sociales", "error"))
-      .finally(() => setLoading(false))
+      .finally(() => setLoadingSocial(false))
   }, [])
 
-  async function handleSave() {
-    setSaving(true)
+  useEffect(() => {
+    setLoadingFooter(true)
+    fetch("/api/admin/footer", { cache: "no-store" })
+      .then(r => r.json())
+      .then(d => {
+        const loaded = { ...FOOTER_EMPTY, ...d }
+        setFooter(loaded)
+        setSavedFooter(loaded)
+      })
+      .catch(() => onToast("Error cargando footer", "error"))
+      .finally(() => setLoadingFooter(false))
+  }, [])
+
+  async function handleSaveSocial() {
+    setSavingSocial(true)
     try {
       const res = await fetch("/api/admin/social", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(social),
       })
       if (!res.ok) throw new Error()
-      setSaved({ ...form })
+      setSavedSocial({ ...social })
       invalidateSocial()
       onToast("Redes sociales guardadas", "success")
     } catch {
       onToast("Error al guardar", "error")
     } finally {
-      setSaving(false)
+      setSavingSocial(false)
     }
   }
 
-  if (loading) {
+  async function handleSaveFooter() {
+    setSavingFooter(true)
+    try {
+      const res = await fetch("/api/admin/footer", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(footer),
+      })
+      if (!res.ok) throw new Error()
+      setSavedFooter({ ...footer })
+      invalidateFooter()
+      onToast("Footer guardado", "success")
+    } catch {
+      onToast("Error al guardar", "error")
+    } finally {
+      setSavingFooter(false)
+    }
+  }
+
+  if (loadingSocial || loadingFooter) {
     return (
       <div style={{ padding: "48px 0", display: "flex", justifyContent: "center", alignItems: "center", gap: 10, color: "var(--txt3)", fontSize: 14 }}>
         <div className="admin-spinner" />
@@ -98,23 +128,65 @@ export default function SocialTab({ onToast }: Props) {
       {/* Header */}
       <div className="admin-section-header">
         <div>
-          <div className="admin-section-title">Redes sociales</div>
+          <div className="admin-section-title">Footer</div>
           <div className="admin-section-sub">
-            URLs que aparecen en el footer y en la sección Sobre mí
+            Contenido del pie de página y redes sociales
           </div>
         </div>
-        <button
-          className="btn-p"
-          onClick={handleSave}
-          disabled={saving || !hasChanges}
-        >
-          {saving ? "Guardando…" : hasChanges ? "Guardar cambios" : "Sin cambios"}
-        </button>
       </div>
 
-      {/* Fields */}
+      {/* Footer text content */}
       <div className="admin-card">
-        {FIELDS.map(({ key, label, placeholder, prefix }) => (
+        <div className="admin-card-title">Contenido del footer</div>
+
+        <div className="admin-field">
+          <label className="admin-label">Nombre / Marca</label>
+          <input
+            className="admin-input"
+            type="text"
+            value={footer.brand}
+            onChange={e => setFooter(prev => ({ ...prev, brand: e.target.value }))}
+            placeholder="Project Zero"
+          />
+        </div>
+
+        <div className="admin-field">
+          <label className="admin-label">Tagline</label>
+          <input
+            className="admin-input"
+            type="text"
+            value={footer.tagline}
+            onChange={e => setFooter(prev => ({ ...prev, tagline: e.target.value }))}
+            placeholder="Product Designer & Frontend Developer · Santiago"
+          />
+        </div>
+
+        <div className="admin-field" style={{ marginBottom: 0 }}>
+          <label className="admin-label">Copyright</label>
+          <input
+            className="admin-input"
+            type="text"
+            value={footer.copy}
+            onChange={e => setFooter(prev => ({ ...prev, copy: e.target.value }))}
+            placeholder="© 2026 Carlos Felipe Rojas Hickmann"
+          />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
+          <button
+            className="btn-p"
+            onClick={handleSaveFooter}
+            disabled={savingFooter || !hasFooterChanges}
+          >
+            {savingFooter ? "Guardando…" : hasFooterChanges ? "Guardar footer" : "Sin cambios"}
+          </button>
+        </div>
+      </div>
+
+      {/* Social links */}
+      <div className="admin-card">
+        <div className="admin-card-title">Redes sociales</div>
+        {SOCIAL_FIELDS.map(({ key, label, placeholder, prefix }) => (
           <div key={key} className="admin-field">
             <label className="admin-label">{label}</label>
             <div style={{ position: "relative" }}>
@@ -128,15 +200,15 @@ export default function SocialTab({ onToast }: Props) {
               <input
                 className="admin-input"
                 type={key === "email" ? "email" : "url"}
-                value={form[key]}
-                onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value }))}
+                value={social[key]}
+                onChange={e => setSocial(prev => ({ ...prev, [key]: e.target.value }))}
                 placeholder={placeholder}
                 style={{ paddingLeft: 36 }}
               />
             </div>
-            {form[key] && (
+            {social[key] && (
               <div className="admin-input-hint" style={{ marginTop: 4 }}>
-                <a href={key === "email" ? `mailto:${form[key]}` : form[key]}
+                <a href={key === "email" ? `mailto:${social[key]}` : social[key]}
                   target={key === "email" ? undefined : "_blank"}
                   rel="noopener noreferrer"
                   style={{ color: "var(--accent)", textDecoration: "none", fontSize: 12 }}>
@@ -147,7 +219,17 @@ export default function SocialTab({ onToast }: Props) {
           </div>
         ))}
         <div className="admin-input-hint" style={{ marginTop: 4 }}>
-          Deja en blanco los campos que no quieras mostrar. Los íconos solo aparecen cuando hay URL.
+          Deja en blanco los campos que no quieras mostrar.
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
+          <button
+            className="btn-p"
+            onClick={handleSaveSocial}
+            disabled={savingSocial || !hasSocialChanges}
+          >
+            {savingSocial ? "Guardando…" : hasSocialChanges ? "Guardar redes" : "Sin cambios"}
+          </button>
         </div>
       </div>
 
@@ -164,17 +246,22 @@ export default function SocialTab({ onToast }: Props) {
           gap: 16,
         }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: "var(--txt2)", fontFamily: "var(--portfolio-heading-font)" }}>
-            A·Studio
+            {footer.brand || "Project Zero"}
           </span>
-          <span style={{ fontSize: 12, color: "var(--txt3)", textAlign: "center" }}>
-            © 2026 A·Studio
-          </span>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 11, color: "var(--txt3)", marginBottom: 2 }}>
+              {footer.tagline || "Product Designer & Frontend Developer · Santiago"}
+            </div>
+            <div style={{ fontSize: 11, color: "var(--txt3)" }}>
+              {footer.copy || "© 2026 Carlos Felipe Rojas Hickmann"}
+            </div>
+          </div>
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
             {[
               { key: "linkedin" as const, label: "in" },
               { key: "instagram" as const, label: "IG" },
               { key: "github" as const, label: "GH" },
-            ].filter(({ key }) => form[key]).map(({ key, label }) => (
+            ].filter(({ key }) => social[key]).map(({ key, label }) => (
               <div key={key} style={{
                 width: 28, height: 28, borderRadius: "50%",
                 border: "1px solid var(--border)",
@@ -184,7 +271,7 @@ export default function SocialTab({ onToast }: Props) {
                 {label}
               </div>
             ))}
-            {!form.linkedin && !form.instagram && !form.github && (
+            {!social.linkedin && !social.instagram && !social.github && (
               <span style={{ fontSize: 12, color: "var(--txt3)", fontStyle: "italic" }}>
                 Sin redes configuradas
               </span>

@@ -14,13 +14,15 @@ import { ContactSection } from "./sections/contact-section"
 import { DesignSystemSection } from "./sections/design-system-section"
 import type { Project } from "@/lib/data/projects"
 import { useSocial, type SocialData } from "@/lib/hooks/use-social"
+import { useFooter, type FooterData } from "@/lib/hooks/use-footer"
 import { LinkedInIcon, InstagramIcon, GitHubIcon } from "./icons"
 
 type Section = "trabajos" | "sobre" | "cv" | "contacto" | "design-system"
 
-export function Portfolio({ initialSocial }: { initialSocial?: SocialData }) {
+export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: SocialData; initialFooter?: FooterData }) {
   const router  = useRouter()
   const social  = useSocial(initialSocial)
+  const footerData = useFooter(initialFooter)
   const [section, setSection] = useState<Section>("trabajos")
   const [displaySection, setDisplaySection] = useState<Section>("trabajos")
   const [transitioning, setTransitioning] = useState(false)
@@ -103,10 +105,8 @@ export function Portfolio({ initialSocial }: { initialSocial?: SocialData }) {
 
       <footer className="footer">
         <div className="footer-mark">✦</div>
-        <div className="footer-brand">Project Zero</div>
-        <div className="footer-tagline">
-          Product Designer & Frontend Developer · Santiago
-        </div>
+        <div className="footer-brand">{footerData.brand}</div>
+        <div className="footer-tagline">{footerData.tagline}</div>
         <div className="footer-social">
           {social.linkedin && (
             <a href={social.linkedin} target="_blank" rel="noopener noreferrer"
@@ -127,7 +127,7 @@ export function Portfolio({ initialSocial }: { initialSocial?: SocialData }) {
             </a>
           )}
         </div>
-        <div className="footer-copy">© 2026 Carlos Felipe Rojas Hickmann</div>
+        <div className="footer-copy">{footerData.copy}</div>
       </footer>
 
       {showProfile && (
