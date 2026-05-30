@@ -1974,11 +1974,11 @@ body {
 .footer {
   position: relative;
   z-index: 2;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
-  padding: 24px 40px;
+  padding: 20px 40px;
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -1995,6 +1995,7 @@ body {
 }
 
 .footer-brand {
+  flex-shrink: 0;
   font-family: var(--portfolio-heading-font);
   font-weight: 700;
   font-size: 14px;
@@ -2003,15 +2004,16 @@ body {
 }
 
 .footer-copy {
+  flex: 1;
+  text-align: center;
   font-size: 13px;
   color: var(--txt3);
-  white-space: nowrap;
 }
 
 .footer-social {
+  flex-shrink: 0;
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
   align-items: center;
 }
 
@@ -2216,12 +2218,12 @@ body {
   /* El espacio para el bottom-nav va dentro del footer (cubierto por su glass),
      no como padding del body (que dejaba un hueco sin estilar entre ellos). */
   .footer {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     text-align: center;
     padding: 20px 24px 80px;
     gap: 10px;
   }
-  .footer-brand { text-align: center; }
+  .footer-copy { text-align: center; }
   .footer-social { justify-content: center; }
 
   body {
