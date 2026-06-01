@@ -9,7 +9,7 @@ import { SunIcon, MoonIcon } from "./icons"
 
 export const NAV_SESSION_KEY = "portfolio-nav-target"
 
-type Section = "trabajos" | "sobre" | "contacto" | "design-system"
+type Section = "trabajos" | "sobre" | "contacto"
 
 // ── Portfolio mode props ──────────────────────────────────────────────────
 interface PortfolioProps {
@@ -28,9 +28,8 @@ type AppNavbarProps = PortfolioProps | BlogProps
 
 // Nav items shared between both modes
 const SECTION_ITEMS: { key: Section; label: string }[] = [
-  { key: "sobre",          label: "Sobre Mí" },
-  { key: "contacto",       label: "Contacto" },
-  { key: "design-system",  label: "Project Zero DS" },
+  { key: "sobre",    label: "Sobre Mí" },
+  { key: "contacto", label: "Contacto" },
 ]
 
 // ── Theme toggle (shared) ─────────────────────────────────────────────────

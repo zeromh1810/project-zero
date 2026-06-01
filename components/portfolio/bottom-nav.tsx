@@ -1,9 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { MonitorIcon, UserIcon, EmailIcon, LayersIcon, BlogIcon } from "./icons"
+import { MonitorIcon, UserIcon, EmailIcon, BlogIcon } from "./icons"
 
-type Section = "trabajos" | "sobre" | "contacto" | "design-system"
+type Section = "trabajos" | "sobre" | "contacto"
 
 interface BottomNavProps {
   currentSection: Section
@@ -12,9 +12,8 @@ interface BottomNavProps {
 
 const TABS: { key: Section; label: string; Icon: typeof MonitorIcon }[] = [
   { key: "trabajos", label: "Trabajos", Icon: MonitorIcon },
-  { key: "sobre", label: "Sobre mí", Icon: UserIcon },
+  { key: "sobre",    label: "Sobre mí", Icon: UserIcon },
   { key: "contacto", label: "Contacto", Icon: EmailIcon },
-  { key: "design-system", label: "DS", Icon: LayersIcon },
 ]
 
 export function BottomNav({ currentSection, onNavigate }: BottomNavProps) {

@@ -6,16 +6,20 @@ import { useLogo } from "@/lib/hooks/use-logo"
 import dynamic from "next/dynamic"
 import AdminToast, { type ToastType } from "./_components/admin-toast"
 
-const ProjectsTab = dynamic(() => import("./_components/projects-tab"), { ssr: false })
-const HeroTab     = dynamic(() => import("./_components/hero-tab"),     { ssr: false })
-const AboutTab    = dynamic(() => import("./_components/about-tab"),    { ssr: false })
-const CVTab       = dynamic(() => import("./_components/cv-tab"),       { ssr: false })
-const LogoTab     = dynamic(() => import("./_components/logo-tab"),     { ssr: false })
-const SocialTab   = dynamic(() => import("./_components/social-tab"),   { ssr: false })
-const BrandsTab   = dynamic(() => import("./_components/brands-tab"),   { ssr: false })
-const BlogTab     = dynamic(() => import("./_components/blog-tab"),     { ssr: false })
+const ProjectsTab       = dynamic(() => import("./_components/projects-tab"), { ssr: false })
+const HeroTab           = dynamic(() => import("./_components/hero-tab"),     { ssr: false })
+const AboutTab          = dynamic(() => import("./_components/about-tab"),    { ssr: false })
+const CVTab             = dynamic(() => import("./_components/cv-tab"),       { ssr: false })
+const LogoTab           = dynamic(() => import("./_components/logo-tab"),     { ssr: false })
+const SocialTab         = dynamic(() => import("./_components/social-tab"),   { ssr: false })
+const BrandsTab         = dynamic(() => import("./_components/brands-tab"),   { ssr: false })
+const BlogTab           = dynamic(() => import("./_components/blog-tab"),     { ssr: false })
+const DesignSystemSection = dynamic(
+  () => import("@/components/portfolio/sections/design-system-section").then(m => ({ default: m.DesignSystemSection })),
+  { ssr: false }
+)
 
-type Tab = "proyectos" | "hero" | "sobre" | "cv" | "logo" | "footer" | "marcas" | "blog"
+type Tab = "proyectos" | "hero" | "sobre" | "cv" | "logo" | "footer" | "marcas" | "blog" | "ds"
 type ToastState = { title: string; msg?: string; type: ToastType } | null
 
 const TABS: { id: Tab; label: string }[] = [
@@ -27,6 +31,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "footer",    label: "Footer" },
   { id: "marcas",    label: "Marcas" },
   { id: "blog",      label: "Blog" },
+  { id: "ds",        label: "Design System" },
 ]
 
 export default function AdminPage() {
@@ -205,16 +210,19 @@ export default function AdminPage() {
       </div>
 
       {/* Content */}
-      <div className="admin-container">
-        {tab === "proyectos" && <ProjectsTab onToast={showToast} />}
-        {tab === "hero"      && <HeroTab     onToast={showToast} />}
-        {tab === "sobre"     && <AboutTab    onToast={showToast} />}
-        {tab === "cv"        && <CVTab       onToast={showToast} />}
-        {tab === "logo"      && <LogoTab     onToast={showToast} />}
-        {tab === "footer"    && <SocialTab   onToast={showToast} />}
-        {tab === "marcas"    && <BrandsTab   onToast={showToast} />}
-        {tab === "blog"      && <BlogTab     onToast={showToast} />}
-      </div>
+      {tab !== "ds" && (
+        <div className="admin-container">
+          {tab === "proyectos" && <ProjectsTab onToast={showToast} />}
+          {tab === "hero"      && <HeroTab     onToast={showToast} />}
+          {tab === "sobre"     && <AboutTab    onToast={showToast} />}
+          {tab === "cv"        && <CVTab       onToast={showToast} />}
+          {tab === "logo"      && <LogoTab     onToast={showToast} />}
+          {tab === "footer"    && <SocialTab   onToast={showToast} />}
+          {tab === "marcas"    && <BrandsTab   onToast={showToast} />}
+          {tab === "blog"      && <BlogTab     onToast={showToast} />}
+        </div>
+      )}
+      {tab === "ds" && <DesignSystemSection adminMode />}
 
       {/* Toast */}
       {toast && (

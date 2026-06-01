@@ -4423,3 +4423,14 @@ html {
   .ds-layer-row { flex-direction: column; align-items: flex-start; gap: 6px; }
   .ds-layer-z { min-width: unset; }
 }
+
+/* ── DS — Admin mode overrides ─────────────────────────────────────────────── */
+/* Navbar (fixed 64px) + admin tabbar (~46px) = 110px total offset            */
+.ds-layout--admin {
+  padding-top: 0;
+  min-height: calc(100vh - 110px);
+}
+.ds-layout--admin .ds-sidebar {
+  top: 110px;
+  height: calc(100vh - 110px);
+}

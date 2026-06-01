@@ -1172,7 +1172,7 @@ const PAGE_MAP: Record<DSPageId, React.ComponentType> = {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export function DesignSystemSection() {
+export function DesignSystemSection({ adminMode }: { adminMode?: boolean }) {
   const [activePage, setActivePage] = useState<DSPageId>("overview")
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const PageComponent = PAGE_MAP[activePage]
@@ -1184,7 +1184,7 @@ export function DesignSystemSection() {
   }
 
   return (
-    <div className="ds-layout">
+    <div className={`ds-layout${adminMode ? " ds-layout--admin" : ""}`}>
       {/* Sidebar */}
       <aside className={`ds-sidebar${sidebarOpen ? " ds-sidebar--open" : ""}`} aria-label="Navegación del sistema de diseño">
         <div className="ds-brand">
