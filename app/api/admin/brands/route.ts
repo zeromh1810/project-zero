@@ -2,10 +2,12 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
+import { commitToGitHub } from "@/lib/github-data"
 
 export const dynamic = "force-dynamic"
 
-const FILE = path.join(process.cwd(), "data", "brands.json")
+const FILE      = path.join(process.cwd(), "data", "brands.json")
+const DATA_PATH = "data/brands.json"
 
 interface Brand {
   id: string
@@ -42,6 +44,13 @@ export async function POST(request: Request) {
     }
     data.brands.push(brand)
     write(data)
+
+    try {
+      await commitToGitHub(DATA_PATH, data, "chore(data): update brands via admin [skip ci]")
+    } catch (err) {
+      console.warn("[brands] GitHub commit failed:", err)
+    }
+
     return NextResponse.json(brand, { status: 201 })
   } catch {
     return NextResponse.json({ error: "Error al guardar" }, { status: 500 })
@@ -63,6 +72,13 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Marca no encontrada" }, { status: 404 })
 
     write(data)
+
+    try {
+      await commitToGitHub(DATA_PATH, data, "chore(data): update brands via admin [skip ci]")
+    } catch (err) {
+      console.warn("[brands] GitHub commit failed:", err)
+    }
+
     return NextResponse.json({ ok: true })
   } catch {
     return NextResponse.json({ error: "Error al eliminar" }, { status: 500 })

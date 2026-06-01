@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, ChangeEvent } from "react"
+import { useState, useEffect, useRef, ChangeEvent, useCallback } from "react"
 import type { ToastType } from "./admin-toast"
 
 interface Brand {
@@ -111,6 +111,11 @@ export default function BrandsTab({ onToast }: Props) {
   const [adding,    setAdding]    = useState(false)
   const [loading,   setLoading]   = useState(true)
   const [deleting,  setDeleting]  = useState<string | null>(null)
+  const addCardRef = useRef<HTMLDivElement>(null)
+
+  const scrollToAdd = useCallback(() => {
+    addCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [])
 
   useEffect(() => {
     fetch("/api/admin/brands", { cache: "no-store" })
@@ -177,7 +182,7 @@ export default function BrandsTab({ onToast }: Props) {
       </div>
 
       {/* ── Agregar ── */}
-      <div className="admin-card" style={{ marginBottom: 16 }}>
+      <div ref={addCardRef} className="admin-card" style={{ marginBottom: 16 }}>
         <div className="admin-card-title">Agregar logo</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
           <UploadZone
@@ -209,11 +214,27 @@ export default function BrandsTab({ onToast }: Props) {
 
       {/* ── Lista ── */}
       <div className="admin-card">
-        <div className="admin-card-title">
-          Logos en el slider
-          <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 500, color: "var(--txt3)" }}>
-            ({brands.length})
+        <div className="admin-card-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span>
+            Logos en el slider
+            <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 500, color: "var(--txt3)" }}>
+              ({brands.length})
+            </span>
           </span>
+          <button
+            onClick={scrollToAdd}
+            style={{
+              display: "flex", alignItems: "center", gap: 5,
+              padding: "5px 12px", borderRadius: 7, border: "none",
+              background: "rgba(41,151,255,0.12)", color: "#2997ff",
+              fontSize: 12, fontWeight: 600, cursor: "pointer",
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Agregar logo
+          </button>
         </div>
 
         {loading ? (

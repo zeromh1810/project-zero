@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
+import { commitBinaryToGitHub } from "@/lib/github-data"
 
 export const dynamic = "force-dynamic"
 
@@ -40,6 +41,17 @@ export async function POST(request: Request) {
     // Write file
     const buffer = Buffer.from(await file.arrayBuffer())
     fs.writeFileSync(filePath, buffer)
+
+    // Persist to GitHub so the file survives Railway deploys
+    try {
+      await commitBinaryToGitHub(
+        `public/uploads/${filename}`,
+        buffer,
+        `chore(assets): upload ${filename} via admin [skip ci]`
+      )
+    } catch (err) {
+      console.warn("[upload] GitHub commit failed:", err)
+    }
 
     return NextResponse.json({ url: `/uploads/${filename}` })
   } catch (err) {
