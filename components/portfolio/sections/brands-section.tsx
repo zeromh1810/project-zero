@@ -24,7 +24,7 @@ export function BrandsSection() {
 
   return (
     <section className="brands-section">
-      <p className="brands-label">He trabajado con</p>
+      <p className="brands-label">Han confiado en mí</p>
       <div className="brands-gallery">
         {brands.map(brand => {
           const logo = isDark
