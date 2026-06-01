@@ -1,8 +1,9 @@
 "use client"
 
-import { MonitorIcon, UserIcon, DocumentIcon, EmailIcon, LayersIcon } from "./icons"
+import Link from "next/link"
+import { MonitorIcon, UserIcon, EmailIcon, LayersIcon, BlogIcon } from "./icons"
 
-type Section = "trabajos" | "sobre" | "cv" | "contacto" | "design-system"
+type Section = "trabajos" | "sobre" | "contacto" | "design-system"
 
 interface BottomNavProps {
   currentSection: Section
@@ -12,7 +13,6 @@ interface BottomNavProps {
 const TABS: { key: Section; label: string; Icon: typeof MonitorIcon }[] = [
   { key: "trabajos", label: "Trabajos", Icon: MonitorIcon },
   { key: "sobre", label: "Sobre mí", Icon: UserIcon },
-  { key: "cv", label: "CV", Icon: DocumentIcon },
   { key: "contacto", label: "Contacto", Icon: EmailIcon },
   { key: "design-system", label: "DS", Icon: LayersIcon },
 ]
@@ -32,6 +32,10 @@ export function BottomNav({ currentSection, onNavigate }: BottomNavProps) {
           {label}
         </button>
       ))}
+      <Link href="/blog" className="bottom-tab" style={{ textDecoration: "none" }} aria-label="Blog">
+        <BlogIcon />
+        Blog
+      </Link>
     </nav>
   )
 }

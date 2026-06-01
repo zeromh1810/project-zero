@@ -27,6 +27,7 @@ interface AboutData {
   stats: Stat[]
   badge: string
   available: boolean
+  cvUrl: string
 }
 
 const DEFAULT: AboutData = {
@@ -36,11 +37,12 @@ const DEFAULT: AboutData = {
   stats: STATS.map(s => ({ value: s.value, label: s.label })),
   badge: "Disponible para freelance",
   available: true,
+  cvUrl: "",
 }
 
 interface AboutSectionProps {
   onNavigateContact: () => void
-  onNavigateCV: () => void
+  onNavigateCV?: () => void
 }
 
 export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionProps) {
@@ -138,7 +140,13 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
 
           <div style={{ display: "flex", gap: 12 }} className="anim-up">
             <button className="btn-p" onClick={onNavigateContact}>Contáctame</button>
-            <button className="btn-g" onClick={onNavigateCV}>Ver CV</button>
+            {data.cvUrl ? (
+              <a href={data.cvUrl} target="_blank" rel="noopener noreferrer" className="btn-g" style={{ textDecoration: "none" }}>
+                Ver CV
+              </a>
+            ) : onNavigateCV ? (
+              <button className="btn-g" onClick={onNavigateCV}>Ver CV</button>
+            ) : null}
           </div>
         </div>
       </div>

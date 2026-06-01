@@ -1,0 +1,64 @@
+{
+  "posts": [
+    {
+      "id": "1780400001",
+      "slug": "design-thinking-de-la-empatia-al-prototipo",
+      "title": "Design Thinking en la práctica: de la empatía al prototipo",
+      "content": "El Design Thinking no es una metodología, es una forma de ver los problemas. Después de cinco años aplicándola en proyectos reales, llegué a una conclusión que parece obvia pero que pocos equipos realmente internalizan: el problema que el cliente te presenta rara vez es el problema real.\n\nEn un proyecto reciente para una plataforma de e-commerce, el brief inicial era 'mejorar el carrito de compras'. Pero tres sesiones de entrevistas con usuarios reales revelaron algo diferente: el problema no era el carrito, sino la ansiedad generada por la incertidumbre en los costos de envío. El carrito era síntoma, no causa.\n\nLa fase de empatía es donde la mayoría de los equipos falla por impaciencia. Queremos llegar rápido a las soluciones porque las soluciones son visibles, medibles, presentables. Pero sin empatía real, construimos respuestas a preguntas que nadie hizo.\n\nMi proceso actual tiene tres momentos que no negocio: observación contextual (ver al usuario en su ambiente natural, no en un laboratorio), entrevistas en profundidad sin guion rígido, y síntesis colectiva del equipo antes de definir el problema.\n\nEl prototipo debe ser lo más tonto posible. Papel, cartón, clicks en Figma. El objetivo no es impresionar, es aprender. Un prototipo que tardó dos semanas en construirse genera un sesgo de supervivencia: nadie quiere decir que ese tiempo fue mal invertido.",
+      "image": "https://picsum.photos/seed/design-thinking/1200/675",
+      "category": "Diseño",
+      "publishedAt": "2026-05-28T09:00:00.000Z",
+      "draft": false
+    },
+    {
+      "id": "1780400002",
+      "slug": "sistemas-de-diseno-escalables-desde-cero",
+      "title": "Cómo construir un sistema de diseño que realmente escale",
+      "content": "La mayoría de los sistemas de diseño mueren en su segunda versión. No porque sean malos, sino porque fueron diseñados para el equipo que existe hoy, no para el equipo que existirá mañana.\n\nHe construido tres design systems desde cero y heredado dos. El patrón de fracaso es siempre el mismo: demasiados componentes demasiado pronto, documentación que queda obsoleta en semanas, y tokens que son nombres de colores en vez de intenciones de uso.\n\nLa arquitectura de tokens es el cimiento. Si llamas a un token 'blue-500' en vez de 'color-interactive-primary', cada vez que el brand cambie tendrás que actualizar referencias en vez de simplemente cambiar el valor. Este error cuesta meses de deuda técnica.\n\nMi metodología actual parte de los primitivos: valores brutos sin semántica. Luego vienen los semánticos: qué significa ese valor en contexto. Por último los tokens de componente: qué valor semántico usa este elemento específico. Tres capas, una sola fuente de verdad.\n\nLo más importante que aprendí: un design system no es un producto interno, es una plataforma. Necesita un maintainer dedicado, un proceso de contribución claro, y métricas de adopción. Sin eso, en seis meses cada equipo habrá forkeado sus propios componentes y volverás al punto de partida.",
+      "image": "https://picsum.photos/seed/design-system-scalable/1200/675",
+      "category": "Diseño",
+      "publishedAt": "2026-05-15T09:00:00.000Z",
+      "draft": false
+    },
+    {
+      "id": "1780400003",
+      "slug": "user-research-antes-de-disenar",
+      "title": "Por qué el research es la inversión más rentable en producto",
+      "content": "Cada vez que un equipo me dice que no tiene tiempo para hacer research, calculo mentalmente el costo de construir la feature equivocada. Generalmente es 10 a 40 veces más caro que las sesiones que querían saltarse.\n\nEl research mal entendido es una encuesta de 20 preguntas que confirma lo que ya crees. El research real es incómodo, porque te obliga a cuestionar los supuestos que dieron forma al proyecto desde el día uno.\n\nEn un proyecto de fintech trabajé con un equipo convencido de que el problema de sus usuarios era la complejidad de la interfaz. Hicimos cinco entrevistas. El problema real era desconfianza: los usuarios no usaban la app porque no entendían cómo estaba protegido su dinero. Simplificar la UI habría sido invisible para ese problema.\n\nLas herramientas que más uso: entrevistas contextuales (el usuario en su ambiente, haciendo la tarea real), card sorting para información architecture, y análisis de grabaciones de sesión para encontrar fricciones que los usuarios no saben verbalizar.\n\nUna regla que aplico siempre: nunca vayas a una entrevista con wireframes. El usuario te dirá qué le gusta de tus ideas en vez de contarte sus problemas reales. El prototipo solo aparece en la fase de validación, nunca en la de descubrimiento.",
+      "image": "https://picsum.photos/seed/user-research/1200/675",
+      "category": "UX Research",
+      "publishedAt": "2026-05-01T09:00:00.000Z",
+      "draft": false
+    },
+    {
+      "id": "1780400004",
+      "slug": "dashboard-analytics-caso-de-estudio",
+      "title": "Caso de estudio: rediseño de dashboard que mejoró retención un 34%",
+      "content": "Este es el proyecto del que más orgulloso estoy en los últimos dos años, no por el resultado final sino por el proceso que tomamos para llegar ahí.\n\nEl cliente era una empresa de analytics B2B con 12.000 usuarios activos y una tasa de churn mensual del 8%. La hipótesis inicial del equipo era que el producto era demasiado complejo. La hipótesis correcta, que descubrimos en research, era diferente.\n\nFase 1 - Descubrimiento: Analizamos el comportamiento de los usuarios que se quedaban versus los que se iban. El patrón fue claro: los que sobrevivían el primer mes habían configurado al menos un dashboard personalizado en los primeros tres días. Los que se iban nunca llegaban a esa acción.\n\nFase 2 - Problema real: El onboarding llevaba a los usuarios directamente a un dashboard vacío sin contexto. Era como entregar un instrumento musical sin mostrar cómo se toca.\n\nFase 3 - Solución: Rediseñamos el onboarding con un wizard de configuración que llevaba al usuario a crear su primer dashboard significativo antes de terminar el registro. Cinco pasos, tiempo estimado 3 minutos.\n\nResultado a los 90 días: retención del primer mes subió de 62% a 83%. Churn mensual bajó de 8% a 5.3%. El cliente atribuyó el impacto a 'cambiar la feature principal', pero la feature no cambió: cambió cuándo y cómo el usuario la descubría.",
+      "image": "https://picsum.photos/seed/dashboard-case/1200/675",
+      "category": "Case Study",
+      "publishedAt": "2026-04-18T09:00:00.000Z",
+      "draft": false
+    },
+    {
+      "id": "1780400005",
+      "slug": "tipografia-en-interfaces-digitales",
+      "title": "Tipografía funcional: cómo el tipo mejora (o destruye) la UX",
+      "content": "La tipografía es el elemento de diseño más influyente y el más ignorado cuando algo falla. Nadie dice 'esta app tiene mala experiencia porque el kerning está mal'. Pero el kerning incorrecto genera fatiga visual, y la fatiga visual genera abandono.\n\nTres principios que nunca negocio en mis proyectos:\n\nPrimero: la jerarquía tipográfica tiene que ser obvia sin color ni peso. Si necesitas color para distinguir un heading de un body text, la escala de tamaños está mal. Un usuario con daltonismo o con el brillo al mínimo debe entender la estructura solo por el tamaño.\n\nSegundo: line-height y measure van juntos. Una columna de texto de 800px de ancho necesita más interlineado que una de 400px porque el ojo tiene que recorrer más distancia para encontrar la siguiente línea. La regla 45-75 caracteres por línea existe por razones cognitivas, no estéticas.\n\nTercero: las fuentes variables cambiaron el juego. En vez de cargar seis pesos distintos de una familia tipográfica, una fuente variable te da acceso a cualquier peso con un único archivo. El impacto en performance en mobile es significativo, especialmente en conexiones lentas.\n\nEl error que veo más seguido: elegir tipografías por cómo se ven en el home de la foundry, no por cómo se leen en el contexto de uso real. Una fuente hermosa a 80px puede ser ilegible a 14px en un input field.",
+      "image": "https://picsum.photos/seed/typography/1200/675",
+      "category": "Diseño",
+      "publishedAt": "2026-04-05T09:00:00.000Z",
+      "draft": false
+    },
+    {
+      "id": "1780400006",
+      "slug": "colaboracion-diseno-desarrollo",
+      "title": "El flujo diseño-desarrollo que realmente funciona (y los que no)",
+      "content": "Trabajé en equipos donde el handoff era un PDF de 120 páginas. En equipos donde no había handoff y el diseñador era también quien codificaba. En equipos donde Figma era la fuente de verdad y otros donde la fuente de verdad era un Google Doc desactualizado.\n\nDespués de todos esos contextos, llegué a una conclusión: la herramienta importa menos que el momento en que el desarrollador entra al proceso.\n\nEl modelo que más éxito me ha dado: el desarrollador entra en la fase de exploración, no en el handoff. No para codificar, sino para señalar restricciones técnicas temprano. 'Este scroll infinito va a ser complejo por X razón' en semana dos es información valiosa. La misma frase en semana seis, cuando el diseño ya está aprobado y en producción, es un problema.\n\nLas design tokens son el lenguaje común. Cuando diseño con tokens que mapean directamente al código, el gap de interpretación se reduce a casi cero. El color 'interactive-primary' en Figma es exactamente la variable `--color-interactive-primary` en CSS. No hay traducción, hay sincronización.\n\nEl feedback más valioso que recibo de desarrolladores no es sobre lo que es difícil de construir, sino sobre lo que es difícil de mantener. Un componente que parece simple de implementar puede ser una pesadilla de mantener si no está bien pensado desde el diseño.",
+      "image": "https://picsum.photos/seed/design-dev/1200/675",
+      "category": "Producto",
+      "publishedAt": "2026-03-22T09:00:00.000Z",
+      "draft": false
+    }
+  ]
+}

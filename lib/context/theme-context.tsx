@@ -13,22 +13,15 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 const THEME_STORAGE_KEY = "portfolio-theme"
 
 function getInitialTheme(): boolean {
-  // Check localStorage first (only on client)
   if (typeof window !== "undefined") {
     const stored = localStorage.getItem(THEME_STORAGE_KEY)
-    if (stored !== null) {
-      return stored === "dark"
-    }
-    // Fall back to system preference
-    if (window.matchMedia("(prefers-color-scheme: light)").matches) {
-      return false
-    }
+    if (stored !== null) return stored === "dark"
   }
-  return true // Default to dark
+  return false // Default to light
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [isDark, setIsDark] = useState(true) // SSR default
+  const [isDark, setIsDark] = useState(false) // SSR default: light
   const [mounted, setMounted] = useState(false)
   const darkRef = useRef(isDark)
 

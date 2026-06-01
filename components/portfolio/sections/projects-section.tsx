@@ -1,9 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { PROJECTS, type Project } from "@/lib/data/projects"
 import { ProjectCard } from "../project-card"
 import { HeroSection } from "./hero-section"
+import { BrandsSection } from "./brands-section"
+import { BlogPreviewSection } from "./blog-preview-section"
 
 interface ProjectsSectionProps {
   onNavigateContact: () => void
@@ -19,6 +21,7 @@ function getBentoVariant(i: number): "featured" | "compact" {
 
 export function ProjectsSection({ onNavigateContact, onNavigateAbout, onSelectProject }: ProjectsSectionProps) {
   const [projects, setProjects] = useState<Project[]>(PROJECTS)
+  const sheetRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch("/api/admin/projects", { cache: "no-store" })
@@ -27,11 +30,36 @@ export function ProjectsSection({ onNavigateContact, onNavigateAbout, onSelectPr
       .catch(() => {})
   }, [])
 
+  // Scroll-driven alpha: semitransparente → sólido al entrar al viewport
+  useEffect(() => {
+    const el = sheetRef.current
+    if (!el) return
+
+    const update = () => {
+      const isDark = document.documentElement.classList.contains("dark")
+      const rect   = el.getBoundingClientRect()
+      const navH   = 64
+      // alpha va de 0.82 → 1.0 mientras el top del sheet viaja
+      // desde el borde inferior del viewport hasta el navbar
+      const progress = Math.max(0, Math.min(1,
+        (window.innerHeight - rect.top) / (window.innerHeight - navH)
+      ))
+      const alpha = (0.82 + 0.18 * progress).toFixed(3)
+      el.style.background = isDark
+        ? `rgba(6, 12, 26, ${alpha})`
+        : `rgba(240, 244, 251, ${alpha})`
+    }
+
+    window.addEventListener("scroll", update, { passive: true })
+    update()
+    return () => window.removeEventListener("scroll", update)
+  }, [])
+
   return (
     <>
       <HeroSection onNavigateContact={onNavigateContact} onNavigateAbout={onNavigateAbout} />
 
-      <div className="projects-sheet">
+      <div className="projects-sheet" ref={sheetRef}>
         <div className="section">
           <div className="projects-hero">
             <div className="s-label anim-up">Portafolio seleccionado</div>
@@ -73,6 +101,9 @@ export function ProjectsSection({ onNavigateContact, onNavigateAbout, onSelectPr
             ))}
           </div>
         </div>
+
+        <BrandsSection />
+        <BlogPreviewSection />
       </div>
     </>
   )

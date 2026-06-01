@@ -43,17 +43,17 @@ const LAYERS = [
   { count: 800,  szMin: 0.7, szMax: 1.1, spdMult: 0.38,
     darkColor:  [0.28, 0.50, 0.95] as [number,number,number],
     lightColor: [0.10, 0.38, 0.82] as [number,number,number],
-    alphaDark: 0.08, alphaLight: 0.11 },
+    alphaDark: 0.08, alphaLight: 0 },
   // mid:  original behavior
   { count: 1200, szMin: 1.2, szMax: 2.0, spdMult: 1.00,
     darkColor:  [0.42, 0.68, 1.00] as [number,number,number],
     lightColor: [0.16, 0.50, 0.90] as [number,number,number],
-    alphaDark: 0.22, alphaLight: 0.30 },
+    alphaDark: 0.22, alphaLight: 0 },
   // near: large, fast, bright, warm cyan — parallax with mouse
   { count: 800,  szMin: 2.6, szMax: 4.2, spdMult: 1.45,
     darkColor:  [0.55, 0.82, 1.00] as [number,number,number],
     lightColor: [0.24, 0.64, 0.98] as [number,number,number],
-    alphaDark: 0.24, alphaLight: 0.32 },
+    alphaDark: 0.24, alphaLight: 0 },
 ]
 
 const PARTICLE_COUNT  = LAYERS.reduce((s, l) => s + l.count, 0) // 2800

@@ -1,8 +1,10 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
+import Link from "next/link"
 import { useTheme } from "@/lib/context/theme-context"
 import { useLogo } from "@/lib/hooks/use-logo"
+import { SunIcon, MoonIcon } from "./icons"
 
 type Section = "trabajos" | "sobre" | "cv" | "contacto" | "design-system"
 
@@ -12,11 +14,10 @@ interface NavbarProps {
   onProfileClick: () => void
 }
 
-const NAV_ITEMS: { key: Section; label: string }[] = [
-  { key: "trabajos", label: "Trabajos" },
-  { key: "sobre", label: "Sobre Mí" },
-  { key: "cv", label: "CV" },
-  { key: "contacto", label: "Contacto" },
+const SECTION_ITEMS: { key: Section; label: string }[] = [
+  { key: "sobre",         label: "Sobre Mí" },
+  { key: "cv",            label: "CV" },
+  { key: "contacto",      label: "Contacto" },
   { key: "design-system", label: "Project Zero DS" },
 ]
 
@@ -24,85 +25,133 @@ export function Navbar({ currentSection, onNavigate, onProfileClick }: NavbarPro
   const { isDark, toggleTheme } = useTheme()
   const logo = useLogo()
   const navCenterRef = useRef<HTMLDivElement>(null)
-  const pillRef = useRef<HTMLSpanElement>(null)
+  const pillRef      = useRef<HTMLSpanElement>(null)
   const [pillReady, setPillReady] = useState(false)
+  const [activeKey, setActiveKey] = useState<string>(
+    currentSection === "trabajos" ? "home" : currentSection
+  )
 
-  const logoUrl = isDark
-    ? (logo.darkUrl || logo.lightUrl)
-    : (logo.lightUrl || logo.darkUrl)
+  const logoUrl  = isDark ? (logo.darkUrl || logo.lightUrl) : (logo.lightUrl || logo.darkUrl)
   const logoText = logo.fallbackText || "A·Studio"
 
-  // Measure active button and animate the pill
+  // Sync activeKey when section changes from outside
+  useEffect(() => {
+    if (currentSection !== "trabajos") setActiveKey(currentSection)
+  }, [currentSection])
+
+  // Move pill to the active element
   useEffect(() => {
     const container = navCenterRef.current
-    const pill = pillRef.current
+    const pill      = pillRef.current
     if (!container || !pill) return
 
-    const activeBtn = container.querySelector(`[data-section="${currentSection}"]`) as HTMLElement
-    if (!activeBtn) return
+    const el = container.querySelector(`[data-nav="${activeKey}"]`) as HTMLElement
+    if (!el) return
 
-    const containerRect = container.getBoundingClientRect()
-    const btnRect = activeBtn.getBoundingClientRect()
+    const cRect = container.getBoundingClientRect()
+    const eRect = el.getBoundingClientRect()
+    pill.style.left  = `${eRect.left - cRect.left}px`
+    pill.style.width = `${eRect.width}px`
 
-    pill.style.left = `${btnRect.left - containerRect.left}px`
-    pill.style.width = `${btnRect.width}px`
-
-    // On first render, skip transition so pill appears instantly
     if (!pillReady) {
       pill.style.transition = "none"
       setPillReady(true)
-      // Re-enable transition after first paint
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (pillRef.current) {
-            pillRef.current.style.transition =
-              "left 350ms cubic-bezier(0.34, 1.56, 0.64, 1), width 350ms cubic-bezier(0.34, 1.56, 0.64, 1)"
-          }
-        })
-      })
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (pillRef.current)
+          pillRef.current.style.transition =
+            "left 350ms cubic-bezier(0.34,1.56,0.64,1), width 350ms cubic-bezier(0.34,1.56,0.64,1)"
+      }))
     }
-  }, [currentSection, pillReady])
+  }, [activeKey, pillReady])
+
+  function goHome() {
+    onNavigate("trabajos")
+    setActiveKey("home")
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  function goTrabajos() {
+    onNavigate("trabajos")
+    setActiveKey("trabajos")
+    // Scroll to projects sheet after section renders
+    requestAnimationFrame(() => {
+      const sheet = document.querySelector(".projects-sheet") as HTMLElement
+      if (sheet) sheet.scrollIntoView({ behavior: "smooth", block: "start" })
+    })
+  }
+
+  function goSection(key: Section) {
+    onNavigate(key)
+    setActiveKey(key)
+    window.scrollTo({ top: 0, behavior: "instant" })
+  }
 
   return (
     <nav className="navbar">
-      <div className="nav-logo" onClick={() => onNavigate("trabajos")} style={{ cursor: "pointer" }}>
-        {logoUrl ? (
-          <img src={logoUrl} alt={logoText} className="nav-logo-img" />
-        ) : (
-          <>
-            <span className="nav-logo-dot" />
-            {logoText}
-          </>
-        )}
+      <div className="nav-logo" onClick={goHome} style={{ cursor: "pointer" }}>
+        {logoUrl
+          ? <img src={logoUrl} alt={logoText} className="nav-logo-img" />
+          : <><span className="nav-logo-dot" />{logoText}</>}
       </div>
 
       <div className="nav-center" ref={navCenterRef}>
-        {/* Sliding pill background */}
         <span ref={pillRef} className="nav-pill" aria-hidden="true" />
 
-        {NAV_ITEMS.map(({ key, label }) => (
+        {/* Home */}
+        <button
+          data-nav="home"
+          className={`nav-item${activeKey === "home" ? " active" : ""}`}
+          onClick={goHome}
+        >
+          Home
+        </button>
+
+        {/* Trabajos — ancla a projects-sheet */}
+        <button
+          data-nav="trabajos"
+          className={`nav-item${activeKey === "trabajos" ? " active" : ""}`}
+          onClick={goTrabajos}
+        >
+          Trabajos
+        </button>
+
+        {/* Rest of sections */}
+        {SECTION_ITEMS.map(({ key, label }) => (
           <button
             key={key}
-            data-section={key}
-            className={`nav-item${currentSection === key ? " active" : ""}`}
-            onClick={() => onNavigate(key)}
+            data-nav={key}
+            className={`nav-item${activeKey === key ? " active" : ""}`}
+            onClick={() => goSection(key)}
           >
             {label}
           </button>
         ))}
+
+        {/* Blog link */}
+        <Link href="/blog" className="nav-item">Blog</Link>
       </div>
 
       <div className="nav-right">
-        <button
-          className="theme-btn"
-          aria-label={isDark ? "Modo claro" : "Modo oscuro"}
-          onClick={toggleTheme}
-          title={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-          style={{
-            ["--knob-position" as string]: isDark ? "16px" : "2px",
-            ["--knob-color" as string]: isDark ? "var(--txt)" : "var(--txt)",
-          }}
-        />
+        {/* Theme toggle — dual icon */}
+        <div className="theme-toggle" role="group" aria-label="Modo de color">
+          <button
+            className={`theme-toggle-btn${!isDark ? " active" : ""}`}
+            onClick={() => isDark && toggleTheme()}
+            aria-label="Modo claro"
+            aria-pressed={!isDark}
+          >
+            <SunIcon />
+          </button>
+          <button
+            className={`theme-toggle-btn${isDark ? " active" : ""}`}
+            onClick={() => !isDark && toggleTheme()}
+            aria-label="Modo oscuro"
+            aria-pressed={isDark}
+          >
+            <MoonIcon />
+          </button>
+        </div>
+
         <button className="btn-profile" onClick={onProfileClick}>
           Perfil
         </button>
