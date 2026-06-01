@@ -12,12 +12,15 @@ import { AboutSection } from "./sections/about-section"
 import { ContactSection } from "./sections/contact-section"
 import type { Project } from "@/lib/data/projects"
 import { useSocial, type SocialData } from "@/lib/hooks/use-social"
+import { useFooter, type FooterData } from "@/lib/hooks/use-footer"
+import { LinkedInIcon, InstagramIcon, GitHubIcon } from "./icons"
 
 type Section = "trabajos" | "sobre" | "contacto"
 
-export function Portfolio({ initialSocial }: { initialSocial?: SocialData }) {
-  const router  = useRouter()
-  const social  = useSocial(initialSocial)
+export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: SocialData; initialFooter?: FooterData }) {
+  const router     = useRouter()
+  const social     = useSocial(initialSocial)
+  const footerData = useFooter(initialFooter)
   const [section, setSection] = useState<Section>("trabajos")
   const [displaySection, setDisplaySection] = useState<Section>("trabajos")
   const [transitioning, setTransitioning] = useState(false)
@@ -115,6 +118,33 @@ export function Portfolio({ initialSocial }: { initialSocial?: SocialData }) {
 
         {displaySection === "contacto" && <ContactSection />}
       </div>
+
+      <footer className="footer">
+        <div className="footer-mark">✦</div>
+        <div className="footer-brand">{footerData.brand}</div>
+        <div className="footer-tagline">{footerData.tagline}</div>
+        <div className="footer-social">
+          {social.linkedin && (
+            <a href={social.linkedin} target="_blank" rel="noopener noreferrer"
+               aria-label="LinkedIn" className="footer-social-link">
+              <LinkedInIcon />
+            </a>
+          )}
+          {social.instagram && (
+            <a href={social.instagram} target="_blank" rel="noopener noreferrer"
+               aria-label="Instagram" className="footer-social-link">
+              <InstagramIcon />
+            </a>
+          )}
+          {social.github && (
+            <a href={social.github} target="_blank" rel="noopener noreferrer"
+               aria-label="GitHub" className="footer-social-link">
+              <GitHubIcon />
+            </a>
+          )}
+        </div>
+        <div className="footer-copy">{footerData.copy}</div>
+      </footer>
 
       {showProfile && (
         <ProfileModal
