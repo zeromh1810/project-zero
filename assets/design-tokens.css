@@ -1,6 +1,6 @@
 /* Design Tokens - Auto-generated */
 /* Project: Project Zero Portafolio de trabajos Carlos Felipe Rojas Hickmann */
-/* Author: Carlos Felipe Rojas Hickmann — v1.3.0 */
+/* Author: Carlos Felipe Rojas Hickmann — v1.5.0 */
 /* Do not edit directly - modify assets/design-tokens.json instead */
 
 /* === PRIMITIVES === */
@@ -21,6 +21,16 @@
   --primitive-color-neutral-800: #141414;
   --primitive-color-neutral-900: #0a0a0a;
   --primitive-color-neutral-950: #000000;
+  --primitive-color-blue-tinted-50: #f0f4fb;
+  --primitive-color-blue-tinted-100: #e8edf7;
+  --primitive-color-blue-tinted-900: #0b1526;
+  --primitive-color-blue-tinted-950: #060c1a;
+  --primitive-color-blue-tinted-brands-start: #03070e;
+  --primitive-color-blue-tinted-brands-end: #060b16;
+  --primitive-color-blue-tinted-blog-dark-start: #0c1325;
+  --primitive-color-blue-tinted-blog-dark-end: #07090e;
+  --primitive-color-neutral-200: #e4e4e4;
+  --primitive-color-neutral-700: #1e1e1e;
   --primitive-color-text-dark-900: #1d1d1f;
   --primitive-color-text-dark-700: #3a3a40;
   --primitive-color-text-dark-500: #5e5e64;

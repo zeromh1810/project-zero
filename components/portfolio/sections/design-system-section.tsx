@@ -7,7 +7,7 @@ import { EmailIcon } from "../icons"
 // ── Types ────────────────────────────────────────────────────────────────────
 type DSPageId =
   | "overview" | "colors" | "typography"
-  | "buttons" | "cards" | "forms" | "navigation" | "badges" | "toast" | "patterns"
+  | "buttons" | "cards" | "forms" | "navigation" | "badges" | "toast" | "patterns" | "brands"
 
 const DS_GROUPS: { label: string; items: { id: DSPageId; label: string }[] }[] = [
   {
@@ -31,7 +31,10 @@ const DS_GROUPS: { label: string; items: { id: DSPageId; label: string }[] }[] =
   },
   {
     label: "Patrones",
-    items: [{ id: "patterns", label: "Layouts" }],
+    items: [
+      { id: "patterns", label: "Layouts" },
+      { id: "brands",   label: "Brands Section" },
+    ],
   },
 ]
 
@@ -1157,6 +1160,167 @@ onToast("Sin cambios",         "info")`} />
   )
 }
 
+// ── Page: Brands Section ─────────────────────────────────────────────────────
+function PageBrands() {
+  return (
+    <div className="ds-page-body">
+      <div className="ds-page-header">
+        <h2 className="ds-page-title">Brands Section</h2>
+        <p className="ds-page-desc">
+          Inter-sección "Han confiado en mí" entre proyectos y blog. Grid auto-fill que escala de 6 a 12 logos sin tocar código. Entrada con IntersectionObserver + stagger. Admin: <code>/admin → Marcas</code>.
+        </p>
+      </div>
+
+      <SectionHeading title="Eyebrow Label — Patrón editorial" />
+      <p className="ds-pattern-desc">
+        Label centrado con líneas decorativas a los lados. <strong>Label XS</strong> (11px / w600 / 0.12em tracking / uppercase). Color <code>txt2</code> al 55% de opacidad. Líneas al 22%. Usar solo en secciones de soporte (social proof, inter-secciones). Para secciones primarias usar heading jerárquico.
+      </p>
+      <PreviewBox label="Eyebrow label con líneas">
+        <div style={{ display: "flex", alignItems: "center", gap: 16, width: "100%", maxWidth: 320 }}>
+          <div style={{ flex: 1, maxWidth: 64, height: 1, background: "var(--txt2)", opacity: 0.22 }} />
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--txt2)", opacity: 0.55, whiteSpace: "nowrap" }}>
+            Han confiado en mí
+          </span>
+          <div style={{ flex: 1, maxWidth: 64, height: 1, background: "var(--txt2)", opacity: 0.22 }} />
+        </div>
+      </PreviewBox>
+      <CodeBlock code={`<div className="brands-label-wrap">
+  <div className="brands-label-line" />
+  <p className="brands-label">Han confiado en mí</p>
+  <div className="brands-label-line" />
+</div>
+
+/* CSS */
+.brands-label-wrap { display: flex; align-items: center; gap: 16px; }
+.brands-label-line { flex: 1; max-width: 64px; height: 1px;
+  background: var(--txt2); opacity: 0.22; }
+.brands-label { font-size: 11px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--txt2); opacity: 0.55; }`} />
+
+      <SectionHeading title="Grid auto-fill — Layout de logos" />
+      <p className="ds-pattern-desc">
+        <code>repeat(auto-fill, minmax(130px, 1fr))</code> — 6 columnas en ≥780px, se adapta solo al añadir más marcas. Max-width 1000px. Gap 24px row / 16px column.
+      </p>
+      <PreviewBox label="Grid 6 items (esquema)">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "8px", width: "100%", maxWidth: 480 }}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} style={{
+              height: 36, borderRadius: 8, border: "1.5px dashed var(--border)",
+              background: "var(--bg3)", display: "flex", alignItems: "center",
+              justifyContent: "center", fontSize: 10, color: "var(--txt3)", fontWeight: 600
+            }}>
+              {i + 1}
+            </div>
+          ))}
+        </div>
+      </PreviewBox>
+      <CodeBlock code={`.brands-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 24px 16px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .brands-gallery {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}`} />
+
+      <SectionHeading title="Stagger Entrance — Animación de entrada" />
+      <p className="ds-pattern-desc">
+        IntersectionObserver (threshold 0.12) añade la clase <code>brands-section--visible</code> al <code>&lt;section&gt;</code> cuando entra en viewport. Cada ítem parte de <code>opacity: 0; transform: translateY(10px)</code> y recibe un <code>transition-delay</code> inline basado en su índice. Límite: ≤12 items (stagger total ≤660ms).
+      </p>
+      <div className="ds-layer-diagram">
+        {[
+          { z: "threshold: 0.12", label: "12% del section visible → dispara entrada" },
+          { z: "delay: idx × 60ms", label: "6 logos → 300ms total stagger" },
+          { z: "duration: 0.55s", label: "opacity 0→0.38 + translateY 10px→0" },
+          { z: "hover: 0.22s", label: "opacity →0.86, scale →1.06, grayscale →0%" },
+        ].map(({ z, label }) => (
+          <div key={label} className="ds-layer-row">
+            <span className="ds-layer-z">{z}</span>
+            <span className="ds-layer-label">{label}</span>
+          </div>
+        ))}
+      </div>
+      <CodeBlock code={`// React — IntersectionObserver
+useEffect(() => {
+  const el = sectionRef.current
+  if (!el || !brands.length) return
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) {
+        el.classList.add("brands-section--visible")
+        observer.disconnect()
+      }
+    },
+    { threshold: 0.12 }
+  )
+  observer.observe(el)
+  return () => observer.disconnect()
+}, [brands])
+
+// JSX — transition-delay por índice
+{brands.map((brand, idx) => (
+  <div
+    key={brand.id}
+    className="brand-item"
+    style={{ transitionDelay: \`\${idx * 60}ms\` }}
+  >
+    <img src={logo} alt="" draggable={false} />
+  </div>
+))}
+
+/* CSS */
+.brand-item {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+}
+.brands-section--visible .brand-item {
+  opacity: 0.38;
+  transform: translateY(0);
+}
+.brands-section--visible .brand-item:hover {
+  opacity: 0.86;
+  transform: translateY(0) scale(1.06);
+  transition-duration: 0.22s;
+}
+.brand-item img {
+  filter: grayscale(20%);
+  transition: filter 0.22s ease;
+}
+.brands-section--visible .brand-item:hover img {
+  filter: grayscale(0%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-item { opacity: 0.38; transform: none; }
+}`} />
+
+      <SectionHeading title="Gradientes de fondo" />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid var(--border)" }}>
+          <div style={{ height: 64, background: "linear-gradient(#d8deec 0% 26%, #e6ebf3 100%)" }} />
+          <div style={{ padding: "10px 14px", fontSize: 11, color: "var(--txt3)", fontFamily: "monospace" }}>
+            light: #d8deec → #e6ebf3
+          </div>
+        </div>
+        <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid var(--border)" }}>
+          <div style={{ height: 64, background: "linear-gradient(#03070e 0%, #060b16 100%)" }} />
+          <div style={{ padding: "10px 14px", fontSize: 11, color: "var(--txt3)", fontFamily: "monospace" }}>
+            dark: #03070e → #060b16
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Page map ──────────────────────────────────────────────────────────────────
 const PAGE_MAP: Record<DSPageId, React.ComponentType> = {
   overview: PageOverview,
@@ -1169,6 +1333,7 @@ const PAGE_MAP: Record<DSPageId, React.ComponentType> = {
   badges: PageBadges,
   toast: PageToast,
   patterns: PagePatterns,
+  brands: PageBrands,
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────

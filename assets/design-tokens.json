@@ -3,9 +3,9 @@
   "$meta": {
     "project": "Project Zero Portafolio de trabajos Carlos Felipe Rojas Hickmann",
     "author": "Carlos Felipe Rojas Hickmann",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "source": "Extracted from portfolio.css — do not edit CSS directly",
-    "changelog": "v1.4.0: Blog system completo (BlogCard, BlogPreviewSection, BlogNavbar, AppNavbar unificado), BrandsSection inter-sección, ThemeToggle dual-icon sun/moon, tokens bg4 + content-sheet + inter-section (superficies blue-tinted), scroll-driven alpha en projects-sheet y footer, auto-ripple idle 2s en WebGL, modo light como default, partículas dust deshabilitadas en light mode, sección .page--solid-bg para About y Contact, CV link en About admin. Docs: docs/components.md, docs/blog.md. v1.3.0: AdminToast tokens completados — border/shadow-dark tokenizados, title-size corregido a 14px, close-radius 6px, anim-enter/anim-exit como tokens CSS, admin.css refactorizado a 100% token-first, documentación docs/toast.md. v1.2.0: AdminToast component (4 estados: success/error/warning/info), token --warning #f59e0b amber, glassmorphism toast con progress bar y animación exit. v1.1.0: hero-title line-height 1.05, anim-enter-translate 16px, scroll-indicator opacity 0.65, card hover shadow + thumb scale, nav-item hover glass bg, theme-toggle 44px touch target, DS layout navbar offset, hardcoded colors → tokens"
+    "changelog": "v1.5.0: BrandsSection rediseño completo — grid auto-fill (6→12 logos sin cambios), eyebrow label editorial con líneas decorativas, stagger entrance via IntersectionObserver, hover scale(1.06)+grayscale lift. Nuevos tokens: section-eyebrow-label, stagger-entrance, blog-preview-section. brand-item y brands-section actualizados. Primitivos brands-dark (#03070e, #060b16) y blog-dark (#0c1325, #07090e) añadidos. Dark mode blog-preview-section homologado. DS viewer: página Brands añadida al grupo Patrones. Docs: docs/brands-section.md. v1.4.0: Blog system completo (BlogCard, BlogPreviewSection, BlogNavbar, AppNavbar unificado), BrandsSection inter-sección, ThemeToggle dual-icon sun/moon, tokens bg4 + content-sheet + inter-section (superficies blue-tinted), scroll-driven alpha en projects-sheet y footer, auto-ripple idle 2s en WebGL, modo light como default, partículas dust deshabilitadas en light mode, sección .page--solid-bg para About y Contact, CV link en About admin. Docs: docs/components.md, docs/blog.md. v1.3.0: AdminToast tokens completados — border/shadow-dark tokenizados, title-size corregido a 14px, close-radius 6px, anim-enter/anim-exit como tokens CSS, admin.css refactorizado a 100% token-first, documentación docs/toast.md. v1.2.0: AdminToast component (4 estados: success/error/warning/info), token --warning #f59e0b amber, glassmorphism toast con progress bar y animación exit. v1.1.0: hero-title line-height 1.05, anim-enter-translate 16px, scroll-indicator opacity 0.65, card hover shadow + thumb scale, nav-item hover glass bg, theme-toggle 44px touch target, DS layout navbar offset, hardcoded colors → tokens"
   },
 
   "primitive": {
@@ -40,9 +40,13 @@
       },
       "blue-tinted": {
         "50":  { "$value": "#f0f4fb", "$type": "color", "$description": "Content-sheet light — fondo sólido secciones con azul tintado (proyectos, blog, sobre mí, contacto, footer)" },
-        "100": { "$value": "#e8edf7", "$type": "color", "$description": "Inter-section light — base sección 'He trabajado con'" },
-        "900": { "$value": "#0b1526", "$type": "color", "$description": "Inter-section dark — base sección 'He trabajado con' modo oscuro" },
-        "950": { "$value": "#060c1a", "$type": "color", "$description": "Content-sheet dark — fondo sólido secciones modo oscuro (deep navy)" }
+        "100": { "$value": "#e8edf7", "$type": "color", "$description": "Inter-section light — base sección brands" },
+        "900": { "$value": "#0b1526", "$type": "color", "$description": "Inter-section dark legacy — referencia" },
+        "950": { "$value": "#060c1a", "$type": "color", "$description": "Content-sheet dark — fondo sólido secciones modo oscuro (deep navy)" },
+        "brands-start": { "$value": "#03070e", "$type": "color", "$description": "Brands section dark — inicio gradiente (casi negro con tinte azul)" },
+        "brands-end":   { "$value": "#060b16", "$type": "color", "$description": "Brands section dark — fin gradiente (navy oscuro)" },
+        "blog-dark-start": { "$value": "#0c1325", "$type": "color", "$description": "Blog preview section dark — inicio gradiente, conecta visualmente con brands-end" },
+        "blog-dark-end":   { "$value": "#07090e", "$type": "color", "$description": "Blog preview section dark — fin gradiente (casi negro)" }
       },
       "text": {
         "dark-900": { "$value": "#1d1d1f", "$type": "color", "$description": "Primary text light mode" },
@@ -261,23 +265,72 @@
       "inactive-color": { "$value": "{semantic.color.txt3}", "$type": "color" }
     },
     "brand-item": {
-      "$description": "Bounding box estandarizado para logos de marcas en BrandsSection. Garantiza peso visual uniforme independiente de proporciones del logo. CSS: .brand-item, .brand-item img",
-      "width":         { "$value": "148px",  "$type": "dimension", "$description": "Desktop — ancho del bounding box" },
-      "height":        { "$value": "48px",   "$type": "dimension", "$description": "Desktop — alto del bounding box" },
-      "width-mobile":  { "$value": "112px",  "$type": "dimension", "$description": "Mobile ≤640px" },
-      "height-mobile": { "$value": "38px",   "$type": "dimension" },
-      "img-max-width": { "$value": "180px",  "$type": "dimension", "$description": "max-width de la imagen dentro del bounding box" },
-      "opacity":       { "$value": "0.50",   "$type": "number", "$description": "Logos siempre al 50% — señal de confianza sin protagonismo" }
+      "$description": "Celda de logo en el grid de BrandsSection. Cada ítem centra su imagen dentro de una celda de altura fija. Opacity idle baja para señal de confianza sin protagonismo; hover revela con scale + grayscale lift. CSS: .brand-item, .brand-item img. Animación: transition-delay inline por índice (stagger-entrance).",
+      "cell-height":        { "$value": "56px",  "$type": "dimension", "$description": "Desktop — alto de la celda grid" },
+      "cell-height-mobile": { "$value": "46px",  "$type": "dimension", "$description": "Mobile ≤640px" },
+      "img-max-width":      { "$value": "110px", "$type": "dimension", "$description": "max-width imagen desktop" },
+      "img-max-height":     { "$value": "34px",  "$type": "dimension", "$description": "max-height imagen desktop" },
+      "img-max-width-mobile":  { "$value": "84px",  "$type": "dimension" },
+      "img-max-height-mobile": { "$value": "28px",  "$type": "dimension" },
+      "opacity-idle":       { "$value": "0.38",  "$type": "number", "$description": "Estado reposo — presencia sin robar protagonismo al contenido" },
+      "opacity-hover":      { "$value": "0.86",  "$type": "number", "$description": "Estado hover — revela la marca con claridad" },
+      "scale-hover":        { "$value": "1.06",  "$type": "number", "$description": "Escala sutil en hover — confirma interactividad" },
+      "grayscale-idle":     { "$value": "20%",   "$type": "string", "$description": "Leve desaturación en reposo — unifica paleta sin anular color" },
+      "grayscale-hover":    { "$value": "0%",    "$type": "string", "$description": "Color completo en hover" },
+      "transition-duration":{ "$value": "0.55s", "$type": "duration", "$description": "Duración de la transición de entrada (opacity + transform)" },
+      "stagger-delay":      { "$value": "60ms",  "$type": "duration", "$description": "Delay incremental por índice: style={{ transitionDelay: `${idx * 60}ms` }}" }
     },
     "brands-section": {
-      "$description": "Inter-sección 'He trabajado con' entre proyectos y blog. Gradiente interno para volumen. CSS: .brands-section, .brands-label, .brands-gallery. Admin: /admin → tab Marcas",
-      "padding-x":     { "$value": "48px",   "$type": "dimension" },
-      "padding-y":     { "$value": "40px 44px", "$type": "dimension", "$description": "top 40px / bottom 44px" },
-      "label-size":    { "$value": "13px",   "$type": "dimension", "$description": "Body M — sin uppercase, sin letter-spacing exagerado" },
-      "label-opacity": { "$value": "0.55",   "$type": "number" },
-      "gallery-gap":   { "$value": "24px 64px", "$type": "dimension", "$description": "row 24px / column 64px" },
-      "bg-light":      { "$value": "linear-gradient(#d8deec 0% 26%, #e6ebf3 100%)", "$type": "color", "$description": "Gradiente de más oscuro arriba a base abajo — volumen visual" },
-      "bg-dark":       { "$value": "linear-gradient(to bottom, #060e1c 0%, #090f1e 100%)", "$type": "color" }
+      "$description": "Inter-sección 'Han confiado en mí' entre proyectos y blog. Grid auto-fill que escala de 6 a 12 logos sin cambios de código. Entrada con IntersectionObserver + stagger. CSS: .brands-section, .brands-label-wrap, .brands-label, .brands-label-line, .brands-gallery, .brand-item. Admin: /admin → tab Marcas. Docs: docs/brands-section.md",
+      "padding-y-top":      { "$value": "56px",  "$type": "dimension" },
+      "padding-y-bottom":   { "$value": "64px",  "$type": "dimension" },
+      "padding-section-x":  { "$value": "0",     "$type": "dimension", "$description": "La sección no tiene padding horizontal — label y gallery tienen su propio padding" },
+      "padding-gallery-x":  { "$value": "48px",  "$type": "dimension", "$description": "Padding horizontal del label-wrap y de .brands-gallery" },
+      "label-size":         { "$value": "11px",  "$type": "dimension", "$description": "Label XS — mismo scale que etiquetas de categoría" },
+      "label-weight":       { "$value": "600",   "$type": "number" },
+      "label-tracking":     { "$value": "0.12em","$type": "string" },
+      "label-transform":    { "$value": "uppercase", "$type": "string" },
+      "label-opacity":      { "$value": "0.55",  "$type": "number" },
+      "label-line-max-width": { "$value": "64px","$type": "dimension", "$description": "Longitud máxima de las líneas decorativas" },
+      "label-line-opacity": { "$value": "0.22",  "$type": "number" },
+      "label-margin-bottom":{ "$value": "44px",  "$type": "dimension" },
+      "gallery-max-width":  { "$value": "1000px","$type": "dimension" },
+      "gallery-columns":    { "$value": "repeat(auto-fill, minmax(130px, 1fr))", "$type": "string", "$description": "6 cols a ≥780px, escala sola al crecer" },
+      "gallery-gap":        { "$value": "24px 16px", "$type": "dimension", "$description": "row 24px / column 16px" },
+      "bg-light":           { "$value": "linear-gradient(#d8deec 0% 26%, #e6ebf3 100%)", "$type": "color" },
+      "bg-dark":            { "$value": "linear-gradient(#03070e 0%, #060b16 100%)", "$type": "color" },
+      "entrance-threshold": { "$value": "0.12",  "$type": "number", "$description": "IntersectionObserver threshold — 12% visible dispara la animación" },
+      "entrance-class":     { "$value": "brands-section--visible", "$type": "string", "$description": "Clase que se añade al <section> al entrar en viewport; activa transiciones en hijos" }
+    },
+    "blog-preview-section": {
+      "$description": "Sección preview del blog en el home (últimas entradas). Aparece bajo brands-section. Los gradientes dark conectan visualmente: brands termina en #060b16 y blog empieza en #0c1325. CSS: .blog-preview-section, .dark .blog-preview-section",
+      "bg-light": { "$value": "linear-gradient(#f0f4fb 0%, #f0f4fb 100%)", "$type": "color" },
+      "bg-dark":  { "$value": "linear-gradient(#0c1325 0%, #07090e 100%)", "$type": "color", "$description": "Conecta con brands-end para transición suave entre secciones dark" }
+    },
+    "section-eyebrow-label": {
+      "$description": "Patrón editorial de etiqueta de sección con líneas decorativas horizontales a los lados. Actual uso: BrandsSection. Patrón reutilizable para cualquier sección que necesite un encabezado discreto centrado. HTML: <div class='brands-label-wrap'><div class='brands-label-line'/><p class='brands-label'>TEXTO</p><div class='brands-label-line'/></div>. Regla de uso: solo para secciones de soporte (inter-secciones, social proof). Para secciones primarias usar heading jerárquico.",
+      "font-size":     { "$value": "{primitive.fontSize.xs}", "$type": "dimension", "$description": "11px — Label XS" },
+      "font-weight":   { "$value": "600", "$type": "number" },
+      "letter-spacing":{ "$value": "{primitive.letterSpacing.widest}", "$type": "string", "$description": "0.12em" },
+      "text-transform":{ "$value": "uppercase", "$type": "string" },
+      "color":         { "$value": "{semantic.color.txt2}", "$type": "color" },
+      "opacity":       { "$value": "0.55", "$type": "number" },
+      "line-max-width":{ "$value": "64px", "$type": "dimension" },
+      "line-height":   { "$value": "1px",  "$type": "dimension" },
+      "line-color":    { "$value": "{semantic.color.txt2}", "$type": "color" },
+      "line-opacity":  { "$value": "0.22", "$type": "number" },
+      "gap":           { "$value": "16px", "$type": "dimension", "$description": "Gap entre línea y texto" },
+      "margin-bottom": { "$value": "44px", "$type": "dimension" }
+    },
+    "stagger-entrance": {
+      "$description": "Patrón de animación de entrada escalonada para colecciones de items. Implementación: (1) Añadir ref al contenedor <section>, (2) IntersectionObserver con threshold 0.12 añade clase '--visible' al contenedor, (3) CSS define transición en items con opacity 0 → target + translateY 0→10px, (4) cada item recibe style={{ transitionDelay: `${idx * 60}ms` }} inline. Actual uso: BrandsSection. Regla: usar solo en colecciones ≤12 items para que el stagger total (≤720ms) no sea percibido como lentitud. Para listas largas usar fade global sin stagger.",
+      "io-threshold":    { "$value": "0.12", "$type": "number" },
+      "translate-y-start":{ "$value": "10px","$type": "dimension" },
+      "opacity-start":   { "$value": "0",   "$type": "number" },
+      "duration":        { "$value": "0.55s","$type": "duration" },
+      "easing":          { "$value": "ease-out", "$type": "string" },
+      "delay-per-item":  { "$value": "60ms", "$type": "duration", "$description": "6 items → 300ms total stagger. 12 items → 660ms — límite recomendado" },
+      "visible-class-pattern": { "$value": "{component}--visible", "$type": "string", "$description": "El sufijo --visible se añade al elemento raíz. CSS: .component--visible .item { opacity: target; transform: none; }" }
     },
     "blog-card": {
       "$description": "Tarjeta de entrada de blog. Usada en /blog (grid) y BrandsSection preview. CSS: .blog-card, .blog-card-img, .blog-card-body, .blog-card-cat, .blog-card-title, .blog-card-excerpt, .blog-card-meta",
