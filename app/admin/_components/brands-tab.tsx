@@ -25,15 +25,18 @@ function makeSlot(): Slot {
   return { key: String(Date.now() + Math.random()), light: "", dark: "", upL: false, upD: false }
 }
 
-async function uploadImage(file: File): Promise<string> {
-  const fd = new FormData()
-  fd.append("file", file)
-  const res = await fetch("/api/admin/upload", { method: "POST", body: fd })
-  if (!res.ok) {
-    const d = await res.json().catch(() => ({}))
-    throw new Error(d.error || "Error al subir")
+const MAX_FILE_SIZE = 600 * 1024 // 600 KB
+
+function fileToDataUrl(file: File): Promise<string> {
+  if (file.size > MAX_FILE_SIZE) {
+    return Promise.reject(new Error(`El archivo supera el límite de 600 KB (${(file.size / 1024).toFixed(0)} KB)`))
   }
-  return (await res.json()).url
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload  = () => resolve(reader.result as string)
+    reader.onerror = () => reject(new Error("No se pudo leer el archivo"))
+    reader.readAsDataURL(file)
+  })
 }
 
 function UploadZone({
@@ -62,7 +65,7 @@ function UploadZone({
       <input
         ref={ref}
         type="file"
-        accept=".svg,.png,.webp,image/svg+xml,image/png,image/webp"
+        accept=".svg,.png,.webp,.jpg,.jpeg,image/svg+xml,image/png,image/webp,image/jpeg"
         style={{ display: "none" }}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ""
@@ -105,7 +108,7 @@ function UploadZone({
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ margin: "0 auto 4px", display: "block" }}>
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
               </svg>
-              <div style={{ fontSize: 12 }}>SVG · PNG · WebP</div>
+              <div style={{ fontSize: 12 }}>SVG · PNG · WebP · JPG</div>
             </div>
           )}
         </div>
@@ -136,7 +139,7 @@ export default function BrandsTab({ onToast }: Props) {
   async function handleUpload(key: string, file: File, v: "light" | "dark") {
     patchSlot(key, v === "light" ? { upL: true } : { upD: true })
     try {
-      const url = await uploadImage(file)
+      const url = await fileToDataUrl(file)
       patchSlot(key, v === "light" ? { light: url } : { dark: url })
     } catch (e) {
       onToast(e instanceof Error ? e.message : "Error al subir", "error")
@@ -258,7 +261,7 @@ export default function BrandsTab({ onToast }: Props) {
         </div>
 
         <div className="admin-input-hint" style={{ marginTop: 14, marginBottom: 14 }}>
-          Si subes solo una versión se usará para ambos modos. SVG con fondo transparente recomendado.
+          Si subes solo una versión se usará para ambos modos. SVG recomendado · máx. 600 KB por archivo.
         </div>
         <button
           className="btn-p"
