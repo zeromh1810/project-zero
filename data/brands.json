@@ -1,3 +1,9 @@
 {
-  "brands": []
+  "brands": [
+    {
+      "id": "1780347705765",
+      "lightLogo": "/uploads/1780347694305-cqzq4g.svg",
+      "darkLogo": "/uploads/1780347702767-6vd0bv.svg"
+    }
+  ]
 }
