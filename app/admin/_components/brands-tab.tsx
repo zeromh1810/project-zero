@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, ChangeEvent, useCallback } from "react"
+import { useState, useEffect, useRef, ChangeEvent } from "react"
 import type { ToastType } from "./admin-toast"
 
 interface Brand {
@@ -9,8 +9,20 @@ interface Brand {
   darkLogo: string
 }
 
+interface Slot {
+  key: string
+  light: string
+  dark: string
+  upL: boolean
+  upD: boolean
+}
+
 interface Props {
   onToast: (title: string, type: ToastType, msg?: string) => void
+}
+
+function makeSlot(): Slot {
+  return { key: String(Date.now() + Math.random()), light: "", dark: "", upL: false, upD: false }
 }
 
 async function uploadImage(file: File): Promise<string> {
@@ -103,19 +115,11 @@ function UploadZone({
 }
 
 export default function BrandsTab({ onToast }: Props) {
-  const [brands,    setBrands]    = useState<Brand[]>([])
-  const [light,     setLight]     = useState("")
-  const [dark,      setDark]      = useState("")
-  const [upL,       setUpL]       = useState(false)
-  const [upD,       setUpD]       = useState(false)
-  const [adding,    setAdding]    = useState(false)
-  const [loading,   setLoading]   = useState(true)
-  const [deleting,  setDeleting]  = useState<string | null>(null)
-  const addCardRef = useRef<HTMLDivElement>(null)
-
-  const scrollToAdd = useCallback(() => {
-    addCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-  }, [])
+  const [brands,   setBrands]  = useState<Brand[]>([])
+  const [slots,    setSlots]   = useState<Slot[]>([makeSlot()])
+  const [adding,   setAdding]  = useState(false)
+  const [loading,  setLoading] = useState(true)
+  const [deleting, setDeleting] = useState<string | null>(null)
 
   useEffect(() => {
     fetch("/api/admin/brands", { cache: "no-store" })
@@ -125,32 +129,47 @@ export default function BrandsTab({ onToast }: Props) {
       .finally(() => setLoading(false))
   }, [])
 
-  async function handleUpload(file: File, v: "light" | "dark") {
-    v === "light" ? setUpL(true) : setUpD(true)
+  function patchSlot(key: string, patch: Partial<Slot>) {
+    setSlots(prev => prev.map(s => s.key === key ? { ...s, ...patch } : s))
+  }
+
+  async function handleUpload(key: string, file: File, v: "light" | "dark") {
+    patchSlot(key, v === "light" ? { upL: true } : { upD: true })
     try {
       const url = await uploadImage(file)
-      v === "light" ? setLight(url) : setDark(url)
+      patchSlot(key, v === "light" ? { light: url } : { dark: url })
     } catch (e) {
       onToast(e instanceof Error ? e.message : "Error al subir", "error")
     } finally {
-      v === "light" ? setUpL(false) : setUpD(false)
+      patchSlot(key, v === "light" ? { upL: false } : { upD: false })
     }
   }
 
+  function removeSlot(key: string) {
+    setSlots(prev => prev.length > 1 ? prev.filter(s => s.key !== key) : prev)
+  }
+
+  const anyBusy = slots.some(s => s.upL || s.upD)
+  const anyFilled = slots.some(s => s.light || s.dark)
+
   async function handleAdd() {
-    if (!light && !dark) { onToast("Sube al menos un logo", "warning"); return }
+    const filled = slots.filter(s => s.light || s.dark)
+    if (!filled.length) { onToast("Sube al menos un logo", "warning"); return }
     setAdding(true)
     try {
-      const res = await fetch("/api/admin/brands", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lightLogo: light, darkLogo: dark }),
-      })
-      if (!res.ok) { const d = await res.json(); throw new Error(d.error) }
-      const brand = await res.json()
-      setBrands(prev => [...prev, brand])
-      setLight(""); setDark("")
-      onToast("Marca agregada", "success")
+      const added: Brand[] = []
+      for (const s of filled) {
+        const res = await fetch("/api/admin/brands", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lightLogo: s.light, darkLogo: s.dark }),
+        })
+        if (!res.ok) { const d = await res.json(); throw new Error(d.error) }
+        added.push(await res.json())
+      }
+      setBrands(prev => [...prev, ...added])
+      setSlots([makeSlot()])
+      onToast(added.length === 1 ? "Marca agregada" : `${added.length} marcas agregadas`, "success")
     } catch (e) {
       onToast(e instanceof Error ? e.message : "Error al guardar", "error")
     } finally {
@@ -182,47 +201,11 @@ export default function BrandsTab({ onToast }: Props) {
       </div>
 
       {/* ── Agregar ── */}
-      <div ref={addCardRef} className="admin-card" style={{ marginBottom: 16 }}>
-        <div className="admin-card-title">Agregar logo</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-          <UploadZone
-            label="Versión modo claro"
-            bg={{ background: "rgba(248,248,248,0.95)", border: "1.5px solid rgba(0,0,0,0.08)" }}
-            url={light} uploading={upL}
-            onFile={f => handleUpload(f, "light")}
-            onRemove={() => setLight("")}
-          />
-          <UploadZone
-            label="Versión modo oscuro"
-            bg={{ background: "rgba(10,10,10,0.92)", border: "1.5px solid rgba(255,255,255,0.08)" }}
-            url={dark} uploading={upD}
-            onFile={f => handleUpload(f, "dark")}
-            onRemove={() => setDark("")}
-          />
-        </div>
-        <div className="admin-input-hint" style={{ marginBottom: 14 }}>
-          Si subes solo una versión se usará para ambos modos. SVG con fondo transparente recomendado.
-        </div>
-        <button
-          className="btn-p"
-          onClick={handleAdd}
-          disabled={adding || upL || upD || (!light && !dark)}
-        >
-          {adding ? "Guardando…" : "Agregar al slider"}
-        </button>
-      </div>
-
-      {/* ── Lista ── */}
-      <div className="admin-card">
-        <div className="admin-card-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span>
-            Logos en el slider
-            <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 500, color: "var(--txt3)" }}>
-              ({brands.length})
-            </span>
-          </span>
+      <div className="admin-card" style={{ marginBottom: 16 }}>
+        <div className="admin-card-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <span>Agregar logos</span>
           <button
-            onClick={scrollToAdd}
+            onClick={() => setSlots(prev => [...prev, makeSlot()])}
             style={{
               display: "flex", alignItems: "center", gap: 5,
               padding: "5px 12px", borderRadius: 7, border: "none",
@@ -233,8 +216,66 @@ export default function BrandsTab({ onToast }: Props) {
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            Agregar logo
+            Agregar otro logo
           </button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {slots.map((slot, idx) => (
+            <div key={slot.key}>
+              {slots.length > 1 && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--txt3)" }}>Logo #{idx + 1}</span>
+                  <button
+                    onClick={() => removeSlot(slot.key)}
+                    style={{ padding: "3px 10px", borderRadius: 6, border: "none", background: "rgba(239,68,68,0.1)", color: "#ef4444", fontSize: 11, fontWeight: 600, cursor: "pointer" }}
+                  >
+                    Quitar
+                  </button>
+                </div>
+              )}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <UploadZone
+                  label="Versión modo claro"
+                  bg={{ background: "rgba(248,248,248,0.95)", border: "1.5px solid rgba(0,0,0,0.08)" }}
+                  url={slot.light} uploading={slot.upL}
+                  onFile={f => handleUpload(slot.key, f, "light")}
+                  onRemove={() => patchSlot(slot.key, { light: "" })}
+                />
+                <UploadZone
+                  label="Versión modo oscuro"
+                  bg={{ background: "rgba(10,10,10,0.92)", border: "1.5px solid rgba(255,255,255,0.08)" }}
+                  url={slot.dark} uploading={slot.upD}
+                  onFile={f => handleUpload(slot.key, f, "dark")}
+                  onRemove={() => patchSlot(slot.key, { dark: "" })}
+                />
+              </div>
+              {idx < slots.length - 1 && (
+                <div style={{ height: 1, background: "var(--border)", marginTop: 16 }} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="admin-input-hint" style={{ marginTop: 14, marginBottom: 14 }}>
+          Si subes solo una versión se usará para ambos modos. SVG con fondo transparente recomendado.
+        </div>
+        <button
+          className="btn-p"
+          onClick={handleAdd}
+          disabled={adding || anyBusy || !anyFilled}
+        >
+          {adding ? "Guardando…" : slots.filter(s => s.light || s.dark).length > 1 ? `Agregar ${slots.filter(s => s.light || s.dark).length} logos al slider` : "Agregar al slider"}
+        </button>
+      </div>
+
+      {/* ── Lista ── */}
+      <div className="admin-card">
+        <div className="admin-card-title">
+          Logos en el slider
+          <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 500, color: "var(--txt3)" }}>
+            ({brands.length})
+          </span>
         </div>
 
         {loading ? (
