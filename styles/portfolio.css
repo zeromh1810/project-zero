@@ -2073,70 +2073,128 @@ html {
   opacity: 0.7;
 }
 
-/* ── BRANDS INTER-SECTION — puente visual entre proyectos y blog ── */
+/* ── BRANDS INTER-SECTION — grid estático ── */
 .brands-section {
-  padding: 40px 48px 44px;
+  padding: 56px 0 64px;
   position: relative;
   background: linear-gradient(#d8deec 0% 26%, #e6ebf3 100%);
 }
 
 .dark .brands-section {
-  background: linear-gradient(to bottom, #060e1c 0%, #090f1e 100%);
+  background: linear-gradient(#03070e 0%, #060b16 100%);
+}
+
+/* Label editorial con líneas decorativas */
+.brands-label-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 44px;
+  padding: 0 48px;
+}
+
+.brands-label-line {
+  flex: 1;
+  max-width: 64px;
+  height: 1px;
+  background: var(--txt2);
+  opacity: 0.22;
 }
 
 .brands-label {
-  text-align: center;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   font-family: var(--portfolio-font);
   color: var(--txt2);
   opacity: 0.55;
-  margin-bottom: 28px;
+  margin: 0;
+  white-space: nowrap;
 }
 
+/* Grid de logos — auto-fill para escalar de 6 a 12 sin cambios */
 .brands-gallery {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 24px 64px;
-  max-width: 960px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 24px 16px;
+  max-width: 920px;
   margin: 0 auto;
+  padding: 0 48px;
 }
 
-/* Bounding box estandarizado — cualquier logo ocupa el mismo espacio visual */
+/* Cada logo: entra desde abajo con stagger vía JS (transition-delay inline) */
 .brand-item {
-  width: 148px;
-  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.50;
+  height: 56px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.55s ease-out, transform 0.55s ease-out;
   user-select: none;
-  pointer-events: none;
-  flex-shrink: 0;
+  cursor: default;
+}
+
+.brands-section--visible .brand-item {
+  opacity: 0.38;
+  transform: translateY(0);
+}
+
+.brands-section--visible .brand-item:hover {
+  opacity: 0.86;
+  transform: translateY(0) scale(1.06);
+  transition-duration: 0.22s;
 }
 
 .brand-item img {
-  max-width: 180px;
-  max-height: 100%;
+  max-width: 110px;
+  max-height: 34px;
   width: auto;
   height: auto;
   object-fit: contain;
   display: block;
   -webkit-user-drag: none;
+  pointer-events: none;
+  filter: grayscale(20%);
+  transition: filter 0.22s ease;
+}
+
+.brands-section--visible .brand-item:hover img {
+  filter: grayscale(0%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-item {
+    opacity: 0.38;
+    transform: none;
+    transition: opacity 0.2s ease;
+  }
+  .brands-section--visible .brand-item:hover {
+    transform: none;
+  }
 }
 
 @media (max-width: 640px) {
   .brands-section {
-    padding: 32px 24px 36px;
+    padding: 40px 0 48px;
+  }
+  .brands-label-wrap {
+    padding: 0 24px;
+    margin-bottom: 32px;
   }
   .brands-gallery {
-    gap: 20px 40px;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0 24px;
+    gap: 20px 12px;
   }
   .brand-item {
-    width: 112px;
-    height: 38px;
+    height: 46px;
+  }
+  .brand-item img {
+    max-width: 84px;
+    max-height: 28px;
   }
 }
 
@@ -2437,6 +2495,10 @@ html {
 /* ── Blog preview (home section) ── */
 .blog-preview-section {
   background: linear-gradient(rgb(240, 244, 251) 0%, #f0f4fb 100%);
+}
+
+.dark .blog-preview-section {
+  background: linear-gradient(#0c1325 0%, #07090e 100%);
 }
 
 .blog-preview-head {

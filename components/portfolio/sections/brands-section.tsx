@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useTheme } from "@/lib/context/theme-context"
 
 interface Brand {
@@ -12,6 +12,7 @@ interface Brand {
 export function BrandsSection() {
   const { isDark } = useTheme()
   const [brands, setBrands] = useState<Brand[]>([])
+  const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     fetch("/api/admin/brands", { cache: "no-store" })
@@ -20,18 +21,42 @@ export function BrandsSection() {
       .catch(() => {})
   }, [])
 
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el || !brands.length) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("brands-section--visible")
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.12 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [brands])
+
   if (!brands.length) return null
 
   return (
-    <section className="brands-section">
-      <p className="brands-label">Han confiado en mí</p>
+    <section ref={sectionRef} className="brands-section">
+      <div className="brands-label-wrap">
+        <div className="brands-label-line" />
+        <p className="brands-label">Han confiado en mí</p>
+        <div className="brands-label-line" />
+      </div>
       <div className="brands-gallery">
-        {brands.map(brand => {
+        {brands.map((brand, idx) => {
           const logo = isDark
             ? (brand.darkLogo  || brand.lightLogo)
             : (brand.lightLogo || brand.darkLogo)
           return (
-            <div key={brand.id} className="brand-item">
+            <div
+              key={brand.id}
+              className="brand-item"
+              style={{ transitionDelay: `${idx * 60}ms` }}
+            >
               <img src={logo} alt="" draggable={false} />
             </div>
           )
