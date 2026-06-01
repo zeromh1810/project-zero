@@ -2119,7 +2119,7 @@ html {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 24px 16px;
-  max-width: 920px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 0 48px;
 }
