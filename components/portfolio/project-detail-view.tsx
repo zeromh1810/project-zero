@@ -45,7 +45,7 @@ export function ProjectDetailView({
   const logoUrl = isDark
     ? (logo.darkUrl || logo.lightUrl)
     : (logo.lightUrl || logo.darkUrl)
-  const logoText = logo.fallbackText || "A·Studio"
+  const logoText = logo.fallbackText || "Project Zero"
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 50)

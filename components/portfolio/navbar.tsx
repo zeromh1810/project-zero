@@ -32,7 +32,7 @@ export function Navbar({ currentSection, onNavigate, onProfileClick }: NavbarPro
   )
 
   const logoUrl  = isDark ? (logo.darkUrl || logo.lightUrl) : (logo.lightUrl || logo.darkUrl)
-  const logoText = logo.fallbackText || "A·Studio"
+  const logoText = logo.fallbackText || "Project Zero"
 
   // Sync activeKey when section changes from outside
   useEffect(() => {

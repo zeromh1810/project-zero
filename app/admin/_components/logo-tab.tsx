@@ -278,7 +278,7 @@ export default function LogoTab({ onToast }: Props) {
               className="admin-input"
               value={form.fallbackText}
               onChange={e => setForm(prev => ({ ...prev, fallbackText: e.target.value }))}
-              placeholder="A·Studio"
+              placeholder="Project Zero"
               maxLength={40}
             />
           </div>
@@ -299,7 +299,7 @@ export default function LogoTab({ onToast }: Props) {
             whiteSpace: "nowrap",
           }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--accent)", display: "inline-block", flexShrink: 0 }} />
-            {form.fallbackText || "A·Studio"}
+            {form.fallbackText || "Project Zero"}
           </div>
         </div>
         <div className="admin-input-hint" style={{ marginTop: 8 }}>
@@ -372,7 +372,7 @@ export default function LogoTab({ onToast }: Props) {
                   ) : (
                     <span style={{ fontFamily: "var(--portfolio-heading-font)", fontWeight: 700, fontSize: 14, color: "#1d1d1f", display: "flex", alignItems: "center", gap: 6 }}>
                       <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", display: "inline-block" }} />
-                      {form.fallbackText || "A·Studio"}
+                      {form.fallbackText || "Project Zero"}
                     </span>
                   )}
                 </div>
@@ -407,7 +407,7 @@ export default function LogoTab({ onToast }: Props) {
                   ) : (
                     <span style={{ fontFamily: "var(--portfolio-heading-font)", fontWeight: 700, fontSize: 14, color: "#f5f5f7", display: "flex", alignItems: "center", gap: 6 }}>
                       <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", display: "inline-block" }} />
-                      {form.fallbackText || "A·Studio"}
+                      {form.fallbackText || "Project Zero"}
                     </span>
                   )}
                 </div>
@@ -430,7 +430,7 @@ export default function LogoTab({ onToast }: Props) {
             Sin logo SVG subido
           </div>
           <div style={{ fontSize: 13, color: "var(--txt3)" }}>
-            La navbar mostrará el texto "{form.fallbackText || "A·Studio"}" como identidad visual.
+            La navbar mostrará el texto "{form.fallbackText || "Project Zero"}" como identidad visual.
           </div>
         </div>
       )}

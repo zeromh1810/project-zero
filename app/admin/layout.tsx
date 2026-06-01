@@ -5,7 +5,7 @@ import "@/assets/design-tokens.css"
 import "./admin.css"
 
 export const metadata: Metadata = {
-  title: "Admin — A·Studio",
+  title: "Admin - Project Zero",
   robots: { index: false, follow: false },
 }
 

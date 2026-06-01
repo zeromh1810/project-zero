@@ -607,7 +607,7 @@ function PageNavigation() {
           borderRadius: 14, border: "1px solid var(--border)", width: "100%",
           boxSizing: "border-box", fontFamily: "var(--portfolio-font)"
         }}>
-          <div style={{ fontFamily: "var(--portfolio-heading-font)", fontWeight: 700, fontSize: 14, letterSpacing: "-0.03em", color: "var(--txt)" }}>A·Studio</div>
+          <div style={{ fontFamily: "var(--portfolio-heading-font)", fontWeight: 700, fontSize: 14, letterSpacing: "-0.03em", color: "var(--txt)" }}>Project Zero</div>
           <div style={{ display: "flex", gap: 4, position: "relative" }}>
             {(["trabajos", "sobre", "cv", "contacto"] as const).map(key => (
               <button key={key} onClick={() => setActiveTab(key)} style={{

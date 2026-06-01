@@ -26,7 +26,7 @@ export function BlogNavbar() {
   const [pillReady, setPillReady] = useState(false)
 
   const logoUrl  = isDark ? (logo.darkUrl || logo.lightUrl) : (logo.lightUrl || logo.darkUrl)
-  const logoText = logo.fallbackText || "A·Studio"
+  const logoText = logo.fallbackText || "Project Zero"
 
   // Animate pill to active item
   useEffect(() => {

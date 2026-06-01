@@ -95,7 +95,7 @@ function PortfolioNavbar({ currentSection, onNavigate, onProfileClick }: Omit<Po
   const { isDark } = useTheme()
   const logo = useLogo()
   const logoUrl  = isDark ? (logo.darkUrl || logo.lightUrl) : (logo.lightUrl || logo.darkUrl)
-  const logoText = logo.fallbackText || "A·Studio"
+  const logoText = logo.fallbackText || "Project Zero"
 
   const [activeKey, setActiveKey] = useState<string>(
     currentSection === "trabajos" ? "home" : currentSection
@@ -175,7 +175,7 @@ function BlogNavbarInner() {
   const router   = useRouter()
 
   const logoUrl  = isDark ? (logo.darkUrl || logo.lightUrl) : (logo.lightUrl || logo.darkUrl)
-  const logoText = logo.fallbackText || "A·Studio"
+  const logoText = logo.fallbackText || "Project Zero"
 
   const activeKey = pathname.startsWith("/blog") ? "blog" : "home"
   const { navCenterRef, pillRef } = usePill(activeKey)

@@ -1,8 +1,8 @@
-# A·Studio — Brand Guidelines
+# Project Zero — Brand Guidelines
 
 ## Identity
 
-**Studio Name:** A·Studio  
+**Studio Name:** Project Zero  
 **Author:** Alejandro Silva  
 **Role:** Product Designer & Frontend Developer  
 **Location:** Santiago, Chile  

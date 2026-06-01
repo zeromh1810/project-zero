@@ -4,7 +4,7 @@ import "@/assets/design-tokens.css"
 import "@/styles/portfolio.css"
 
 export const metadata: Metadata = {
-  title: "Blog — A·Studio",
+  title: "Blog — Project Zero",
   description: "Perspectivas sobre diseño de producto, UX y desarrollo frontend.",
 }
 

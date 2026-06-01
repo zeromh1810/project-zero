@@ -123,7 +123,7 @@ export default function AdminPage() {
         <div className="admin-login-card">
           <div className="admin-login-logo">
             <span className="admin-login-dot" />
-            A·Studio
+            Project Zero
           </div>
           <div className="admin-login-sub">Panel de administración</div>
 
@@ -171,7 +171,7 @@ export default function AdminPage() {
           ) : (
             <>
               <span className="nav-logo-dot" />
-              {logo.fallbackText || "A·Studio"}
+              {logo.fallbackText || "Project Zero"}
             </>
           )}
           <span className="admin-nav-badge">Admin</span>
