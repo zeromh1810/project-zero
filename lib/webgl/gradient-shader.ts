@@ -210,9 +210,10 @@ const FRAGMENT_SHADER = `precision mediump float;
     float totalW    = abs(rv0) + abs(rv1) + abs(rv2) + abs(rv3) + 0.001;
     vec3  tintBlend = (rTint0*abs(rv0) + rTint1*abs(rv1)
                      + rTint2*abs(rv2) + rTint3*abs(rv3)) / totalW;
-    vec3  baseCrest = dark > .5 ? vec3(0.38, 0.62, 1.0) : vec3(0.08, 0.22, 0.68);
-    col += mix(baseCrest, tintBlend, 0.45) * rippleCrest  * 0.26;
-    col -= vec3(0.05, 0.07, 0.10)          * rippleTrough * 0.14;
+    vec3  baseCrest = dark > .5 ? vec3(0.38, 0.62, 1.0) : vec3(0.02, 0.12, 0.80);
+    float rippleAmp = dark > .5 ? 0.26 : 0.88;
+    col += mix(baseCrest, tintBlend, 0.45) * rippleCrest  * rippleAmp;
+    col -= vec3(0.05, 0.07, 0.10)          * rippleTrough * (dark > .5 ? 0.14 : 0.42);
 
     // [4] Idle breathing + luminous nodes
     col *= (1.0 + sin(t * 1.22) * 0.055 * idleGlow);
@@ -229,8 +230,8 @@ const FRAGMENT_SHADER = `precision mediump float;
     float base_alpha = dark > .5 ? 0.82 : 0.50;
     float alpha = base_alpha * (0.5 + 0.5*vig);
     alpha += mouseGlow    * 0.10;
-    alpha += rippleCrest  * 0.07;
-    alpha -= rippleTrough * 0.03;
+    alpha += rippleCrest  * (dark > .5 ? 0.07 : 0.26);
+    alpha -= rippleTrough * (dark > .5 ? 0.03 : 0.12);
     alpha += aurVal       * (dark > .5 ? 0.04 : 0.02);
     alpha += ng0 * 0.07   + ng1 * 0.05;
 
@@ -340,8 +341,13 @@ export function buildGradientGL(
   let prevMouseX = 0.5, prevMouseY = 0.5, prevMoveTime = 0
   let velX = 0, velY = 0
   let lastMoveTime = 0, mouseActive = 0
-  let lastInteractionTime = 0
+  let lastInteractionTime = performance.now() // inicia en now para no disparar al cargar
   const MOUSE_FADE = 3000
+
+  // Auto-ripple en idle
+  const AUTO_RIPPLE_DELAY    = 2000 // ms sin actividad antes del primer ripple
+  const AUTO_RIPPLE_INTERVAL = 2000 // ms entre ripples automáticos
+  let lastAutoRipple = 0
 
   // [4] Idle glow
   let idleGlowSmoothed = 0
@@ -445,6 +451,15 @@ export function buildGradientGL(
 
     const timeSinceMove = ts - lastMoveTime
     mouseActive = Math.max(0, 1 - timeSinceMove / MOUSE_FADE)
+
+    // Auto-ripple: cada AUTO_RIPPLE_INTERVAL ms sin actividad del usuario
+    if (
+      ts - lastInteractionTime > AUTO_RIPPLE_DELAY &&
+      ts - lastAutoRipple    > AUTO_RIPPLE_INTERVAL
+    ) {
+      addRipple(Math.random(), Math.random(), 0.5 + Math.random() * 0.6)
+      lastAutoRipple = ts
+    }
     const mouseTime = Math.min(timeSinceMove * 0.001, 5.0)
 
     // [4] Idle glow — ramp up 3s after last interaction, ramp down on interaction

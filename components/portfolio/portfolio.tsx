@@ -1,15 +1,14 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useIntersection } from "@/hooks/use-intersection"
 import { WebGLCanvas } from "./webgl-canvas"
-import { Navbar } from "./navbar"
+import { AppNavbar, NAV_SESSION_KEY } from "./app-navbar"
 import { BottomNav } from "./bottom-nav"
 import { ProfileModal } from "./profile-modal"
 import { ProjectsSection } from "./sections/projects-section"
 import { AboutSection } from "./sections/about-section"
-import { CVSection } from "./sections/cv-section"
 import { ContactSection } from "./sections/contact-section"
 import { DesignSystemSection } from "./sections/design-system-section"
 import type { Project } from "@/lib/data/projects"
@@ -17,7 +16,7 @@ import { useSocial, type SocialData } from "@/lib/hooks/use-social"
 import { useFooter, type FooterData } from "@/lib/hooks/use-footer"
 import { LinkedInIcon, InstagramIcon, GitHubIcon } from "./icons"
 
-type Section = "trabajos" | "sobre" | "cv" | "contacto" | "design-system"
+type Section = "trabajos" | "sobre" | "contacto" | "design-system"
 
 export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: SocialData; initialFooter?: FooterData }) {
   const router  = useRouter()
@@ -27,7 +26,7 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
   const [displaySection, setDisplaySection] = useState<Section>("trabajos")
   const [transitioning, setTransitioning] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
-  const pageRef = useRef<HTMLDivElement>(null)
+  const pageRef   = useRef<HTMLDivElement>(null)
 
   // Scroll animations
   useIntersection(
@@ -37,6 +36,26 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
     }, []),
     [displaySection]
   )
+
+  // Lee sessionStorage antes del primer paint — sin flash, sin hash en URL
+  useLayoutEffect(() => {
+    const raw = sessionStorage.getItem(NAV_SESSION_KEY)
+    if (!raw) return
+    sessionStorage.removeItem(NAV_SESSION_KEY)
+    try {
+      const { section: target, scroll } = JSON.parse(raw) as { section: Section; scroll?: string }
+      const valid: Section[] = ["trabajos", "sobre", "contacto", "design-system"]
+      if (!valid.includes(target)) return
+      setSection(target)
+      setDisplaySection(target)
+      if (scroll === "projects") {
+        setTimeout(() => {
+          const sheet = document.querySelector(".projects-sheet") as HTMLElement
+          if (sheet) sheet.scrollIntoView({ behavior: "smooth", block: "start" })
+        }, 200)
+      }
+    } catch {}
+  }, [])
 
   // Crossfade transition between sections
   useEffect(() => {
@@ -71,14 +90,17 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
     <>
       <WebGLCanvas />
 
-      <Navbar
+      <AppNavbar
+        mode="portfolio"
         currentSection={section}
         onNavigate={navigateTo}
         onProfileClick={() => setShowProfile(true)}
       />
 
       <div
-        className={`page${transitioning ? " page--exit" : " page--enter"}`}
+        className={`page${transitioning ? " page--exit" : " page--enter"}${
+          displaySection === "sobre" || displaySection === "contacto" ? " page--solid-bg" : ""
+        }`}
         ref={pageRef}
       >
         {displaySection === "trabajos" && (
@@ -92,11 +114,8 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
         {displaySection === "sobre" && (
           <AboutSection
             onNavigateContact={() => navigateTo("contacto")}
-            onNavigateCV={() => navigateTo("cv")}
           />
         )}
-
-        {displaySection === "cv" && <CVSection />}
 
         {displaySection === "contacto" && <ContactSection />}
 

@@ -10,6 +10,7 @@ interface AboutData {
   stats: Stat[]
   badge: string
   available: boolean
+  cvUrl: string
 }
 
 const DEFAULT: AboutData = {
@@ -23,6 +24,7 @@ const DEFAULT: AboutData = {
   ],
   badge: "Disponible para freelance",
   available: true,
+  cvUrl: "",
 }
 
 import type { ToastType } from "./admin-toast"
@@ -169,6 +171,34 @@ export default function AboutTab({ onToast }: Props) {
           </div>
           <div className="admin-input-hint">Presiona Enter o coma para agregar</div>
         </div>
+      </div>
+
+      {/* CV */}
+      <div className="admin-card" style={{ marginBottom: 16 }}>
+        <div className="admin-card-title">Currículum (CV)</div>
+        <div className="admin-field" style={{ marginBottom: 0 }}>
+          <label className="admin-label">Link al archivo PDF del CV</label>
+          <input
+            className="admin-input"
+            value={data.cvUrl}
+            onChange={e => set("cvUrl", e.target.value)}
+            placeholder="https://drive.google.com/... o /cv.pdf"
+            type="url"
+          />
+          <div className="admin-input-hint">
+            El botón "Ver CV" en la sección Sobre mí abrirá este link en una nueva pestaña.
+          </div>
+        </div>
+        {data.cvUrl && (
+          <a
+            href={data.cvUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: "inline-block", marginTop: 10, fontSize: 13, color: "var(--accent)" }}
+          >
+            Previsualizar → {data.cvUrl}
+          </a>
+        )}
       </div>
 
       {/* Badge */}
