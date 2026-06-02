@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Fragment } from "react"
+import { useState, useEffect, Fragment, Suspense } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { AppNavbar } from "@/components/portfolio/app-navbar"
@@ -100,7 +100,7 @@ function BlogCard({ post, onTagClick }: { post: BlogPost; onTagClick: (tag: stri
   )
 }
 
-export default function BlogPage() {
+function BlogPageInner() {
   const searchParams  = useSearchParams()
   const [posts,       setPosts]       = useState<BlogPost[]>([])
   const [category,    setCategory]    = useState("Todos")
@@ -227,5 +227,13 @@ export default function BlogPage() {
 
       </main>
     </div>
+  )
+}
+
+export default function BlogPage() {
+  return (
+    <Suspense fallback={<div className="blog-page"><div className="blog-empty">Cargando…</div></div>}>
+      <BlogPageInner />
+    </Suspense>
   )
 }
