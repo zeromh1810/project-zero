@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useTheme } from "@/lib/context/theme-context"
 import type { Project } from "@/lib/data/projects"
 
@@ -8,12 +9,25 @@ interface ProjectPanelProps {
   onClose: () => void
 }
 
+const EXIT_DURATION = 380
+
 export function ProjectPanel({ project, onClose }: ProjectPanelProps) {
   const { isDark } = useTheme()
+  const [exiting, setExiting] = useState(false)
+
+  const handleClose = () => {
+    setExiting(true)
+    setTimeout(onClose, EXIT_DURATION)
+  }
 
   return (
-    <div className="project-view" role="dialog" aria-modal="true" aria-label={project.title}>
-      <div className="project-view-backdrop" onClick={onClose} />
+    <div
+      className={`project-view${exiting ? " project-view--exiting" : ""}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label={project.title}
+    >
+      <div className="project-view-backdrop" onClick={handleClose} />
       <div className="project-view-panel">
         {/* Hero image */}
         <div className="pv-hero">
@@ -32,7 +46,7 @@ export function ProjectPanel({ project, onClose }: ProjectPanelProps) {
               {project.emoji}
             </span>
           </div>
-          <button className="pv-close" onClick={onClose} aria-label="Cerrar">
+          <button className="pv-close" onClick={handleClose} aria-label="Cerrar">
             ✕
           </button>
         </div>
@@ -86,7 +100,7 @@ export function ProjectPanel({ project, onClose }: ProjectPanelProps) {
           <div className="pv-divider" />
           <div className="pv-actions">
             <button className="btn-p">Ver proyecto live →</button>
-            <button className="btn-g" onClick={onClose}>
+            <button className="btn-g" onClick={handleClose}>
               ← Volver
             </button>
           </div>

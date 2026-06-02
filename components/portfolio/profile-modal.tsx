@@ -1,5 +1,7 @@
 "use client"
 
+import { useState, useEffect } from "react"
+
 interface ProfileModalProps {
   onClose: () => void
   onNavigateContact: () => void
@@ -11,21 +13,42 @@ const SOCIAL_LINKS = [
   { label: "Email",    href: "mailto:c.hickmann86@gmail.com",                target: undefined },
 ]
 
+const EXIT_DURATION = 200
+
 export function ProfileModal({ onClose, onNavigateContact }: ProfileModalProps) {
+  const [exiting, setExiting] = useState(false)
+
+  const handleClose = () => {
+    setExiting(true)
+    setTimeout(onClose, EXIT_DURATION)
+  }
+
+  // Cerrar con ESC también anima la salida
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleClose()
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [])
+
   const handleContact = () => {
-    onClose()
-    onNavigateContact()
+    setExiting(true)
+    setTimeout(() => {
+      onClose()
+      onNavigateContact()
+    }, EXIT_DURATION)
   }
 
   return (
     <div
-      className="overlay"
+      className={`overlay${exiting ? " overlay--exiting" : ""}`}
       role="dialog"
       aria-modal="true"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
       <div className="modal">
-        <button className="modal-x" onClick={onClose} aria-label="Cerrar">
+        <button className="modal-x" onClick={handleClose} aria-label="Cerrar">
           ✕
         </button>
         <div className="m-av">C</div>

@@ -48,10 +48,11 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
       setSection(target)
       setDisplaySection(target)
       if (scroll === "projects") {
+        // 350ms: margen suficiente para hidratación Next.js + render inicial
         setTimeout(() => {
           const sheet = document.querySelector(".projects-sheet") as HTMLElement
           if (sheet) sheet.scrollIntoView({ behavior: "smooth", block: "start" })
-        }, 200)
+        }, 350)
       }
     } catch {}
   }, [])
@@ -85,9 +86,20 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
     setSection(s)
   }
 
+  // Overlay sólido que bloquea el WebGL durante transiciones entre secciones.
+  // Se activa basado en `section` (el target) no en `displaySection` (el actual),
+  // así aparece ANTES de que empiece el exit animation del page div.
+  const needsSolidOverlay = section === "sobre" || section === "contacto"
+
   return (
     <>
       <WebGLCanvas />
+
+      {/* Overlay entre WebGL y page — inmune al opacity del page div */}
+      <div
+        className={`section-bg-overlay${needsSolidOverlay ? " section-bg-overlay--on" : ""}`}
+        aria-hidden="true"
+      />
 
       <AppNavbar
         mode="portfolio"

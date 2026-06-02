@@ -36,8 +36,8 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
   // Pure-transform parallax — no opacity change
   useScrollParallax(wrapRef, 0.35)
 
-  // Blur progresivo al hacer scroll: mismo principio que el CodePen
-  // (filter:blur en el contenido, no backdrop-filter en el panel encima).
+  // ── Blur progresivo en el wrap ────────────────────────────────────────────
+  // filter:blur en el contenido (no backdrop-filter en el panel encima).
   // Empieza al 30% del scroll y alcanza 18px al 90%.
   useEffect(() => {
     const el = wrapRef.current
@@ -50,6 +50,64 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
     }
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
+  // ── Hero content dissolution ────────────────────────────────────────────
+  // Cada elemento del hero sale con timing y dirección distintos:
+  //   CTA     → fade+scale, sale primero  (10%–45% viewport scroll)
+  //   Subtitle → deriva levemente abajo   (20%–55% viewport scroll)
+  //   Title   → asciende hacia arriba     (15%–60% viewport scroll)
+  // Se activa 1.5s post-mount para no conflictuar con las entrance animations.
+  useEffect(() => {
+    const wrap = wrapRef.current
+    if (!wrap) return
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+
+    let active = false
+    const enableTimer = setTimeout(() => { active = true }, 1500)
+
+    const onScroll = () => {
+      if (!active) return
+      const vh = window.innerHeight
+
+      const titleEl = wrap.querySelector<HTMLElement>(".hero-title")
+      const subEl   = wrap.querySelector<HTMLElement>(".hero-sub")
+      const ctaEl   = wrap.querySelector<HTMLElement>(".hero-cta")
+
+      // CTA exits first — sale rápido y pequeño
+      if (ctaEl) {
+        const p = Math.max(0, Math.min(1, (window.scrollY - vh * 0.10) / (vh * 0.35)))
+        ctaEl.style.transform = `translateY(${8 * p}px) scale(${(1 - p * 0.06).toFixed(3)})`
+        ctaEl.style.opacity   = `${Math.max(0, 1 - p * 1.5).toFixed(3)}`
+      }
+
+      // Subtitle drifts down slightly while fading
+      if (subEl) {
+        const p = Math.max(0, Math.min(1, (window.scrollY - vh * 0.20) / (vh * 0.35)))
+        subEl.style.transform = `translateY(${14 * p}px)`
+        subEl.style.opacity   = `${Math.max(0, 1 - p * 1.3).toFixed(3)}`
+      }
+
+      // Title ascends upward — the last to leave, most dramatic
+      if (titleEl) {
+        const p = Math.max(0, Math.min(1, (window.scrollY - vh * 0.15) / (vh * 0.45)))
+        titleEl.style.transform = `translateY(${-36 * p}px)`
+        titleEl.style.opacity   = `${Math.max(0, 1 - p * 0.8).toFixed(3)}`
+      }
+
+      // Reset inline styles when back at top (restores CSS animation fill-mode)
+      if (window.scrollY < vh * 0.08) {
+        if (titleEl) { titleEl.style.transform = ""; titleEl.style.opacity = "" }
+        if (subEl)   { subEl.style.transform   = ""; subEl.style.opacity   = "" }
+        if (ctaEl)   { ctaEl.style.transform   = ""; ctaEl.style.opacity   = "" }
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      clearTimeout(enableTimer)
+      window.removeEventListener("scroll", onScroll)
+    }
   }, [])
 
   // Scroll indicator fades when user starts scrolling

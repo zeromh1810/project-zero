@@ -35,7 +35,8 @@ export function ProjectCard({ project, onClick, variant = "featured", index }: P
     const card = cardRef.current
     if (!card) return
     card.style.transition = "transform 550ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 400ms ease, opacity 0.65s cubic-bezier(0.16,1,0.3,1)"
-    card.style.transform = ""
+    // Restore to the flat CSS state (perspective(1000px) rotateX(0) translateY(0))
+    card.style.transform = "perspective(1000px) rotateX(0deg) translateY(0)"
   }, [])
 
   const num = String(index + 1).padStart(2, "0")
