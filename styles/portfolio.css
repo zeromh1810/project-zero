@@ -70,15 +70,6 @@
   padding: 0;
 }
 
-/* Subtle outline on images for consistent depth across themes */
-img {
-  outline: 1px solid rgba(0, 0, 0, 0.06);
-  outline-offset: -1px;
-}
-
-.dark img {
-  outline-color: rgba(255, 255, 255, 0.06);
-}
 
 html {
   scroll-behavior: smooth;
