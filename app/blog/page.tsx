@@ -1,15 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Fragment } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { AppNavbar } from "@/components/portfolio/app-navbar"
 
 interface BlogPost {
   id: string; slug: string; title: string; content: string
-  image: string; category: string; publishedAt: string; draft: boolean
+  image: string; category: string; tags: string[]; publishedAt: string; draft: boolean
 }
 
 const CATEGORIES = ["Todos", "Diseño", "Desarrollo", "Producto", "UX Research", "Case Study"]
+const POSTS_PER_PAGE = 9
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" })
@@ -20,33 +22,92 @@ function excerpt(content: string, n = 100) {
   return clean.length <= n ? clean : clean.slice(0, n).trimEnd() + "…"
 }
 
-function BlogCard({ post }: { post: BlogPost }) {
+function Paginator({ page, total, onChange }: { page: number; total: number; onChange: (p: number) => void }) {
+  if (total <= 1) return null
+
+  const all = Array.from({ length: total }, (_, i) => i + 1)
+  const near = new Set([1, total, page - 1, page, page + 1].filter(p => p >= 1 && p <= total))
+  const visible = all.filter(p => near.has(p))
+
   return (
-    <Link href={`/blog/${post.slug}`} className="blog-card" style={{ textDecoration: "none" }}>
-      <div className="blog-card-img">
-        {post.image
-          ? <img src={post.image} alt={post.title} />
-          : <div className="blog-card-img-placeholder" />}
-      </div>
-      <div className="blog-card-body">
-        <span className="blog-card-cat">{post.category}</span>
-        <h2 className="blog-card-title">{post.title}</h2>
-        <p className="blog-card-excerpt">{excerpt(post.content)}</p>
-        <div className="blog-card-meta">
+    <nav className="blog-pagination" aria-label="Paginación">
+      <button
+        className="blog-page-btn"
+        onClick={() => onChange(page - 1)}
+        disabled={page === 1}
+        aria-label="Página anterior"
+      >←</button>
+
+      {visible.map((p, i) => {
+        const prev = visible[i - 1]
+        return (
+          <Fragment key={p}>
+            {prev && p - prev > 1 && <span className="blog-page-ellipsis">…</span>}
+            <button
+              className={`blog-page-btn${p === page ? " active" : ""}`}
+              onClick={() => onChange(p)}
+              aria-current={p === page ? "page" : undefined}
+            >{p}</button>
+          </Fragment>
+        )
+      })}
+
+      <button
+        className="blog-page-btn"
+        onClick={() => onChange(page + 1)}
+        disabled={page === total}
+        aria-label="Página siguiente"
+      >→</button>
+    </nav>
+  )
+}
+
+function BlogCard({ post, onTagClick }: { post: BlogPost; onTagClick: (tag: string) => void }) {
+  const tags = post.tags || []
+  return (
+    <article className="blog-card">
+      <Link href={`/blog/${post.slug}`} style={{ textDecoration: "none", display: "contents" }}>
+        <div className="blog-card-img">
+          {post.image
+            ? <img src={post.image} alt={post.title} />
+            : <div className="blog-card-img-placeholder" />}
+        </div>
+        <div className="blog-card-body">
+          <span className="blog-card-cat">{post.category}</span>
+          <h2 className="blog-card-title">{post.title}</h2>
+          <p className="blog-card-excerpt">{excerpt(post.content)}</p>
+        </div>
+      </Link>
+      {/* Tags fuera del Link para que sean clickables independientemente */}
+      {tags.length > 0 && (
+        <div className="blog-tags" style={{ padding: "0 22px" }}>
+          {tags.slice(0, 3).map(tag => (
+            <button
+              key={tag}
+              className="blog-tag"
+              onClick={() => onTagClick(tag)}
+            >#{tag}</button>
+          ))}
+        </div>
+      )}
+      <Link href={`/blog/${post.slug}`} style={{ textDecoration: "none" }}>
+        <div className="blog-card-meta" style={{ margin: "0 22px 22px", paddingTop: 14, borderTop: "1px solid var(--border)" }}>
           <span className="blog-card-date">{formatDate(post.publishedAt)}</span>
           <span className="blog-card-read">Leer entrada →</span>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </article>
   )
 }
 
 export default function BlogPage() {
-
-  const [posts,    setPosts]    = useState<BlogPost[]>([])
-  const [category, setCategory] = useState("Todos")
-  const [search,   setSearch]   = useState("")
-  const [loading,  setLoading]  = useState(true)
+  const searchParams  = useSearchParams()
+  const [posts,       setPosts]       = useState<BlogPost[]>([])
+  const [category,    setCategory]    = useState("Todos")
+  const [search,      setSearch]      = useState("")
+  const [selectedTag, setSelectedTag] = useState<string | null>(searchParams.get("tag"))
+  const [page,        setPage]        = useState(1)
+  const [loading,     setLoading]     = useState(true)
 
   useEffect(() => {
     fetch("/api/admin/blog", { cache: "no-store" })
@@ -56,18 +117,33 @@ export default function BlogPage() {
       .finally(() => setLoading(false))
   }, [])
 
+  // Resetear página al cambiar filtros
+  useEffect(() => { setPage(1) }, [category, search, selectedTag])
+
+  function handleTagClick(tag: string) {
+    setSelectedTag(prev => prev === tag ? null : tag)
+    setCategory("Todos")
+    setSearch("")
+  }
+
   const filtered = posts.filter(p => {
-    const matchCat = category === "Todos" || p.category === category
-    const q = search.toLowerCase()
+    const matchCat    = category === "Todos" || p.category === category
+    const matchTag    = !selectedTag || (p.tags || []).includes(selectedTag)
+    const q           = search.toLowerCase()
     const matchSearch = !q || p.title.toLowerCase().includes(q) || p.content.toLowerCase().includes(q)
-    return matchCat && matchSearch
+    return matchCat && matchTag && matchSearch
   })
+
+  const totalPages = Math.ceil(filtered.length / POSTS_PER_PAGE)
+  const paginated  = filtered.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE)
+
+  // Todos los tags únicos del total de posts (para mostrar como filtros rápidos)
+  const allTags = Array.from(new Set(posts.flatMap(p => p.tags || []))).sort()
 
   return (
     <div className="blog-page">
       <AppNavbar mode="blog" />
 
-      {/* ── Main ── */}
       <main className="blog-main">
 
         {/* Hero */}
@@ -86,34 +162,67 @@ export default function BlogPage() {
             <input
               className="blog-search"
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={e => { setSearch(e.target.value); setSelectedTag(null) }}
               placeholder="Buscar entradas…"
             />
           </div>
+
+          {/* Categorías */}
           <div className="blog-pills">
             {CATEGORIES.map(c => (
               <button
                 key={c}
-                className={`blog-pill${category === c ? " active" : ""}`}
-                onClick={() => setCategory(c)}
+                className={`blog-pill${category === c && !selectedTag ? " active" : ""}`}
+                onClick={() => { setCategory(c); setSelectedTag(null) }}
               >{c}</button>
             ))}
           </div>
+
+          {/* Tags rápidos */}
+          {allTags.length > 0 && (
+            <div className="blog-tags" style={{ marginTop: 4 }}>
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  className={`blog-tag${selectedTag === tag ? " active" : ""}`}
+                  onClick={() => handleTagClick(tag)}
+                >#{tag}</button>
+              ))}
+            </div>
+          )}
         </div>
+
+        {/* Tag activo */}
+        {selectedTag && (
+          <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 13, color: "var(--txt2)" }}>
+              Filtrando por tag:
+            </span>
+            <button
+              className="blog-tag active"
+              onClick={() => setSelectedTag(null)}
+            >#{selectedTag} ×</button>
+          </div>
+        )}
 
         {/* Grid */}
         {loading ? (
           <div className="blog-empty">Cargando…</div>
         ) : filtered.length === 0 ? (
           <div className="blog-empty">
-            {search || category !== "Todos"
+            {search || category !== "Todos" || selectedTag
               ? "No hay entradas que coincidan con tu búsqueda."
               : "Aún no hay entradas publicadas. ¡Pronto!"}
           </div>
         ) : (
-          <div className="blog-grid">
-            {filtered.map(post => <BlogCard key={post.id} post={post} />)}
-          </div>
+          <>
+            <div className="blog-grid">
+              {paginated.map(post => (
+                <BlogCard key={post.id} post={post} onTagClick={handleTagClick} />
+              ))}
+            </div>
+            <Paginator page={page} total={totalPages} onChange={setPage} />
+          </>
         )}
 
       </main>

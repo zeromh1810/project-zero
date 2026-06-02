@@ -14,6 +14,7 @@ export interface BlogPost {
   content: string
   image: string
   category: string
+  tags: string[]
   publishedAt: string
   draft: boolean
 }
@@ -31,6 +32,14 @@ function toSlug(title: string) {
   return title.toLowerCase()
     .normalize("NFD").replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+}
+
+function sanitizeTags(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .filter(t => typeof t === "string" && t.trim())
+    .map(t => t.trim().toLowerCase())
+    .slice(0, 10)
 }
 
 export async function GET(request: Request) {
@@ -66,6 +75,7 @@ export async function POST(request: Request) {
       content: body.content || "",
       image: body.image || "",
       category: body.category || "Diseño",
+      tags: sanitizeTags(body.tags),
       publishedAt: new Date().toISOString(),
       draft: body.draft === true,
     }
@@ -94,6 +104,7 @@ export async function PUT(request: Request) {
       content:  body.content  ?? data.posts[idx].content,
       image:    body.image    ?? data.posts[idx].image,
       category: body.category ?? data.posts[idx].category,
+      tags:     body.tags !== undefined ? sanitizeTags(body.tags) : (data.posts[idx].tags ?? []),
       draft:    body.draft    ?? data.posts[idx].draft,
     }
     write(data)

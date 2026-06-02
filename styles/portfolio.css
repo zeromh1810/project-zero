@@ -2607,7 +2607,37 @@ html {
   line-height: 1.65;
   color: var(--txt2);
   flex: 1;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
+}
+
+/* Tags en blog cards */
+.blog-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.blog-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 980px;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--txt3);
+  background: var(--glass);
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+  text-decoration: none;
+}
+
+.blog-tag:hover,
+.blog-tag.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(41, 151, 255, 0.06);
 }
 
 .blog-card-meta {
@@ -2636,6 +2666,75 @@ html {
   color: var(--txt3);
   font-size: 16px;
   line-height: 1.7;
+}
+
+/* ── Paginador ── */
+.blog-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 48px 0 8px;
+}
+
+.blog-page-btn {
+  min-width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--txt2);
+  font-family: var(--portfolio-font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0 12px;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.blog-page-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(41, 151, 255, 0.05);
+}
+
+.blog-page-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.blog-page-btn:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.blog-page-ellipsis {
+  color: var(--txt3);
+  font-size: 14px;
+  padding: 0 2px;
+  user-select: none;
+}
+
+/* ── Fix alineación meta en post individual ── */
+/* .blog-card-cat tiene margin-bottom:10px útil en cards (columna),
+   pero dentro del flex row de blog-post-meta rompe la alineación vertical */
+.blog-post-meta .blog-card-cat {
+  margin-bottom: 0;
+}
+
+/* Tags en el post individual */
+.blog-post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
 }
 
 /* ── Post page ── */

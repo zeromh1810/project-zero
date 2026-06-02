@@ -1,17 +1,17 @@
 "use client"
 
-import { useState, useEffect, useRef, ChangeEvent } from "react"
+import { useState, useEffect, useRef, ChangeEvent, KeyboardEvent } from "react"
 import type { ToastType } from "./admin-toast"
 
 interface BlogPost {
   id: string; slug: string; title: string; content: string
-  image: string; category: string; publishedAt: string; draft: boolean
+  image: string; category: string; tags: string[]; publishedAt: string; draft: boolean
 }
 
 interface Props { onToast: (title: string, type: ToastType, msg?: string) => void }
 
 const CATEGORIES = ["Diseño", "Desarrollo", "Producto", "UX Research", "Case Study"]
-const EMPTY_FORM = { title: "", content: "", image: "", category: "Diseño", draft: false }
+const EMPTY_FORM = { title: "", content: "", image: "", category: "Diseño", draft: false, tags: [] as string[] }
 
 async function uploadImage(file: File): Promise<string> {
   const fd = new FormData(); fd.append("file", file)
@@ -32,7 +32,8 @@ export default function BlogTab({ onToast }: Props) {
   const [loading,  setLoading]  = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [uploading,setUploading]= useState(false)
-  const imgRef = useRef<HTMLInputElement>(null)
+  const imgRef    = useRef<HTMLInputElement>(null)
+  const tagInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetch("/api/admin/blog", { cache: "no-store" })
@@ -52,9 +53,32 @@ export default function BlogTab({ onToast }: Props) {
     } finally { setUploading(false) }
   }
 
+  function addTag(raw: string) {
+    const tag = raw.trim().toLowerCase().replace(/,+$/, "")
+    if (!tag || form.tags.includes(tag) || form.tags.length >= 10) return
+    setForm(p => ({ ...p, tags: [...p.tags, tag] }))
+  }
+
+  function removeTag(tag: string) {
+    setForm(p => ({ ...p, tags: p.tags.filter(t => t !== tag) }))
+  }
+
+  function handleTagKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault()
+      addTag(e.currentTarget.value)
+      e.currentTarget.value = ""
+    } else if (e.key === "Backspace" && !e.currentTarget.value && form.tags.length) {
+      setForm(p => ({ ...p, tags: p.tags.slice(0, -1) }))
+    }
+  }
+
   function startEdit(post: BlogPost) {
     setEditId(post.id)
-    setForm({ title: post.title, content: post.content, image: post.image, category: post.category, draft: post.draft })
+    setForm({
+      title: post.title, content: post.content, image: post.image,
+      category: post.category, draft: post.draft, tags: post.tags || [],
+    })
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
@@ -143,6 +167,40 @@ export default function BlogTab({ onToast }: Props) {
           </label>
         </div>
 
+        {/* Tags */}
+        <div className="admin-field">
+          <label className="admin-label">
+            Tags
+            <span style={{ fontWeight: 400, marginLeft: 6, color: "var(--txt3)" }}>
+              ({form.tags.length}/10) — Enter o coma para añadir
+            </span>
+          </label>
+          <div
+            className="admin-chips-wrap"
+            onClick={() => tagInputRef.current?.focus()}
+          >
+            {form.tags.map(tag => (
+              <span key={tag} className="admin-chip">
+                {tag}
+                <button
+                  className="admin-chip-x"
+                  onClick={e => { e.stopPropagation(); removeTag(tag) }}
+                  aria-label={`Eliminar tag ${tag}`}
+                >×</button>
+              </span>
+            ))}
+            <input
+              ref={tagInputRef}
+              className="admin-chip-input"
+              placeholder={form.tags.length >= 10 ? "Máx. 10 tags" : "Escribe un tag…"}
+              disabled={form.tags.length >= 10}
+              onKeyDown={handleTagKeyDown}
+              onBlur={e => { if (e.target.value.trim()) { addTag(e.target.value); e.target.value = "" } }}
+            />
+          </div>
+          <div className="admin-input-hint">Los tags mejoran la búsqueda y el filtrado en el blog.</div>
+        </div>
+
         {/* Image */}
         <div className="admin-field">
           <label className="admin-label">Imagen de portada</label>
@@ -215,7 +273,7 @@ export default function BlogTab({ onToast }: Props) {
                 gap: 12, alignItems: "center", padding: "12px 14px",
                 background: editId === post.id ? "rgba(41,151,255,0.06)" : "var(--bg3)",
                 border: `1px solid ${editId === post.id ? "rgba(41,151,255,0.25)" : "var(--border)"}`,
-                borderRadius: 12, transition: "all 150ms ease",
+                borderRadius: 12, transition: "border-color 150ms ease, background 150ms ease",
               }}>
                 {/* Thumb */}
                 <div style={{ width: 64, height: 44, borderRadius: 8, overflow: "hidden", background: "var(--bg)", flexShrink: 0 }}>
@@ -237,9 +295,14 @@ export default function BlogTab({ onToast }: Props) {
                       </span>
                     )}
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--txt3)", display: "flex", gap: 10 }}>
+                  <div style={{ fontSize: 12, color: "var(--txt3)", display: "flex", gap: 10, flexWrap: "wrap" }}>
                     <span>{post.category}</span>
                     <span>{formatDate(post.publishedAt)}</span>
+                    {(post.tags || []).length > 0 && (
+                      <span style={{ color: "var(--accent)" }}>
+                        {post.tags.map(t => `#${t}`).join(" ")}
+                      </span>
+                    )}
                   </div>
                 </div>
                 {/* Actions */}

@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { AppNavbar } from "@/components/portfolio/app-navbar"
 
 interface BlogPost {
   id: string; slug: string; title: string; content: string
-  image: string; category: string; publishedAt: string; draft: boolean
+  image: string; category: string; tags: string[]; publishedAt: string; draft: boolean
 }
 
 function formatDate(iso: string) {
@@ -15,7 +15,8 @@ function formatDate(iso: string) {
 }
 
 export default function BlogPostPage() {
-  const { slug } = useParams<{ slug: string }>()
+  const { slug }  = useParams<{ slug: string }>()
+  const router    = useRouter()
   const [post,    setPost]    = useState<BlogPost | null>(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
@@ -29,6 +30,8 @@ export default function BlogPostPage() {
       .finally(() => setLoading(false))
   }, [slug])
 
+  const tags = post?.tags || []
+
   return (
     <div className="blog-page">
       <AppNavbar mode="blog" />
@@ -38,7 +41,8 @@ export default function BlogPostPage() {
 
         {error && (
           <div className="blog-empty">
-            Entrada no encontrada. <Link href="/blog" style={{ color: "var(--accent)" }}>Volver al blog →</Link>
+            Entrada no encontrada.{" "}
+            <Link href="/blog" style={{ color: "var(--accent)" }}>Volver al blog →</Link>
           </div>
         )}
 
@@ -47,7 +51,7 @@ export default function BlogPostPage() {
             {/* Back */}
             <Link href="/blog" className="blog-post-back">← Volver al blog</Link>
 
-            {/* Meta */}
+            {/* Meta: category + date — alineados en flex, margin-bottom:0 via CSS */}
             <div className="blog-post-meta">
               <span className="blog-card-cat">{post.category}</span>
               <span className="blog-post-date">{formatDate(post.publishedAt)}</span>
@@ -67,6 +71,19 @@ export default function BlogPostPage() {
             <div className="blog-post-content">
               {post.content}
             </div>
+
+            {/* Tags al pie del artículo */}
+            {tags.length > 0 && (
+              <footer className="blog-post-tags" aria-label="Tags">
+                {tags.map(tag => (
+                  <Link
+                    key={tag}
+                    href={`/blog?tag=${encodeURIComponent(tag)}`}
+                    className="blog-tag"
+                  >#{tag}</Link>
+                ))}
+              </footer>
+            )}
           </article>
         )}
       </main>
