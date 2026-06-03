@@ -6,7 +6,7 @@ import { EmailIcon } from "../icons"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type DSPageId =
-  | "overview" | "colors" | "typography" | "darkmode" | "primitivos" | "animaciones"
+  | "overview" | "colors" | "typography" | "darkmode" | "primitivos" | "animaciones" | "breakpoints"
   | "buttons" | "cards" | "forms" | "navigation" | "badges" | "toast" | "patterns" | "brands" | "blog"
 
 const DS_GROUPS: { label: string; items: { id: DSPageId; label: string }[] }[] = [
@@ -18,7 +18,8 @@ const DS_GROUPS: { label: string; items: { id: DSPageId; label: string }[] }[] =
       { id: "typography",  label: "Tipografía" },
       { id: "darkmode",    label: "Modo Oscuro" },
       { id: "primitivos",  label: "Tokens Primitivos" },
-      { id: "animaciones", label: "Animaciones" },
+      { id: "animaciones",  label: "Animaciones" },
+      { id: "breakpoints",  label: "Breakpoints" },
     ],
   },
   {
@@ -92,7 +93,7 @@ function PageOverview() {
   return (
     <div className="ds-page-body">
       <div className="ds-page-header">
-        <div className="ds-page-badge">v1.8.0</div>
+        <div className="ds-page-badge">v1.9.0</div>
         <h2 className="ds-page-title">Project Zero Design System</h2>
         <p className="ds-page-desc">
           Sistema de diseño del portafolio de <strong>Carlos Felipe Rojas Hickmann</strong>. Arquitectura de tokens de 3 capas
@@ -104,7 +105,7 @@ function PageOverview() {
       <div className="ds-overview-grid">
         {[
           { label: "Tokens CSS", value: "120+", desc: "CSS custom properties reales en :root/.dark" },
-          { label: "Páginas DS", value: "15",   desc: "Secciones documentadas en el viewer" },
+          { label: "Páginas DS", value: "16",   desc: "Secciones documentadas en el viewer" },
           { label: "WCAG",       value: "AA",   desc: "Nivel de accesibilidad mínimo" },
           { label: "Modos",      value: "2",    desc: "Light & Dark mode con OS preference" },
         ].map(({ label, value, desc }) => (
@@ -247,6 +248,44 @@ border: 1px solid var(--border);
 /* ✗ Incorrecto — hardcodeado */
 color: #1d1d1f;
 background: #ffffff;`} />
+
+      <SectionHeading title="Tokens en contexto — referencia visual" />
+      <p className="ds-pattern-desc">
+        Cómo los tokens semánticos trabajan juntos en una tarjeta típica. Este patrón es el mismo en light y dark: los colores cambian automáticamente.
+      </p>
+      <PreviewBox label="Tarjeta de sección con todos los tokens aplicados">
+        <div style={{ background: "var(--bg)", padding: 20, borderRadius: 16, width: "100%", maxWidth: 380 }}>
+          {/* Page bg */}
+          <div style={{ fontSize: 9, color: "var(--txt3)", fontFamily: "monospace", marginBottom: 8, letterSpacing: "0.05em" }}>--bg (page background)</div>
+          <div style={{ background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 12, padding: 16 }}>
+            <div style={{ fontSize: 9, color: "var(--txt3)", fontFamily: "monospace", marginBottom: 6, letterSpacing: "0.05em" }}>--bg2 · --border</div>
+            {/* Label */}
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 4 }}>--accent · label</div>
+            {/* Title */}
+            <div style={{ fontFamily: "var(--portfolio-heading-font)", fontSize: 18, fontWeight: 700, color: "var(--txt)", letterSpacing: "-0.02em", marginBottom: 4 }}>--txt · Título principal</div>
+            {/* Secondary */}
+            <div style={{ fontSize: 13, color: "var(--txt2)", lineHeight: 1.6, marginBottom: 10 }}>--txt2 · Descripción secundaria con detalle adicional para dar contexto al usuario.</div>
+            {/* Muted */}
+            <div style={{ fontSize: 11, color: "var(--txt3)", marginBottom: 12 }}>--txt3 · caption · metadata · 12px</div>
+            {/* Divider */}
+            <div style={{ height: 1, background: "var(--border)", marginBottom: 12 }} />
+            <div style={{ fontSize: 9, color: "var(--txt3)", fontFamily: "monospace", marginBottom: 6 }}>--border divider</div>
+            {/* Glass chip */}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+              <div style={{ padding: "4px 10px", borderRadius: 980, border: "1px solid var(--border)", background: "var(--glass)", fontSize: 11, color: "var(--txt2)" }}>--glass · --border</div>
+              <div style={{ padding: "4px 10px", borderRadius: 980, background: "rgba(48,209,88,0.07)", border: "1px solid rgba(48,209,88,0.25)", fontSize: 11, color: "var(--success)" }}>--success</div>
+              <div style={{ padding: "4px 10px", borderRadius: 980, background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.25)", fontSize: 11, color: "var(--error)" }}>--error</div>
+            </div>
+            {/* Buttons */}
+            <div style={{ display: "flex", gap: 8 }}>
+              <div style={{ flex: 1, height: 36, borderRadius: 980, background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#fff", fontWeight: 600 }}>--accent → btn-p</div>
+              <div style={{ flex: 1, height: 36, borderRadius: 980, border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "var(--txt2)" }}>ghost → btn-g</div>
+            </div>
+          </div>
+          {/* Shadow demo */}
+          <div style={{ marginTop: 12, fontSize: 9, color: "var(--txt3)", fontFamily: "monospace" }}>--shadow · --shadow-xl (hover)</div>
+        </div>
+      </PreviewBox>
     </div>
   )
 }
@@ -832,6 +871,70 @@ function getBentoVariant(i: number): "featured" | "compact" {
 @media (max-width: 860px) {
   .about-grid { grid-template-columns: 1fr; gap: 40px; }
 }`} />
+
+      <SectionHeading title="Referencia visual — todos los patrones de layout" />
+      <p className="ds-pattern-desc">
+        Vista de pájaro de los 4 patrones de layout. Los diagramas muestran la estructura de columnas y la jerarquía visual de cada sección.
+      </p>
+      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginTop: 12, alignItems: "flex-start" }}>
+        {/* Hero stack */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--txt3)" }}>1. Hero Sticky Stack</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2, width: 120 }}>
+            <WF label="NAVBAR z:100 fixed" style={{ height: 10 }} />
+            <WF label="HERO z:1 sticky top:0" style={{ height: 44, fontSize: 6 }} />
+            <WF label="PROJECTS SHEET z:2 (desliza encima)" style={{ height: 36, fontSize: 6 }} accent />
+            <WF label="WebGL canvas z:0 fixed" style={{ height: 10, opacity: 0.5 }} />
+          </div>
+          <div style={{ fontSize: 9, color: "var(--txt3)", maxWidth: 120 }}>El sheet tiene z:2 y sube cubriendo al hero sticky</div>
+        </div>
+        {/* Bento Z */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--txt3)" }}>2. Bento Grid Z-pattern</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2, width: 140 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 2 }}>
+              <WF label="FEATURED 01 · 16:10" style={{ height: 30 }} accent />
+              <WF label="COMPACT 02" style={{ height: 30 }} />
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 2 }}>
+              <WF label="COMPACT 03" style={{ height: 30 }} />
+              <WF label="FEATURED 04 · 16:10" style={{ height: 30 }} accent />
+            </div>
+          </div>
+          <div style={{ fontSize: 9, color: "var(--txt3)", maxWidth: 140 }}>pos % 4 === 0,3 → featured · pos % 4 === 1,2 → compact</div>
+        </div>
+        {/* About grid */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--txt3)" }}>3. About Grid (300px + 1fr)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "60px 1fr", gap: 3, width: 160 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <WF label="FOTO 3:4" style={{ height: 56 }} accent />
+              <WF label="BADGE" style={{ height: 10, fontSize: 6 }} accent />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <WF label="STATS 3 cols" style={{ height: 18 }} />
+              <WF label="BIO 16px/1.8" style={{ height: 22 }} />
+              <WF label="SKILLS wrap" style={{ height: 14 }} />
+              <WF label="CTA" style={{ height: 12 }} />
+            </div>
+          </div>
+          <div style={{ fontSize: 9, color: "var(--txt3)", maxWidth: 160 }}>Foto sticky · colapsa a 1col a ≤860px</div>
+        </div>
+        {/* Contact split */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--txt3)" }}>4. Contact Split (1fr + 1.1fr)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: 3, width: 160 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <WF label="TAGLINE" style={{ height: 16 }} />
+              <WF label="SUB 15px" style={{ height: 14 }} />
+              <WF label="LINKS" style={{ height: 24 }} />
+              <WF label="AVAILABLE" style={{ height: 10, fontSize: 6 }} />
+            </div>
+            <WF label="FORM CARD glassmorphism" style={{ height: 68, fontSize: 7 }} accent />
+          </div>
+          <div style={{ fontSize: 9, color: "var(--txt3)", maxWidth: 160 }}>Colapsa a 1col a ≤820px · gap 48px</div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -1839,6 +1942,150 @@ function PagePrimitivos() {
   )
 }
 
+// ── Shared visual helpers ─────────────────────────────────────────────────────
+
+/** Wireframe block for layout diagrams */
+function WF({ label, style, accent }: { label: string; style?: React.CSSProperties; accent?: boolean }) {
+  return (
+    <div style={{
+      border: `1px dashed ${accent ? "rgba(41,151,255,0.55)" : "rgba(0,98,204,0.30)"}`,
+      borderRadius: 3,
+      background: accent ? "rgba(41,151,255,0.10)" : "rgba(0,98,204,0.05)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontSize: 7, color: accent ? "rgba(41,151,255,0.9)" : "rgba(0,98,204,0.75)",
+      fontWeight: 700, textAlign: "center" as const, padding: "2px 3px",
+      letterSpacing: "0.03em", lineHeight: 1.2, userSelect: "none" as const,
+      ...style,
+    }}>
+      {label}
+    </div>
+  )
+}
+
+/** Layout diagram for a given breakpoint */
+function BPDiagram({ bp }: { bp: "mobile" | "tablet" | "desktop" | "qhd" | "ultrawide" }) {
+  const col2 = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 } as const
+  const col3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 2 } as const
+  const col4 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 2 } as const
+  const bentoZ = { display: "grid", gridTemplateColumns: "2fr 1fr", gap: 2 } as const
+  const bentoZr = { display: "grid", gridTemplateColumns: "1fr 2fr", gap: 2 } as const
+  const stack = { display: "flex", flexDirection: "column" as const, gap: 2 }
+
+  const diagrams: Record<typeof bp, React.ReactNode> = {
+    mobile: (
+      <div style={{ ...stack, width: 80 }}>
+        <WF label="NAVBAR 64px" style={{ height: 10, opacity: 0.5 }} />
+        <WF label="HERO 70svh · title clamp(40–52px)" style={{ height: 52, fontSize: 6 }} />
+        <WF label="CARD 16:10" style={{ height: 22 }} />
+        <WF label="CARD 16:10" style={{ height: 22 }} />
+        <WF label="CARD 16:10" style={{ height: 22 }} />
+        <div style={col3}><WF label="B" style={{ height: 12 }} /><WF label="B" style={{ height: 12 }} /><WF label="B" style={{ height: 12 }} /></div>
+        <WF label="BLOG · 1 col" style={{ height: 22 }} />
+        <WF label="FOOTER" style={{ height: 12 }} />
+        <WF label="BOTTOM NAV" style={{ height: 10 }} accent />
+      </div>
+    ),
+    tablet: (
+      <div style={{ ...stack, width: 130 }}>
+        <WF label="NAVBAR" style={{ height: 10 }} />
+        <WF label="HERO 100vh · title clamp(52–100px)" style={{ height: 52, fontSize: 6 }} />
+        <div style={col2}><WF label="CARD" style={{ height: 26 }} /><WF label="CARD" style={{ height: 26 }} /></div>
+        <div style={col2}><WF label="CARD" style={{ height: 26 }} /><WF label="CARD" style={{ height: 26 }} /></div>
+        <WF label="BRANDS auto-fill" style={{ height: 14 }} />
+        <div style={col2}><WF label="BLOG" style={{ height: 22 }} /><WF label="BLOG" style={{ height: 22 }} /></div>
+        <WF label="FOOTER" style={{ height: 12 }} />
+      </div>
+    ),
+    desktop: (
+      <div style={{ ...stack, width: 190 }}>
+        <WF label="NAVBAR · max-w 1160px" style={{ height: 10 }} />
+        <WF label="HERO · max-w 1160px · title clamp(52–100px)" style={{ height: 52, fontSize: 6 }} />
+        <div style={bentoZ}>
+          <WF label="FEATURED (span 2) 16:10" style={{ height: 34 }} />
+          <WF label="COMPACT" style={{ height: 34 }} />
+        </div>
+        <div style={bentoZr}>
+          <WF label="COMPACT" style={{ height: 34 }} />
+          <WF label="FEATURED (span 2) 16:10" style={{ height: 34 }} />
+        </div>
+        <WF label="BRANDS auto-fill · max-w 1000px" style={{ height: 14 }} />
+        <div style={col3}><WF label="BLOG" style={{ height: 22 }} /><WF label="BLOG" style={{ height: 22 }} /><WF label="BLOG" style={{ height: 22 }} /></div>
+        <WF label="FOOTER" style={{ height: 12 }} />
+      </div>
+    ),
+    qhd: (
+      <div style={{ ...stack, width: 190 }}>
+        <WF label="HERO TITLE: 85px fijo" style={{ height: 10 }} accent />
+        <WF label="NAVBAR · max-w 1160px (igual desktop)" style={{ height: 10 }} />
+        <WF label="HERO · max-w 1160px · title 85px" style={{ height: 52, fontSize: 6 }} accent />
+        <div style={bentoZ}>
+          <WF label="FEATURED" style={{ height: 34 }} />
+          <WF label="COMPACT" style={{ height: 34 }} />
+        </div>
+        <div style={bentoZr}>
+          <WF label="COMPACT" style={{ height: 34 }} />
+          <WF label="FEATURED" style={{ height: 34 }} />
+        </div>
+        <WF label="BRANDS / BLOG 3cols — igual a desktop" style={{ height: 14, fontSize: 6 }} />
+        <WF label="FOOTER · igual a desktop" style={{ height: 12 }} />
+      </div>
+    ),
+    ultrawide: (
+      <div style={{ ...stack, width: 200 }}>
+        <WF label="containers: 1400px · hero-wrap: 1160px" style={{ height: 10, fontSize: 6 }} accent />
+        <WF label="NAVBAR" style={{ height: 10 }} />
+        <WF label="HERO · max-w 1160px · title 85px (NO se expande)" style={{ height: 48, fontSize: 6 }} />
+        <div style={bentoZ}>
+          <WF label="FEATURED · max-w 1380px" style={{ height: 28 }} />
+          <WF label="COMPACT" style={{ height: 28 }} />
+        </div>
+        <div style={bentoZr}>
+          <WF label="COMPACT" style={{ height: 28 }} />
+          <WF label="FEATURED" style={{ height: 28 }} />
+        </div>
+        <WF label="BRANDS · max-w 1380px" style={{ height: 12 }} />
+        <div style={col4}><WF label="BLOG" style={{ height: 20 }} /><WF label="BLOG" style={{ height: 20 }} /><WF label="BLOG" style={{ height: 20 }} /><WF label="BLOG" style={{ height: 20 }} /></div>
+        <WF label="FOOTER · max-w 1400px" style={{ height: 12 }} />
+      </div>
+    ),
+  }
+  return <>{diagrams[bp]}</>
+}
+
+/** Blog post layout diagram */
+function BlogPostDiagram({ variant }: { variant: "default" | "ultrawide" }) {
+  return variant === "default" ? (
+    <div style={{ display: "flex", flexDirection: "column", gap: 2, width: 120 }}>
+      <WF label="NAVBAR" style={{ height: 10 }} />
+      <WF label="← volver · meta · fecha" style={{ height: 12, fontSize: 6 }} />
+      <WF label="TÍTULO DEL POST" style={{ height: 18 }} />
+      <WF label="IMAGEN 16:8" style={{ height: 28 }} />
+      <WF label="CONTENIDO 17px/1.85lh" style={{ height: 60, fontSize: 6 }} />
+      <WF label="#tags" style={{ height: 10 }} />
+      <WF label="RELATED POSTS 3 cols" style={{ height: 20, fontSize: 6 }} />
+    </div>
+  ) : (
+    <div style={{ display: "flex", flexDirection: "column", gap: 2, width: 190 }}>
+      <WF label="NAVBAR" style={{ height: 10 }} />
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 2 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <WF label="TÍTULO DEL POST" style={{ height: 18 }} />
+          <WF label="IMAGEN 16:8" style={{ height: 28 }} />
+          <WF label="CONTENIDO 17px · max-w 720px" style={{ height: 60, fontSize: 6 }} />
+          <WF label="#tags" style={{ height: 10 }} />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <WF label="← Blog" style={{ height: 10 }} accent />
+          <WF label="CATEGORÍA" style={{ height: 14 }} accent />
+          <WF label="PUBLICADO" style={{ height: 14 }} accent />
+          <WF label="TAGS" style={{ height: 14 }} accent />
+        </div>
+      </div>
+      <WF label="RELATED POSTS 3 cols · ancho completo blog-post-main" style={{ height: 20, fontSize: 6 }} />
+    </div>
+  )
+}
+
 // ── Page: Animaciones ─────────────────────────────────────────────────────────
 function PageAnimaciones() {
   return (
@@ -2351,6 +2598,316 @@ function PageBlog() {
   )
 }
 
+// ── Page: Breakpoints ─────────────────────────────────────────────────────────
+function PageBreakpoints() {
+  type Tier = { key: "mobile"|"tablet"|"desktop"|"qhd"|"ultrawide"; label: string; range: string; mq: string; color: string }
+  const TIERS: Tier[] = [
+    { key: "mobile",     label: "Mobile",      range: "≤ 640px",       mq: "@media (max-width: 640px)",                              color: "#ef4444" },
+    { key: "tablet",     label: "Tablet",      range: "641–860px",     mq: "@media (min-width: 641px) and (max-width: 860px)",        color: "#f59e0b" },
+    { key: "desktop",    label: "Desktop",     range: "861–1439px",    mq: "base (sin media query)",                                  color: "#30d158" },
+    { key: "qhd",        label: "QHD / 1440p", range: "1440–1920px",   mq: "@media (min-width: 1440px) and (max-width: 1920px)",      color: "#2997ff" },
+    { key: "ultrawide",  label: "Ultra-wide",  range: "≥ 1921px",      mq: "@media (min-width: 1921px)",                             color: "#a855f7" },
+  ]
+
+  const SECONDARY = [
+    { bp: "≤ 768px",  affects: "projects-grid (legacy)",   change: "1 columna" },
+    { bp: "≤ 820px",  affects: ".contact-split",           change: "stack vertical (1 col)" },
+    { bp: "≤ 860px",  affects: ".about-grid",              change: "stack vertical (1 col)" },
+    { bp: "≤ 860px",  affects: ".related-posts-grid",      change: "2 columnas → 1 columna" },
+    { bp: "≤ 900px",  affects: ".blog-grid, .blog-preview-grid", change: "2 columnas" },
+    { bp: "≤ 960px",  affects: "DS sidebar (.ds-sidebar)", change: "drawer móvil con overlay" },
+    { bp: "≤ 1024px", affects: ".detail-main (project detail)", change: "1 col, sidebar inline" },
+  ]
+
+  const CONTAINERS = [
+    { tier: "Mobile ≤640px",      section: "80px 20px",  hero: "20px",  blog: "88px 20px", detail: "24px 16px" },
+    { tier: "Tablet 641–860px",   section: "72px 32px",  hero: "32px",  blog: "—",         detail: "32px 24px" },
+    { tier: "Desktop 861–1439px", section: "80px 48px",  hero: "48px",  blog: "100px 48px",detail: "48px 32px" },
+    { tier: "QHD 1440–1920px",    section: "80px 48px",  hero: "48px",  blog: "100px 48px",detail: "48px 32px" },
+    { tier: "Ultra-wide ≥1921px", section: "96px 80px",  hero: "80px",  blog: "112px 80px",detail: "56px 64px" },
+  ]
+
+  return (
+    <div className="ds-page-body">
+      <div className="ds-page-header">
+        <div className="ds-page-badge">Fundamentos</div>
+        <h2 className="ds-page-title">Breakpoints — Sistema Responsivo</h2>
+        <p className="ds-page-desc">
+          5 tiers principales + 7 breakpoints secundarios de componente. Los tiers definen la estrategia de layout global; los secundarios ajustan componentes específicos dentro de cada tier. <strong>Mobile-first</strong>: los estilos base son para mobile y los media queries agregan complejidad hacia arriba.
+        </p>
+      </div>
+
+      {/* ── Breakpoint scale ── */}
+      <SectionHeading title="Escala visual de breakpoints" />
+      <div style={{ position: "relative", marginTop: 16, marginBottom: 8 }}>
+        {/* Ruler bar */}
+        <div style={{ height: 8, borderRadius: 4, background: "linear-gradient(90deg, #ef4444 0%, #f59e0b 15%, #30d158 30%, #2997ff 75%, #a855f7 100%)", marginBottom: 12 }} />
+        {/* Labels */}
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--txt3)", fontFamily: "monospace" }}>
+          <span>0</span>
+          <span style={{ color: "#f59e0b" }}>641</span>
+          <span style={{ color: "#30d158" }}>861</span>
+          <span style={{ marginLeft: "auto", paddingRight: "22%" }}>—</span>
+          <span style={{ color: "#2997ff" }}>1440</span>
+          <span style={{ color: "#a855f7" }}>1921px</span>
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
+          {TIERS.map(t => (
+            <div key={t.key} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11 }}>
+              <div style={{ width: 10, height: 10, borderRadius: 2, background: t.color, flexShrink: 0 }} />
+              <strong style={{ color: "var(--txt)" }}>{t.label}</strong>
+              <span style={{ color: "var(--txt3)" }}>{t.range}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Per-tier diagrams ── */}
+      <SectionHeading title="Diagramas de layout por tier" />
+      <p className="ds-pattern-desc">
+        Cada diagrama muestra la estructura real de la página: secciones, columnas de grid, alturas relativas y elementos fijos. Las cajas en <span style={{ color: "rgba(41,151,255,0.9)", fontWeight: 600 }}>azul brillante</span> indican elementos que cambian específicamente en ese tier.
+      </p>
+      <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 16, alignItems: "flex-start" }}>
+        {TIERS.map(t => (
+          <div key={t.key} style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
+            <div style={{
+              display: "inline-block", padding: "3px 10px", borderRadius: 4,
+              background: t.color + "22", border: `1.5px solid ${t.color}55`,
+              fontSize: 10, fontWeight: 700, color: t.color, letterSpacing: "0.05em",
+            }}>
+              {t.label.toUpperCase()}
+            </div>
+            <div style={{ fontSize: 9, color: "var(--txt3)", fontFamily: "monospace", textAlign: "center" }}>{t.range}</div>
+            <BPDiagram bp={t.key} />
+            <div style={{ fontSize: 9, color: "var(--txt3)", fontFamily: "monospace", textAlign: "center", maxWidth: 200, textWrap: "balance" as any }}>
+              {t.mq}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Blog post layout ── */}
+      <SectionHeading title="Blog post — layout editorial a ≥1921px" />
+      <p className="ds-pattern-desc">
+        El artículo de blog es la única vista que cambia a un layout 2 columnas editorial. El <code>blog-post-layout</code> pasa de <code>display:block</code> a <code>display:grid (720px + 260px)</code> solo en ultra-wide. La sidebar se vuelve sticky y muestra meta del artículo.
+      </p>
+      <div style={{ display: "flex", gap: 32, flexWrap: "wrap", alignItems: "flex-start", marginTop: 12 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "center" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--txt3)" }}>Default (≤1920px)</div>
+          <BlogPostDiagram variant="default" />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "center" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(41,151,255,0.9)" }}>Ultra-wide (≥1921px) — editorial</div>
+          <BlogPostDiagram variant="ultrawide" />
+        </div>
+      </div>
+
+      {/* ── Container widths ── */}
+      <SectionHeading title="Padding y max-width por tier" />
+      <div className="ds-spec-table">
+        <div className="ds-spec-row">
+          <span className="ds-spec-name">Tier</span>
+          <span className="ds-spec-val">.section (py px)</span>
+          <span className="ds-spec-val">hero-wrap px</span>
+          <span className="ds-spec-val">blog px</span>
+          <span className="ds-spec-val">detail px</span>
+        </div>
+        {CONTAINERS.map(({ tier, section, hero, blog, detail }) => (
+          <div key={tier} className="ds-spec-row">
+            <span className="ds-spec-name" style={{ fontSize: 11 }}>{tier}</span>
+            <span className="ds-spec-val">{section}</span>
+            <span className="ds-spec-val">{hero}</span>
+            <span className="ds-spec-val">{blog}</span>
+            <span className="ds-spec-val">{detail}</span>
+          </div>
+        ))}
+      </div>
+      <p className="ds-pattern-desc" style={{ marginTop: 8 }}>
+        <strong>max-width:</strong> Desktop/QHD → <code>1160px</code> · Ultra-wide → <code>1400px</code> (excepto hero-wrap que se queda en 1160px)
+      </p>
+
+      {/* ── Typography changes ── */}
+      <SectionHeading title="Tipografía por breakpoint" />
+      <div className="ds-spec-table">
+        <div className="ds-spec-row">
+          <span className="ds-spec-name">Elemento</span>
+          <span className="ds-spec-val">Mobile ≤640px</span>
+          <span className="ds-spec-val">Desktop 861–1439px</span>
+          <span className="ds-spec-val">QHD 1440–1920px</span>
+          <span className="ds-spec-val">Ultra-wide ≥1921px</span>
+        </div>
+        {[
+          { el: ".hero-title",   mobile: "clamp(40px, 11vw, 52px)", desktop: "clamp(52px, 7.5vw, 100px)", qhd: "85px (fijo)", uw: "85px (fijo)" },
+          { el: ".s-title",      mobile: "clamp(28px,4vw,44px)",    desktop: "clamp(28px, 4vw, 44px)",    qhd: "—",           uw: "clamp(28px,3vw,56px)" },
+          { el: ".hero-sub",     mobile: "15px",                    desktop: "clamp(16px,1.8vw,20px)",    qhd: "—",           uw: "—" },
+          { el: ".blog-post-title", mobile: "clamp(28px,4vw,44px)", desktop: "clamp(28px,4vw,44px)",      qhd: "—",           uw: "—" },
+          { el: ".s-title projects", mobile: "clamp(36px,5vw,64px)", desktop: "clamp(36px,5vw,64px)",    qhd: "—",           uw: "—" },
+        ].map(({ el, mobile, desktop, qhd, uw }) => (
+          <div key={el} className="ds-spec-row">
+            <span className="ds-spec-name">{el}</span>
+            <span className="ds-spec-val" style={{ fontSize: 10 }}>{mobile}</span>
+            <span className="ds-spec-val" style={{ fontSize: 10 }}>{desktop}</span>
+            <span className="ds-spec-val" style={{ fontSize: 10, color: "var(--accent)" }}>{qhd}</span>
+            <span className="ds-spec-val" style={{ fontSize: 10, color: "rgba(168,85,247,0.9)" }}>{uw}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Navigation behavior ── */}
+      <SectionHeading title="Navegación por breakpoint" />
+      <div className="ds-spec-table">
+        {[
+          { bp: "≤ 640px",   nav: "navbar: .nav-center hidden + .nav-right visible", bottom: "Bottom nav: VISIBLE (5 tabs)", ds: "DS sidebar: drawer" },
+          { bp: "641–860px", nav: "navbar: completo visible",                         bottom: "Bottom nav: OCULTO",           ds: "DS sidebar: drawer" },
+          { bp: "≥ 861px",   nav: "navbar: completo visible",                         bottom: "Bottom nav: OCULTO",           ds: "DS sidebar: fijo 260px" },
+        ].map(({ bp, nav, bottom, ds }) => (
+          <div key={bp} className="ds-spec-row">
+            <span className="ds-spec-name">{bp}</span>
+            <span className="ds-spec-val" style={{ flex: 1, fontSize: 11 }}>{nav}</span>
+            <span className="ds-spec-val" style={{ fontSize: 11 }}>{bottom}</span>
+            <span className="ds-spec-val" style={{ fontSize: 11 }}>{ds}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Secondary breakpoints ── */}
+      <SectionHeading title="Breakpoints secundarios — componentes específicos" />
+      <p className="ds-pattern-desc">
+        Breakpoints de ajuste fino para componentes que necesitan colapsar antes o después del tier general. No definen un "tier" de diseño — solo ajustan el comportamiento de un componente concreto.
+      </p>
+      <div className="ds-spec-table">
+        <div className="ds-spec-row">
+          <span className="ds-spec-name">Breakpoint</span>
+          <span className="ds-spec-val">Componente afectado</span>
+          <span className="ds-spec-val">Cambio</span>
+        </div>
+        {SECONDARY.map(({ bp, affects, change }) => (
+          <div key={bp + affects} className="ds-spec-row">
+            <span className="ds-spec-name">{bp}</span>
+            <span className="ds-spec-val">{affects}</span>
+            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{change}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Code reference ── */}
+      <SectionHeading title="Referencia de código — todos los media queries en orden" />
+      <CodeBlock code={`/* ═══════════════════════════════════════════════════════
+   MOBILE — ≤640px (max-width)
+   - Bottom nav visible, nav-center hidden
+   - Hero: 70svh top-aligned, title clamp(40,11vw,52px)
+   - Proyectos, Blog: 1 columna
+   - Sections: padding 72px 20px 24px
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 640px) { ... }
+
+/* ═══════════════════════════════════════════════════════
+   TABLET — 641px–860px (min + max)
+   - Proyectos: 2 columnas, all cards 16:10
+   - About: horizontal (160px foto + stats column)
+   - Sections: padding 72px 32px 56px
+   ═══════════════════════════════════════════════════════ */
+@media (min-width: 641px) and (max-width: 860px) { ... }
+
+/* SECONDARY — componente-específicos */
+@media (max-width: 768px) { /* projects-grid legacy 1col */ }
+@media (max-width: 820px) { /* contact-split 1col */ }
+@media (max-width: 860px) { /* about-grid + related-posts */ }
+@media (max-width: 900px) { /* blog-grid + blog-preview-grid 2col */ }
+@media (max-width: 960px) { /* DS sidebar drawer */ }
+@media (max-width: 1024px) { /* detail-main 1col */ }
+
+/* ═══════════════════════════════════════════════════════
+   DESKTOP — 861–1439px
+   BASE (sin media query) — diseño base del sitio
+   - Proyectos: bento 3 cols (featured 2fr + compact 1fr)
+   - max-width: 1160px, padding 80px 48px
+   ═══════════════════════════════════════════════════════ */
+/* Estilos por defecto sin @media */
+
+/* ═══════════════════════════════════════════════════════
+   QHD / 1440p — 1440px–1920px (min + max)
+   - hero-title: 85px FIJO (overrides el clamp)
+   - Todo lo demás: igual a desktop
+   ═══════════════════════════════════════════════════════ */
+@media (min-width: 1440px) and (max-width: 1920px) {
+  .hero-title { font-size: 85px; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ULTRA-WIDE — ≥1921px (min-width)
+   - .section: max-width 1400px, padding 96px 80px
+   - hero-wrap: MANTIENE max-width 1160px (intencional)
+   - .hero-title: 85px (mismo que QHD)
+   - .blog-grid: 4 columnas
+   - .blog-post-layout: editorial 2-col (720px + 260px sidebar)
+   - .about-grid: 380px + 1fr, gap 72px
+   - .contact-split: max-width 1200px
+   ═══════════════════════════════════════════════════════ */
+@media (min-width: 1921px) { ... }`} />
+
+      {/* ── About/Contact wireframes ── */}
+      <SectionHeading title="About Grid y Contact Split — layout desktop" />
+      <p className="ds-pattern-desc">
+        Los dos layouts más complejos en desktop. About usa una columna sticky para la foto. Contact usa 1fr + 1.1fr para dar más peso visual al formulario.
+      </p>
+      <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 12 }}>
+        {/* About grid */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--txt3)" }}>About Grid · desktop (300px + 1fr)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "90px 1fr", gap: 4, width: 240 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <WF label="FOTO 3:4 sticky" style={{ height: 80 }} accent />
+              <WF label="BADGE disponible" style={{ height: 12, fontSize: 6 }} accent />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <WF label="STATS 3 cols" style={{ height: 20 }} />
+              <WF label="BIO text 16px/1.8lh" style={{ height: 36 }} />
+              <WF label="SKILLS wrap" style={{ height: 18 }} />
+              <WF label="CTA buttons" style={{ height: 14 }} />
+            </div>
+          </div>
+          <div style={{ fontSize: 9, color: "var(--txt3)", fontFamily: "monospace" }}>
+            Mobile: stack vertical · foto 2:1 landscape<br/>
+            Tablet: horizontal 160px + stats col
+          </div>
+        </div>
+        {/* Contact split */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--txt3)" }}>Contact Split · desktop (1fr + 1.1fr)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: 4, width: 240 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <WF label="TAGLINE 22-30px" style={{ height: 18 }} />
+              <WF label="SUBTÍTULO 15px" style={{ height: 22 }} />
+              <WF label="LINKS email / linkedin" style={{ height: 28 }} />
+              <WF label="BADGE disponible" style={{ height: 12, fontSize: 6 }} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <WF label="FORM CARD glassmorphism · r-2xl · p-32" style={{ height: 80, fontSize: 6 }} accent />
+            </div>
+          </div>
+          <div style={{ fontSize: 9, color: "var(--txt3)", fontFamily: "monospace" }}>
+            Colapsa a 1 col a ≤820px · gap 48px mobile
+          </div>
+        </div>
+      </div>
+
+      {/* ── Reglas ── */}
+      <SectionHeading title="Reglas de implementación responsiva" />
+      <div className="ds-rules">
+        <RuleChip rule="Mobile-first: escribir estilos base para mobile, agregar complejidad hacia arriba con min-width" variant="do" />
+        <RuleChip rule="Usar los tiers principales (640, 860, 1440, 1921) como referencia — los secundarios solo para ajustes de componente" variant="do" />
+        <RuleChip rule="hero-wrap SIEMPRE max-width 1160px — no expandir a 1400px aunque el tier ultra-wide lo permita" variant="do" />
+        <RuleChip rule="Respetar que .blog-preview-grid siempre queda en 3 cols (incluso ultra-wide) — es decisión de diseño intencional" variant="do" />
+        <RuleChip rule="Definir un nuevo breakpoint ad-hoc en vez de usar los tiers existentes — añadir fragmentación innecesaria" variant="dont" />
+        <RuleChip rule="Escribir estilos desktop-first y sobrescribir con max-width — va contra la arquitectura del DS" variant="dont" />
+        <RuleChip rule="Expandir hero-wrap a 1400px en ultra-wide — la decisión es mantenerlo centrado en 1160px" variant="dont" />
+        <RuleChip rule="Añadir bottom-nav en tablet o desktop — es exclusivo de mobile (≤640px)" variant="dont" />
+      </div>
+    </div>
+  )
+}
+
 // ── Page map ──────────────────────────────────────────────────────────────────
 const PAGE_MAP: Record<DSPageId, React.ComponentType> = {
   overview:    PageOverview,
@@ -2359,6 +2916,7 @@ const PAGE_MAP: Record<DSPageId, React.ComponentType> = {
   darkmode:    PageDarkMode,
   primitivos:  PagePrimitivos,
   animaciones: PageAnimaciones,
+  breakpoints: PageBreakpoints,
   buttons:     PageButtons,
   cards:       PageCards,
   forms:       PageForms,
@@ -2396,7 +2954,7 @@ export function DesignSystemSection({ adminMode }: { adminMode?: boolean }) {
           </div>
           <div className="ds-brand-info">
             <div className="ds-brand-title">Project Zero DS</div>
-            <div className="ds-brand-version">v1.8.0</div>
+            <div className="ds-brand-version">v1.9.0</div>
           </div>
         </div>
         <nav className="ds-nav">
