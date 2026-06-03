@@ -3925,13 +3925,6 @@ html {
   animation-delay: 0.3s;
 }
 
-@keyframes fadeUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes fadeLeft {
   to {
     opacity: 1;
@@ -4891,4 +4884,100 @@ html {
 .ds-layout--admin .ds-sidebar {
   top: 110px;
   height: calc(100vh - 110px);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ULTRA-WIDE — 1440p / 2560×1440 (≥1440px)
+   Estrategia: expandir containers de 1160px→1400px, blog 4 cols,
+   tipografía liberada, admin más ancho, DS viewer aprovecha el espacio.
+   ════════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1440px) {
+
+  /* ── Containers ─────────────────────────────────────────────────── */
+  .section {
+    max-width: 1400px;
+    padding: 96px 80px;
+  }
+
+  .section--contact {
+    padding-top: 112px;
+  }
+
+  .hero-wrap {
+    max-width: 1400px;
+    padding: 140px 80px 96px;
+  }
+
+  .blog-main,
+  .blog-post-main {
+    max-width: 1400px;
+    padding: 112px 80px 96px;
+  }
+
+  /* ── Typography ─────────────────────────────────────────────────── */
+  /* Liberar el clamp max para pantallas grandes */
+  .hero-title {
+    font-size: clamp(52px, 7.5vw, 120px);
+  }
+
+  .s-title {
+    font-size: clamp(28px, 3vw, 56px);
+  }
+
+  /* ── Proyectos ──────────────────────────────────────────────────── */
+  .projects-bento {
+    max-width: 1380px;
+    gap: 20px;
+  }
+
+  /* ── Blog grid — 4 columnas ─────────────────────────────────────── */
+  .blog-grid,
+  .blog-preview-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* ── Related posts — head alineado con el artículo (720px) ─────── */
+  .related-posts-head {
+    max-width: 720px;
+  }
+
+  .related-posts-grid {
+    gap: 24px;
+  }
+
+  /* ── About ──────────────────────────────────────────────────────── */
+  .about-grid {
+    grid-template-columns: 380px 1fr;
+    gap: 72px;
+  }
+
+  /* ── Contact ────────────────────────────────────────────────────── */
+  .contact-split {
+    max-width: 1200px;
+    gap: 80px;
+  }
+
+  /* ── Project detail ─────────────────────────────────────────────── */
+  .detail-main {
+    max-width: 1480px;
+    grid-template-columns: 1fr 400px;
+    gap: 64px;
+    padding: 56px 64px 96px;
+  }
+
+  /* ── Brands section ─────────────────────────────────────────────── */
+  .brands-gallery {
+    max-width: 1380px;
+  }
+
+  .brands-label-wrap {
+    padding: 0 80px;
+  }
+
+  /* ── DS viewer ──────────────────────────────────────────────────── */
+  .ds-page-body {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 48px 64px 96px;
+  }
 }
