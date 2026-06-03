@@ -4983,6 +4983,359 @@ html {
   .ds-layer-z { min-width: unset; }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════════
+   DS DEVICE MOCKUPS — Breakpoints visual documentation
+   Principios: concentric border-radius, layered shadows, dark frame + bright screen
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Scroll container for side-by-side devices ── */
+.ds-devices-strip {
+  display: flex;
+  gap: 40px;
+  overflow-x: auto;
+  padding: 32px 4px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-h) transparent;
+  align-items: flex-start;
+}
+.ds-devices-strip::-webkit-scrollbar { height: 4px; }
+.ds-devices-strip::-webkit-scrollbar-track { background: transparent; }
+.ds-devices-strip::-webkit-scrollbar-thumb { background: var(--border-h); border-radius: 2px; }
+
+.ds-device-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.ds-device-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--r-full);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ds-device-range {
+  font-size: 10px;
+  color: var(--txt3);
+  font-family: "SF Mono", "Consolas", monospace;
+  text-align: center;
+}
+
+/* ── Phone frame — concentric: 44px outer, 34px inner screen ── */
+.ds-frame-phone {
+  width: 224px;
+  height: 448px;
+  background: linear-gradient(145deg, #2a2a2e 0%, #1a1a1e 100%);
+  border-radius: 44px;
+  padding: 14px 10px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.10),
+    0 0 0 2px rgba(0,0,0,0.5),
+    0 32px 80px rgba(0,0,0,0.40),
+    0 8px 24px rgba(0,0,0,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.3);
+  position: relative;
+  flex-shrink: 0;
+}
+/* Dynamic Island */
+.ds-frame-phone::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 68px;
+  height: 10px;
+  background: #0a0a0c;
+  border-radius: 6px;
+  z-index: 2;
+}
+/* Side buttons */
+.ds-frame-phone::after {
+  content: '';
+  position: absolute;
+  right: -3px;
+  top: 80px;
+  width: 3px;
+  height: 36px;
+  background: #2a2a2e;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 52px 0 #2a2a2e, 0 92px 0 #2a2a2e;
+}
+.ds-screen-phone {
+  width: 100%;
+  height: 100%;
+  border-radius: 34px; /* concentric: 44 - 10px padding */
+  overflow: hidden;
+  background: #f8f8f8;
+  position: relative;
+}
+.dark .ds-screen-phone { background: #000000; }
+
+/* ── Tablet landscape frame ── */
+.ds-frame-tablet {
+  width: 400px;
+  height: 288px;
+  background: linear-gradient(145deg, #2a2a2e 0%, #1a1a1e 100%);
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.10),
+    0 0 0 2px rgba(0,0,0,0.4),
+    0 24px 60px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  position: relative;
+  flex-shrink: 0;
+}
+.ds-frame-tablet::before {
+  content: '';
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 24px;
+  background: #0a0a0c;
+  border-radius: 2px;
+}
+.ds-screen-tablet {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px; /* concentric: 20 - 8px */
+  overflow: hidden;
+  background: #f8f8f8;
+}
+.dark .ds-screen-tablet { background: #000000; }
+
+/* ── Laptop frame ── */
+.ds-frame-laptop-lid {
+  width: 560px;
+  height: 344px;
+  background: linear-gradient(145deg, #2c2c30 0%, #1a1a1e 100%);
+  border-radius: 12px 12px 0 0;
+  padding: 12px 12px 4px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.09),
+    -1px 0 0 rgba(0,0,0,0.4),
+    1px 0 0 rgba(0,0,0,0.4);
+  position: relative;
+  flex-shrink: 0;
+}
+.ds-frame-laptop-lid::before {
+  content: '';
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #2a2a2e;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08);
+}
+.ds-screen-laptop {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f8f8f8;
+}
+.dark .ds-screen-laptop { background: #000000; }
+.ds-frame-laptop-base {
+  width: 600px;
+  height: 16px;
+  background: linear-gradient(to bottom, #222226, #1a1a1e);
+  border-radius: 0 0 10px 10px;
+  position: relative;
+  box-shadow:
+    0 6px 24px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.ds-frame-laptop-base::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 2px;
+}
+
+/* ── Monitor + stand ── */
+.ds-frame-monitor {
+  width: 580px;
+  height: 360px;
+  background: linear-gradient(145deg, #2a2a2e 0%, #1a1a1e 100%);
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.09),
+    0 0 0 2px rgba(0,0,0,0.4),
+    0 24px 60px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+.ds-screen-monitor {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f8f8f8;
+}
+.dark .ds-screen-monitor { background: #000000; }
+.ds-frame-monitor-stand {
+  width: 4px;
+  height: 40px;
+  background: linear-gradient(to bottom, #222226, #1a1a1e);
+  margin: 0 auto;
+}
+.ds-frame-monitor-base {
+  width: 100px;
+  height: 10px;
+  background: linear-gradient(to bottom, #222226, #1a1a1e);
+  border-radius: 5px;
+  margin: 0 auto;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+/* ── Screen section anatomy — inside device screens ── */
+.ds-screen-bar-nav {
+  height: 7%;
+  background: rgba(248,248,248,0.92);
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  display: flex;
+  align-items: center;
+  padding: 0 6%;
+  gap: 3%;
+  flex-shrink: 0;
+}
+.dark .ds-screen-bar-nav {
+  background: rgba(0,0,0,0.75);
+  border-bottom-color: rgba(255,255,255,0.10);
+}
+.ds-screen-bar-hero {
+  background: linear-gradient(135deg, rgba(0,98,204,0.055) 0%, rgba(41,151,255,0.025) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 8%;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.dark .ds-screen-bar-hero {
+  background: linear-gradient(135deg, rgba(41,151,255,0.09) 0%, transparent 100%);
+}
+.ds-screen-bar-content {
+  background: #f0f4fb;
+  flex-shrink: 0;
+}
+.dark .ds-screen-bar-content {
+  background: #060c1a;
+}
+.ds-screen-bar-brands {
+  background: linear-gradient(#d8deec, #e6ebf3);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 6%;
+  flex-shrink: 0;
+}
+.dark .ds-screen-bar-brands {
+  background: linear-gradient(#03070e, #060b16);
+}
+.ds-screen-bar-blog {
+  background: #f0f4fb;
+  flex-shrink: 0;
+}
+.dark .ds-screen-bar-blog {
+  background: #060c1a;
+}
+.ds-screen-bar-footer {
+  background: #ffffff;
+  border-top: 1px solid rgba(0,98,204,0.12);
+  flex-shrink: 0;
+}
+.dark .ds-screen-bar-footer {
+  background: #000000;
+  border-top-color: rgba(41,151,255,0.2);
+}
+.ds-screen-bar-bottomnav {
+  background: rgba(252,252,252,0.97);
+  border-top: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-shrink: 0;
+}
+.dark .ds-screen-bar-bottomnav {
+  background: rgba(10,10,14,0.97);
+  border-top-color: rgba(255,255,255,0.06);
+}
+
+/* ── DS Anatomy diagrams — labels + arrows ── */
+.ds-anatomy-wrap {
+  position: relative;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  background: var(--bg2);
+  box-shadow: var(--shadow-md);
+  margin-top: 16px;
+}
+
+.ds-annotation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--txt3);
+  font-family: "SF Mono", "Consolas", monospace;
+  white-space: nowrap;
+}
+
+.ds-annotation-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ds-device-changes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 220px;
+  justify-content: center;
+}
+
+.ds-device-change-chip {
+  padding: 3px 8px;
+  border-radius: var(--r-full);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: var(--bg3);
+  color: var(--txt3);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+/* ── Dark mode content adjustments ── */
+.dark .ds-screen-bar-content,
+.dark .ds-screen-bar-blog { background: rgba(6,12,26,0.95); }
+
 /* ── Dark Mode comparison table (.ds-dm-*) ─────────────────────────────────── */
 .ds-dm-table {
   border: 1px solid #e8eaed;

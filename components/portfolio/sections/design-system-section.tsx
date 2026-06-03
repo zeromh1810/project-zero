@@ -360,6 +360,43 @@ function PageTypography() {
         ))}
       </div>
 
+      <SectionHeading title="Jerarquía tipográfica — referencia visual" />
+      <p className="ds-pattern-desc">
+        Cómo se ven los niveles juntos en una sección real. La jerarquía se lee instantáneamente: tamaño + peso + color crean orden sin necesidad de separadores.
+      </p>
+      <div className="ds-anatomy-wrap" style={{ padding: "28px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
+        {/* Label */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent)" }}>Label XS · 11px · 0.12em · uppercase</div>
+          <div style={{ padding: "2px 8px", borderRadius: 4, background: "rgba(0,98,204,0.08)", fontSize: 10, fontFamily: "monospace", color: "var(--accent)" }}>.s-label</div>
+        </div>
+        {/* H1 */}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+          <div style={{ fontFamily: "var(--portfolio-heading-font)", fontSize: 44, fontWeight: 800, letterSpacing: "-0.045em", lineHeight: 1.05, color: "var(--txt)" }}>Hero XL</div>
+          <div style={{ padding: "2px 8px", borderRadius: 4, background: "var(--bg3)", fontSize: 10, fontFamily: "monospace", color: "var(--txt3)" }}>800 / -0.045em / 1.05lh</div>
+        </div>
+        {/* H2 */}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+          <div style={{ fontFamily: "var(--portfolio-heading-font)", fontSize: 28, fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.1, color: "var(--txt)" }}>Heading de sección</div>
+          <div style={{ padding: "2px 8px", borderRadius: 4, background: "var(--bg3)", fontSize: 10, fontFamily: "monospace", color: "var(--txt3)" }}>700 / -0.03em / 1.1lh</div>
+        </div>
+        {/* Lead */}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+          <div style={{ fontSize: 17, fontWeight: 400, lineHeight: 1.65, color: "var(--txt2)" }}>Texto lead · subtítulos de sección</div>
+          <div style={{ padding: "2px 8px", borderRadius: 4, background: "var(--bg3)", fontSize: 10, fontFamily: "monospace", color: "var(--txt3)" }}>400 / normal / 1.65lh</div>
+        </div>
+        {/* Body */}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+          <div style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.65, color: "var(--txt2)", maxWidth: 340 }}>Body text. Me especializo en interfaces digitales que equilibran estética refinada con funcionalidad real.</div>
+          <div style={{ padding: "2px 8px", borderRadius: 4, background: "var(--bg3)", fontSize: 10, fontFamily: "monospace", color: "var(--txt3)", flexShrink: 0 }}>15px / DM Sans</div>
+        </div>
+        {/* Caption */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 4, borderTop: "1px solid var(--border)" }}>
+          <div style={{ fontSize: 12, color: "var(--txt3)" }}>Caption · metadata · fechas · labels de campo</div>
+          <div style={{ padding: "2px 8px", borderRadius: 4, background: "var(--bg3)", fontSize: 10, fontFamily: "monospace", color: "var(--txt3)" }}>12px / txt3</div>
+        </div>
+      </div>
+
       <SectionHeading title="Reglas" />
       <div className="ds-rules">
         <RuleChip rule="Mínimo 16px para body text en mobile (evita auto-zoom de iOS)" variant="do" />
@@ -640,6 +677,67 @@ function PageNavigation() {
         <p className="ds-page-desc">
           Navbar fija con sliding pill animado por spring. Bottom nav para mobile (≤768px) con iconos + labels. Máximo 5 ítems por nav.
         </p>
+      </div>
+
+      <SectionHeading title="Anatomía del navbar — referencia visual" />
+      <p className="ds-pattern-desc">Las 3 zonas del navbar con sus componentes internos. El pill activo es un elemento absolutamente posicionado detrás de los nav-items — se mueve con JS spring animation.</p>
+      <div className="ds-anatomy-wrap">
+        {/* Full navbar mockup */}
+        <div style={{
+          height: 64, display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "0 24px", background: "var(--navbar-bg)", backdropFilter: "blur(48px)",
+          borderBottom: "1px solid var(--border)",
+        }}>
+          {/* Logo zone */}
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--accent)" }} />
+            <div style={{ fontFamily: "var(--portfolio-heading-font)", fontWeight: 700, fontSize: 14, letterSpacing: "-0.03em", color: "var(--txt)" }}>Project Zero</div>
+          </div>
+          {/* Nav center with pill */}
+          <div style={{ display: "flex", gap: 2, position: "relative", alignItems: "center" }}>
+            {/* Pill */}
+            <div style={{
+              position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)",
+              height: 32, width: 56, borderRadius: 8, background: "var(--glass-hover)", pointerEvents: "none",
+              transition: "left 350ms cubic-bezier(0.34,1.56,0.64,1), width 350ms cubic-bezier(0.34,1.56,0.64,1)",
+            }} />
+            {["Home","Trabajos","Sobre Mí","CV","Contacto"].map((label, i) => (
+              <div key={label} style={{
+                padding: "7px 14px", borderRadius: 8, fontSize: 13, fontWeight: i === 0 ? 600 : 500,
+                color: i === 0 ? "var(--txt)" : "var(--txt2)", cursor: "pointer",
+                position: "relative", zIndex: 1, whiteSpace: "nowrap",
+              }}>
+                {label}
+              </div>
+            ))}
+          </div>
+          {/* Right zone */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {/* Theme toggle */}
+            <div style={{ display: "flex", alignItems: "center", gap: 2, padding: 4, border: "1px solid var(--border)", borderRadius: 980, background: "var(--glass)" }}>
+              <div style={{ width: 32, height: 32, borderRadius: 980, background: "var(--bg2)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.14)" }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--txt)" }}><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+              </div>
+              <div style={{ width: 32, height: 32, borderRadius: 980, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--txt3)" }}><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              </div>
+            </div>
+            <div style={{ padding: "7px 14px", borderRadius: 980, border: "1px solid var(--border)", fontSize: 12, color: "var(--txt)", fontWeight: 500, cursor: "pointer" }}>Perfil</div>
+          </div>
+        </div>
+        {/* Annotation row */}
+        <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 24px", background: "var(--bg3)", borderTop: "1px solid var(--border)" }}>
+          {[
+            { zone: ".nav-logo", desc: "Logo · dot + text · cursor pointer → goHome()" },
+            { zone: ".nav-center + .nav-pill", desc: "Items + pill absoluto · spring animation 350ms · z-index 0/1" },
+            { zone: ".nav-right", desc: "ThemeToggle · btn-profile · gap 8px" },
+          ].map(({ zone, desc }) => (
+            <div key={zone} style={{ display: "flex", flexDirection: "column", gap: 3, maxWidth: "32%" }}>
+              <code style={{ fontSize: 10, color: "var(--accent)", fontWeight: 700 }}>{zone}</code>
+              <div style={{ fontSize: 10, color: "var(--txt3)", lineHeight: 1.4 }}>{desc}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <SectionHeading title="Navbar — sliding pill" />
@@ -1944,7 +2042,7 @@ function PagePrimitivos() {
 
 // ── Shared visual helpers ─────────────────────────────────────────────────────
 
-/** Wireframe block for layout diagrams */
+/** Mini block still useful in small diagrams */
 function WF({ label, style, accent }: { label: string; style?: React.CSSProperties; accent?: boolean }) {
   return (
     <div style={{
@@ -1962,126 +2060,364 @@ function WF({ label, style, accent }: { label: string; style?: React.CSSProperti
   )
 }
 
-/** Layout diagram for a given breakpoint */
-function BPDiagram({ bp }: { bp: "mobile" | "tablet" | "desktop" | "qhd" | "ultrawide" }) {
-  const col2 = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 } as const
-  const col3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 2 } as const
-  const col4 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 2 } as const
-  const bentoZ = { display: "grid", gridTemplateColumns: "2fr 1fr", gap: 2 } as const
-  const bentoZr = { display: "grid", gridTemplateColumns: "1fr 2fr", gap: 2 } as const
-  const stack = { display: "flex", flexDirection: "column" as const, gap: 2 }
+// ── Device screen content components ────────────────────────────────────────
 
-  const diagrams: Record<typeof bp, React.ReactNode> = {
-    mobile: (
-      <div style={{ ...stack, width: 80 }}>
-        <WF label="NAVBAR 64px" style={{ height: 10, opacity: 0.5 }} />
-        <WF label="HERO 70svh · title clamp(40–52px)" style={{ height: 52, fontSize: 6 }} />
-        <WF label="CARD 16:10" style={{ height: 22 }} />
-        <WF label="CARD 16:10" style={{ height: 22 }} />
-        <WF label="CARD 16:10" style={{ height: 22 }} />
-        <div style={col3}><WF label="B" style={{ height: 12 }} /><WF label="B" style={{ height: 12 }} /><WF label="B" style={{ height: 12 }} /></div>
-        <WF label="BLOG · 1 col" style={{ height: 22 }} />
-        <WF label="FOOTER" style={{ height: 12 }} />
-        <WF label="BOTTOM NAV" style={{ height: 10 }} accent />
+function NavDots({ count = 4 }: { count?: number }) {
+  return (
+    <>
+      {[...Array(count)].map((_, i) => (
+        <div key={i} style={{ width: i === 0 ? 20 : 10, height: 3, borderRadius: 2, background: i === 0 ? "rgba(0,98,204,0.6)" : "rgba(0,0,0,0.12)" }} />
+      ))}
+    </>
+  )
+}
+
+function HeroBlocks({ lines = 3, accent = false }: { lines?: number; accent?: boolean }) {
+  const widths = ["68%","82%","52%"]
+  return (
+    <>
+      {[...Array(lines)].map((_, i) => (
+        <div key={i} style={{
+          height: i === 1 ? 7 : 5,
+          width: widths[i] || "60%",
+          borderRadius: 3,
+          background: (i === 1 && accent) ? "rgba(0,98,204,0.55)" : "rgba(29,29,31,0.65)",
+          marginBottom: i === 1 ? 4 : 2,
+        }} />
+      ))}
+      <div style={{ height: 6 }} />
+      <div style={{ display: "flex", gap: 4 }}>
+        <div style={{ width: 36, height: 9, borderRadius: 5, background: "#0062cc" }} />
+        <div style={{ width: 24, height: 9, borderRadius: 5, border: "0.5px solid rgba(0,0,0,0.18)" }} />
       </div>
-    ),
-    tablet: (
-      <div style={{ ...stack, width: 130 }}>
-        <WF label="NAVBAR" style={{ height: 10 }} />
-        <WF label="HERO 100vh · title clamp(52–100px)" style={{ height: 52, fontSize: 6 }} />
-        <div style={col2}><WF label="CARD" style={{ height: 26 }} /><WF label="CARD" style={{ height: 26 }} /></div>
-        <div style={col2}><WF label="CARD" style={{ height: 26 }} /><WF label="CARD" style={{ height: 26 }} /></div>
-        <WF label="BRANDS auto-fill" style={{ height: 14 }} />
-        <div style={col2}><WF label="BLOG" style={{ height: 22 }} /><WF label="BLOG" style={{ height: 22 }} /></div>
-        <WF label="FOOTER" style={{ height: 12 }} />
+    </>
+  )
+}
+
+function CardGrid({ cols = 1, rows = 2, bento = false }: { cols?: number; rows?: number; bento?: boolean }) {
+  if (bento) {
+    return (
+      <div style={{ height: "100%", display: "flex", flexDirection: "column", gap: 3, padding: "6px 8px" }}>
+        <div style={{ flex: "0 0 55%", display: "grid", gridTemplateColumns: "2fr 1fr", gap: 3 }}>
+          <div style={{ borderRadius: 5, background: "rgba(0,98,204,0.07)", border: "0.5px solid rgba(0,98,204,0.18)", display: "flex", alignItems: "flex-end", padding: 4 }}>
+            <div style={{ width: "70%", height: 3, borderRadius: 1.5, background: "rgba(255,255,255,0.8)" }} />
+          </div>
+          <div style={{ borderRadius: 5, background: "rgba(0,98,204,0.04)", border: "0.5px solid rgba(0,98,204,0.10)" }} />
+        </div>
+        <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 2fr", gap: 3 }}>
+          <div style={{ borderRadius: 5, background: "rgba(0,98,204,0.04)", border: "0.5px solid rgba(0,98,204,0.10)" }} />
+          <div style={{ borderRadius: 5, background: "rgba(0,98,204,0.07)", border: "0.5px solid rgba(0,98,204,0.18)", display: "flex", alignItems: "flex-end", padding: 4 }}>
+            <div style={{ width: "65%", height: 3, borderRadius: 1.5, background: "rgba(255,255,255,0.8)" }} />
+          </div>
+        </div>
       </div>
-    ),
-    desktop: (
-      <div style={{ ...stack, width: 190 }}>
-        <WF label="NAVBAR · max-w 1160px" style={{ height: 10 }} />
-        <WF label="HERO · max-w 1160px · title clamp(52–100px)" style={{ height: 52, fontSize: 6 }} />
-        <div style={bentoZ}>
-          <WF label="FEATURED (span 2) 16:10" style={{ height: 34 }} />
-          <WF label="COMPACT" style={{ height: 34 }} />
-        </div>
-        <div style={bentoZr}>
-          <WF label="COMPACT" style={{ height: 34 }} />
-          <WF label="FEATURED (span 2) 16:10" style={{ height: 34 }} />
-        </div>
-        <WF label="BRANDS auto-fill · max-w 1000px" style={{ height: 14 }} />
-        <div style={col3}><WF label="BLOG" style={{ height: 22 }} /><WF label="BLOG" style={{ height: 22 }} /><WF label="BLOG" style={{ height: 22 }} /></div>
-        <WF label="FOOTER" style={{ height: 12 }} />
-      </div>
-    ),
-    qhd: (
-      <div style={{ ...stack, width: 190 }}>
-        <WF label="HERO TITLE: 85px fijo" style={{ height: 10 }} accent />
-        <WF label="NAVBAR · max-w 1160px (igual desktop)" style={{ height: 10 }} />
-        <WF label="HERO · max-w 1160px · title 85px" style={{ height: 52, fontSize: 6 }} accent />
-        <div style={bentoZ}>
-          <WF label="FEATURED" style={{ height: 34 }} />
-          <WF label="COMPACT" style={{ height: 34 }} />
-        </div>
-        <div style={bentoZr}>
-          <WF label="COMPACT" style={{ height: 34 }} />
-          <WF label="FEATURED" style={{ height: 34 }} />
-        </div>
-        <WF label="BRANDS / BLOG 3cols — igual a desktop" style={{ height: 14, fontSize: 6 }} />
-        <WF label="FOOTER · igual a desktop" style={{ height: 12 }} />
-      </div>
-    ),
-    ultrawide: (
-      <div style={{ ...stack, width: 200 }}>
-        <WF label="containers: 1400px · hero-wrap: 1160px" style={{ height: 10, fontSize: 6 }} accent />
-        <WF label="NAVBAR" style={{ height: 10 }} />
-        <WF label="HERO · max-w 1160px · title 85px (NO se expande)" style={{ height: 48, fontSize: 6 }} />
-        <div style={bentoZ}>
-          <WF label="FEATURED · max-w 1380px" style={{ height: 28 }} />
-          <WF label="COMPACT" style={{ height: 28 }} />
-        </div>
-        <div style={bentoZr}>
-          <WF label="COMPACT" style={{ height: 28 }} />
-          <WF label="FEATURED" style={{ height: 28 }} />
-        </div>
-        <WF label="BRANDS · max-w 1380px" style={{ height: 12 }} />
-        <div style={col4}><WF label="BLOG" style={{ height: 20 }} /><WF label="BLOG" style={{ height: 20 }} /><WF label="BLOG" style={{ height: 20 }} /><WF label="BLOG" style={{ height: 20 }} /></div>
-        <WF label="FOOTER · max-w 1400px" style={{ height: 12 }} />
-      </div>
-    ),
+    )
   }
-  return <>{diagrams[bp]}</>
+  return (
+    <div style={{
+      height: "100%", padding: "5px 6px",
+      display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`,
+      gridTemplateRows: `repeat(${rows}, 1fr)`, gap: 3,
+    }}>
+      {[...Array(cols * rows)].map((_, i) => (
+        <div key={i} style={{
+          borderRadius: 4,
+          background: "rgba(0,98,204,0.05)",
+          border: "0.5px solid rgba(0,98,204,0.12)",
+          overflow: "hidden",
+          display: "flex", flexDirection: "column",
+        }}>
+          <div style={{ flex: "0 0 42%", background: "rgba(0,98,204,0.08)" }} />
+          <div style={{ flex: 1, padding: "3px 4px", display: "flex", flexDirection: "column", gap: 2 }}>
+            <div style={{ height: 2.5, width: "85%", borderRadius: 1.5, background: "rgba(0,0,0,0.25)" }} />
+            <div style={{ height: 2, width: "60%", borderRadius: 1, background: "rgba(0,0,0,0.12)" }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function BrandDots({ count = 5 }: { count?: number }) {
+  return (
+    <>
+      {[...Array(count)].map((_, i) => (
+        <div key={i} style={{ width: "12%", height: "45%", borderRadius: 2, background: "rgba(0,0,0,0.14)" }} />
+      ))}
+    </>
+  )
+}
+
+function BlogMiniCards({ cols = 2 }: { cols?: number }) {
+  return (
+    <div style={{ height: "100%", padding: "4px 6px", display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 3 }}>
+      {[...Array(cols)].map((_, i) => (
+        <div key={i} style={{ borderRadius: 4, border: "0.5px solid rgba(0,0,0,0.08)", background: "white", overflow: "hidden" }}>
+          <div style={{ height: "44%", background: "rgba(0,98,204,0.06)" }} />
+          <div style={{ padding: "3px 4px", display: "flex", flexDirection: "column", gap: 1.5 }}>
+            <div style={{ height: 2.5, width: "90%", borderRadius: 1.5, background: "rgba(0,0,0,0.22)" }} />
+            <div style={{ height: 2, width: "70%", borderRadius: 1, background: "rgba(0,0,0,0.12)" }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function BottomNavTabs({ count = 5 }: { count?: number }) {
+  return (
+    <>
+      {[...Array(count)].map((_, i) => (
+        <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+          <div style={{ width: 14, height: 10, borderRadius: 2, background: i === 0 ? "rgba(0,98,204,0.14)" : "transparent", border: i === 0 ? "0.5px solid rgba(0,98,204,0.3)" : "none" }}>
+            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 6, height: 5, borderRadius: 1, background: i === 0 ? "rgba(0,98,204,0.7)" : "rgba(0,0,0,0.2)" }} />
+            </div>
+          </div>
+          <div style={{ width: 10, height: 1.5, borderRadius: 1, background: i === 0 ? "rgba(0,98,204,0.8)" : "rgba(0,0,0,0.15)" }} />
+        </div>
+      ))}
+    </>
+  )
+}
+
+// ── Device frame + screen content ───────────────────────────────────────────
+
+function MobileDevice() {
+  return (
+    <div className="ds-frame-phone">
+      <div className="ds-screen-phone">
+        <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+          <div className="ds-screen-bar-nav" style={{ height: "7%" }}>
+            <div style={{ width: 22, height: 4, borderRadius: 2, background: "#0062cc", opacity: 0.7 }} />
+            <div style={{ flex: 1 }} />
+            <div style={{ width: 14, height: 14, borderRadius: 7, background: "rgba(0,98,204,0.12)", border: "0.5px solid rgba(0,98,204,0.28)" }} />
+          </div>
+          <div className="ds-screen-bar-hero" style={{ height: "29%" }}>
+            <HeroBlocks lines={3} accent />
+          </div>
+          <div className="ds-screen-bar-content" style={{ flex: 1, padding: "5px 5px" }}>
+            <div style={{ height: "100%", display: "flex", flexDirection: "column", gap: 3 }}>
+              {[1,0.65,0.65].map((o,i) => (
+                <div key={i} style={{ flex: 1, borderRadius: 5, background: `rgba(0,98,204,${o * 0.06})`, border: `0.5px solid rgba(0,98,204,${o * 0.16})`, display: "flex", alignItems: "flex-end", padding: "0 4px 3px" }}>
+                  <div style={{ width: "55%", height: 3, borderRadius: 1.5, background: "rgba(255,255,255,0.75)" }} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="ds-screen-bar-brands" style={{ height: "6%" }}>
+            <BrandDots count={4} />
+          </div>
+          <div className="ds-screen-bar-blog" style={{ height: "13%" }}>
+            <BlogMiniCards cols={2} />
+          </div>
+          <div className="ds-screen-bar-footer" style={{ height: "5%" }} />
+          <div className="ds-screen-bar-bottomnav" style={{ height: "8%" }}>
+            <BottomNavTabs count={5} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function TabletDevice() {
+  return (
+    <div className="ds-frame-tablet">
+      <div className="ds-screen-tablet">
+        <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+          <div className="ds-screen-bar-nav" style={{ height: "8%" }}>
+            <div style={{ width: 24, height: 4, borderRadius: 2, background: "#0062cc", opacity: 0.7 }} />
+            <div style={{ flex: 1 }} />
+            <NavDots count={4} />
+            <div style={{ width: 14, height: 14, borderRadius: 7, background: "rgba(0,98,204,0.12)", border: "0.5px solid rgba(0,98,204,0.28)", flexShrink: 0 }} />
+          </div>
+          <div className="ds-screen-bar-hero" style={{ height: "28%" }}>
+            <HeroBlocks lines={3} accent />
+          </div>
+          <div className="ds-screen-bar-content" style={{ flex: 1 }}>
+            <div style={{ height: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, padding: "6px 6px" }}>
+              {[...Array(4)].map((_, i) => (
+                <div key={i} style={{ borderRadius: 5, background: "rgba(0,98,204,0.05)", border: "0.5px solid rgba(0,98,204,0.13)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div style={{ flex: "0 0 45%", background: "rgba(0,98,204,0.08)" }} />
+                  <div style={{ flex: 1, padding: "3px 4px", display: "flex", flexDirection: "column", gap: 2 }}>
+                    <div style={{ height: 2.5, width: "80%", borderRadius: 1.5, background: "rgba(0,0,0,0.22)" }} />
+                    <div style={{ height: 2, width: "55%", borderRadius: 1, background: "rgba(0,0,0,0.12)" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="ds-screen-bar-brands" style={{ height: "7%" }}>
+            <BrandDots count={5} />
+          </div>
+          <div className="ds-screen-bar-blog" style={{ height: "15%" }}>
+            <BlogMiniCards cols={2} />
+          </div>
+          <div className="ds-screen-bar-footer" style={{ height: "5%" }} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function LaptopDevice({ blogCols = 3, showQHDBadge = false }: { blogCols?: number; showQHDBadge?: boolean }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      {showQHDBadge && (
+        <div style={{ marginBottom: 8, padding: "3px 12px", borderRadius: 980, background: "rgba(41,151,255,0.12)", border: "1px solid rgba(41,151,255,0.3)", fontSize: 9, fontWeight: 700, color: "rgba(41,151,255,0.9)", letterSpacing: "0.06em" }}>
+          HERO TITLE: 85px — resto igual a desktop
+        </div>
+      )}
+      <div className="ds-frame-laptop-lid">
+        <div className="ds-screen-laptop">
+          <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+            <div className="ds-screen-bar-nav" style={{ height: "8%" }}>
+              <div style={{ width: 28, height: 4, borderRadius: 2, background: "#0062cc", opacity: 0.7 }} />
+              <div style={{ flex: 1 }} />
+              <NavDots count={5} />
+              <div style={{ display: "flex", gap: 4, marginLeft: 4 }}>
+                <div style={{ width: 22, height: 10, borderRadius: 5, border: "0.5px solid rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center", gap: 2 }}>
+                  <div style={{ width: 5, height: 5, borderRadius: 3, background: "rgba(0,0,0,0.25)" }} />
+                  <div style={{ width: 5, height: 5, borderRadius: 3, background: "rgba(0,0,0,0.1)" }} />
+                </div>
+                <div style={{ width: 28, height: 10, borderRadius: 5, border: "0.5px solid rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ fontSize: 6, color: "rgba(0,0,0,0.4)", fontWeight: 600 }}>Perfil</div>
+                </div>
+              </div>
+            </div>
+            <div className="ds-screen-bar-hero" style={{ height: "26%" }}>
+              <HeroBlocks lines={3} accent />
+            </div>
+            <div className="ds-screen-bar-content" style={{ flex: 1 }}>
+              <CardGrid bento />
+            </div>
+            <div className="ds-screen-bar-brands" style={{ height: "7%" }}>
+              <BrandDots count={6} />
+            </div>
+            <div className="ds-screen-bar-blog" style={{ height: "15%" }}>
+              <BlogMiniCards cols={blogCols} />
+            </div>
+            <div className="ds-screen-bar-footer" style={{ height: "6%" }} />
+          </div>
+        </div>
+      </div>
+      <div className="ds-frame-laptop-base" />
+    </div>
+  )
+}
+
+function MonitorDevice() {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div className="ds-frame-monitor">
+        <div className="ds-screen-monitor">
+          <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+            <div className="ds-screen-bar-nav" style={{ height: "7%" }}>
+              <div style={{ width: 28, height: 4, borderRadius: 2, background: "#0062cc", opacity: 0.7 }} />
+              <div style={{ flex: 1 }} />
+              <NavDots count={6} />
+              <div style={{ display: "flex", gap: 3, marginLeft: 4 }}>
+                <div style={{ width: 24, height: 10, borderRadius: 5, border: "0.5px solid rgba(0,0,0,0.15)" }} />
+                <div style={{ width: 30, height: 10, borderRadius: 5, border: "0.5px solid rgba(0,0,0,0.15)" }} />
+              </div>
+            </div>
+            {/* Hero — annotated: stays 1160px max-w */}
+            <div className="ds-screen-bar-hero" style={{ height: "24%", position: "relative" }}>
+              <div style={{ maxWidth: "73%", margin: "0 auto", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <HeroBlocks lines={3} accent />
+              </div>
+              <div style={{ position: "absolute", top: 3, right: 4, fontSize: 7, fontWeight: 700, color: "rgba(41,151,255,0.7)", fontFamily: "monospace", background: "rgba(41,151,255,0.08)", padding: "1px 4px", borderRadius: 2 }}>max-w 1160px</div>
+            </div>
+            <div className="ds-screen-bar-content" style={{ flex: 1, position: "relative" }}>
+              <CardGrid bento />
+              <div style={{ position: "absolute", top: 3, right: 4, fontSize: 7, fontWeight: 700, color: "rgba(41,151,255,0.7)", fontFamily: "monospace", background: "rgba(41,151,255,0.08)", padding: "1px 4px", borderRadius: 2 }}>max-w 1380px</div>
+            </div>
+            <div className="ds-screen-bar-brands" style={{ height: "6%" }}>
+              <BrandDots count={7} />
+            </div>
+            {/* Blog — 4 columns at ultra-wide */}
+            <div className="ds-screen-bar-blog" style={{ height: "15%", position: "relative" }}>
+              <BlogMiniCards cols={4} />
+              <div style={{ position: "absolute", top: 3, right: 4, fontSize: 7, fontWeight: 700, color: "rgba(168,85,247,0.9)", fontFamily: "monospace", background: "rgba(168,85,247,0.08)", padding: "1px 4px", borderRadius: 2 }}>4 cols</div>
+            </div>
+            <div className="ds-screen-bar-footer" style={{ height: "5%" }} />
+          </div>
+        </div>
+      </div>
+      <div className="ds-frame-monitor-stand" />
+      <div className="ds-frame-monitor-base" />
+    </div>
+  )
+}
+
+/** Legacy small diagram — kept for compact tables */
+function BPDiagram({ bp }: { bp: "mobile" | "tablet" | "desktop" | "qhd" | "ultrawide" }) {
+  const map = {
+    mobile: <MobileDevice />,
+    tablet: <TabletDevice />,
+    desktop: <LaptopDevice />,
+    qhd: <LaptopDevice showQHDBadge />,
+    ultrawide: <MonitorDevice />,
+  }
+  return <>{map[bp]}</>
 }
 
 /** Blog post layout diagram */
 function BlogPostDiagram({ variant }: { variant: "default" | "ultrawide" }) {
-  return variant === "default" ? (
-    <div style={{ display: "flex", flexDirection: "column", gap: 2, width: 120 }}>
-      <WF label="NAVBAR" style={{ height: 10 }} />
-      <WF label="← volver · meta · fecha" style={{ height: 12, fontSize: 6 }} />
-      <WF label="TÍTULO DEL POST" style={{ height: 18 }} />
-      <WF label="IMAGEN 16:8" style={{ height: 28 }} />
-      <WF label="CONTENIDO 17px/1.85lh" style={{ height: 60, fontSize: 6 }} />
-      <WF label="#tags" style={{ height: 10 }} />
-      <WF label="RELATED POSTS 3 cols" style={{ height: 20, fontSize: 6 }} />
-    </div>
-  ) : (
-    <div style={{ display: "flex", flexDirection: "column", gap: 2, width: 190 }}>
-      <WF label="NAVBAR" style={{ height: 10 }} />
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 2 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <WF label="TÍTULO DEL POST" style={{ height: 18 }} />
-          <WF label="IMAGEN 16:8" style={{ height: 28 }} />
-          <WF label="CONTENIDO 17px · max-w 720px" style={{ height: 60, fontSize: 6 }} />
-          <WF label="#tags" style={{ height: 10 }} />
+  const col = { display: "flex", flexDirection: "column" as const, gap: 3 }
+  return (
+    <div style={{ background: "var(--bg3)", borderRadius: 12, padding: 16, border: "1px solid var(--border)" }}>
+      {variant === "default" ? (
+        <div style={{ ...col, width: 200 }}>
+          <div style={{ height: 10, borderRadius: 4, background: "rgba(0,0,0,0.12)" }} />
+          <div style={{ height: 6, width: "50%", borderRadius: 3, background: "rgba(0,0,0,0.08)" }} />
+          <div style={{ height: 16, borderRadius: 4, background: "rgba(29,29,31,0.55)" }} />
+          <div style={{ height: 60, borderRadius: 6, background: "rgba(0,98,204,0.07)", border: "1px solid rgba(0,98,204,0.15)" }} />
+          <div style={{ ...col, gap: 2 }}>
+            {[1,.8,.8,.6,.4].map((o,i) => (
+              <div key={i} style={{ height: 4, width: `${(0.9 - i * 0.08) * 100}%`, borderRadius: 2, background: `rgba(0,0,0,${o * 0.15})` }} />
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 4 }}>
+            {["#design","#frontend","#ux"].map(t => (
+              <div key={t} style={{ padding: "2px 6px", borderRadius: 980, border: "0.5px solid rgba(0,98,204,0.35)", fontSize: 8, color: "rgba(0,98,204,0.8)", fontFamily: "monospace" }}>{t}</div>
+            ))}
+          </div>
+          <div style={{ height: 8, borderRadius: 4, background: "rgba(0,0,0,0.06)", border: "0.5px solid rgba(0,0,0,0.08)" }} />
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <WF label="← Blog" style={{ height: 10 }} accent />
-          <WF label="CATEGORÍA" style={{ height: 14 }} accent />
-          <WF label="PUBLICADO" style={{ height: 14 }} accent />
-          <WF label="TAGS" style={{ height: 14 }} accent />
+      ) : (
+        <div style={{ ...col, width: 380 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 12 }}>
+            <div style={{ ...col }}>
+              <div style={{ height: 16, borderRadius: 4, background: "rgba(29,29,31,0.55)" }} />
+              <div style={{ height: 60, borderRadius: 6, background: "rgba(0,98,204,0.07)", border: "1px solid rgba(0,98,204,0.15)" }} />
+              <div style={{ ...col, gap: 2 }}>
+                {[1,.8,.8,.6].map((o,i) => (
+                  <div key={i} style={{ height: 4, width: `${(0.9 - i * 0.1) * 100}%`, borderRadius: 2, background: `rgba(0,0,0,${o * 0.15})` }} />
+                ))}
+              </div>
+              <div style={{ display: "flex", gap: 4 }}>
+                {["#design","#frontend"].map(t => (
+                  <div key={t} style={{ padding: "2px 6px", borderRadius: 980, border: "0.5px solid rgba(0,98,204,0.35)", fontSize: 8, color: "rgba(0,98,204,0.8)", fontFamily: "monospace" }}>{t}</div>
+                ))}
+              </div>
+            </div>
+            <div style={{ background: "rgba(41,151,255,0.06)", borderRadius: 8, border: "1px solid rgba(41,151,255,0.18)", padding: 8, ...col, gap: 6 }}>
+              <div style={{ height: 4, borderRadius: 2, background: "rgba(41,151,255,0.4)", width: "60%" }} />
+              {["Categoría","Publicado","Etiquetas"].map(l => (
+                <div key={l} style={{ ...col, gap: 1.5 }}>
+                  <div style={{ fontSize: 7, color: "rgba(41,151,255,0.7)", fontWeight: 700, fontFamily: "monospace", letterSpacing: "0.06em", textTransform: "uppercase" }}>{l}</div>
+                  <div style={{ height: 6, borderRadius: 2, background: "rgba(0,0,0,0.1)", width: "80%" }} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ height: 20, borderRadius: 6, background: "rgba(0,0,0,0.06)", display: "flex", alignItems: "center", padding: "0 8px" }}>
+            <div style={{ fontSize: 8, color: "rgba(0,0,0,0.4)", fontFamily: "monospace" }}>RELATED POSTS · 3 cols · ancho completo blog-post-main</div>
+          </div>
         </div>
-      </div>
-      <WF label="RELATED POSTS 3 cols · ancho completo blog-post-main" style={{ height: 20, fontSize: 6 }} />
+      )}
     </div>
   )
 }
@@ -2662,28 +2998,140 @@ function PageBreakpoints() {
         </div>
       </div>
 
-      {/* ── Per-tier diagrams ── */}
-      <SectionHeading title="Diagramas de layout por tier" />
+      {/* ── Per-tier device mockups ── */}
+      <SectionHeading title="Diagramas de dispositivo — layout por tier" />
       <p className="ds-pattern-desc">
-        Cada diagrama muestra la estructura real de la página: secciones, columnas de grid, alturas relativas y elementos fijos. Las cajas en <span style={{ color: "rgba(41,151,255,0.9)", fontWeight: 600 }}>azul brillante</span> indican elementos que cambian específicamente en ese tier.
+        Cada mockup muestra la estructura real de la página renderizada en el dispositivo típico de ese tier. Las anotaciones resaltan los cambios clave respecto al tier anterior. Scroll horizontal para ver todos los tiers.
       </p>
-      <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 16, alignItems: "flex-start" }}>
-        {TIERS.map(t => (
-          <div key={t.key} style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
-            <div style={{
-              display: "inline-block", padding: "3px 10px", borderRadius: 4,
-              background: t.color + "22", border: `1.5px solid ${t.color}55`,
-              fontSize: 10, fontWeight: 700, color: t.color, letterSpacing: "0.05em",
-            }}>
-              {t.label.toUpperCase()}
-            </div>
-            <div style={{ fontSize: 9, color: "var(--txt3)", fontFamily: "monospace", textAlign: "center" }}>{t.range}</div>
-            <BPDiagram bp={t.key} />
-            <div style={{ fontSize: 9, color: "var(--txt3)", fontFamily: "monospace", textAlign: "center", maxWidth: 200, textWrap: "balance" as any }}>
-              {t.mq}
+
+      {/* Mobile */}
+      <div style={{ marginTop: 24, padding: "24px 0" }}>
+        <div style={{ display: "flex", gap: 40, alignItems: "flex-start", flexWrap: "wrap" }}>
+          <div className="ds-device-unit">
+            <div className="ds-device-badge" style={{ background: "#ef444422", border: "1.5px solid #ef444455", color: "#ef4444" }}>📱 Mobile</div>
+            <div className="ds-device-range">≤ 640px · @media (max-width: 640px)</div>
+            <MobileDevice />
+            <div className="ds-device-changes">
+              {["Nav oculto","Bottom nav 5 tabs","Hero 70svh top","title clamp(40–52px)","1 col projects","1–3 col blog","padding 20px"].map(c => (
+                <span key={c} className="ds-device-change-chip" style={{ borderColor: "#ef444433", color: "#ef4444" }}>{c}</span>
+              ))}
             </div>
           </div>
-        ))}
+          <div style={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", gap: 12, paddingTop: 40 }}>
+            <div style={{ padding: 16, borderRadius: 12, background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.15)" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#ef4444", marginBottom: 8, letterSpacing: "0.06em", textTransform: "uppercase" }}>Cambios principales</div>
+              <ul style={{ fontSize: 13, color: "var(--txt2)", lineHeight: 1.7, paddingLeft: 16 }}>
+                <li><strong>.nav-center</strong> → <code>display: none</code></li>
+                <li><strong>.bottom-nav</strong> → <code>display: flex</code> (z:150)</li>
+                <li><strong>.hero-title</strong> → <code>clamp(40px, 11vw, 52px)</code></li>
+                <li><strong>.section-full</strong> → <code>min-height: 70svh</code></li>
+                <li><strong>.footer</strong> → <code>padding-bottom: 80px</code> (espacio bottom-nav)</li>
+                <li><strong>.projects-bento</strong> → <code>1 columna</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tablet */}
+      <div style={{ marginTop: 8, padding: "24px 0", borderTop: "1px solid var(--border)" }}>
+        <div style={{ display: "flex", gap: 40, alignItems: "flex-start", flexWrap: "wrap" }}>
+          <div className="ds-device-unit">
+            <div className="ds-device-badge" style={{ background: "#f59e0b22", border: "1.5px solid #f59e0b55", color: "#f59e0b" }}>📱 Tablet</div>
+            <div className="ds-device-range">641–860px · @media (min-width: 641px) and (max-width: 860px)</div>
+            <TabletDevice />
+            <div className="ds-device-changes">
+              {["Navbar visible","No bottom nav","2 cols projects","2 cols blog","About horizontal","padding 32px"].map(c => (
+                <span key={c} className="ds-device-change-chip" style={{ borderColor: "#f59e0b33", color: "#b45309" }}>{c}</span>
+              ))}
+            </div>
+          </div>
+          <div style={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", gap: 12, paddingTop: 40 }}>
+            <div style={{ padding: 16, borderRadius: 12, background: "rgba(245,158,11,0.04)", border: "1px solid rgba(245,158,11,0.18)" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#b45309", marginBottom: 8, letterSpacing: "0.06em", textTransform: "uppercase" }}>Cambios principales</div>
+              <ul style={{ fontSize: 13, color: "var(--txt2)", lineHeight: 1.7, paddingLeft: 16 }}>
+                <li><strong>.nav-center</strong> → visible nuevamente</li>
+                <li><strong>.bottom-nav</strong> → <code>display: none</code></li>
+                <li><strong>.projects-bento</strong> → <code>2 cols, todas span 1</code></li>
+                <li><strong>.about-grid</strong> → horizontal: foto 160px + columna stats</li>
+                <li><strong>.section</strong> → <code>padding: 72px 32px 56px</code></li>
+                <li><strong>.blog-grid</strong> → 2 columnas</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop */}
+      <div style={{ marginTop: 8, padding: "24px 0", borderTop: "1px solid var(--border)" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="ds-device-unit" style={{ alignItems: "flex-start" }}>
+            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <div className="ds-device-badge" style={{ background: "#30d15822", border: "1.5px solid #30d15855", color: "#1a8f3c" }}>💻 Desktop</div>
+              <div className="ds-device-range">861–1439px · estilos base (sin @media)</div>
+            </div>
+          </div>
+          <LaptopDevice blogCols={3} />
+          <div style={{ padding: 16, borderRadius: 12, background: "rgba(48,209,88,0.04)", border: "1px solid rgba(48,209,88,0.18)", maxWidth: 560 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#1a8f3c", marginBottom: 8, letterSpacing: "0.06em", textTransform: "uppercase" }}>El tier base — los estilos sin @media query</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 16px", fontSize: 13, color: "var(--txt2)", lineHeight: 1.7 }}>
+              <div><strong>max-width</strong>: 1160px</div>
+              <div><strong>hero title</strong>: clamp(52px,7.5vw,100px)</div>
+              <div><strong>section padding</strong>: 80px 48px</div>
+              <div><strong>projects</strong>: bento 3 cols Z-pattern</div>
+              <div><strong>about</strong>: 300px + 1fr</div>
+              <div><strong>blog grid</strong>: 3 columnas</div>
+              <div><strong>contact</strong>: 1fr + 1.1fr</div>
+              <div><strong>hero-wrap</strong>: 120px 48px 80px</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* QHD */}
+      <div style={{ marginTop: 8, padding: "24px 0", borderTop: "1px solid var(--border)" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="ds-device-unit" style={{ alignItems: "flex-start" }}>
+            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <div className="ds-device-badge" style={{ background: "rgba(41,151,255,0.12)", border: "1.5px solid rgba(41,151,255,0.4)", color: "#2997ff" }}>🖥 QHD / 1440p</div>
+              <div className="ds-device-range">1440–1920px · @media (min-width: 1440px) and (max-width: 1920px)</div>
+            </div>
+          </div>
+          <LaptopDevice blogCols={3} showQHDBadge />
+          <div style={{ padding: 16, borderRadius: 12, background: "rgba(41,151,255,0.05)", border: "1px solid rgba(41,151,255,0.2)", maxWidth: 560 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#2997ff", marginBottom: 8, letterSpacing: "0.06em", textTransform: "uppercase" }}>Un solo cambio respecto a desktop</div>
+            <div style={{ fontSize: 13, color: "var(--txt2)", lineHeight: 1.7 }}>
+              <code style={{ fontSize: 12, background: "rgba(41,151,255,0.1)", padding: "1px 6px", borderRadius: 4, color: "#2997ff" }}>.hero-title {"{"} font-size: 85px; {"}"}</code>
+              <p style={{ marginTop: 8 }}>El <code>clamp(52px, 7.5vw, 100px)</code> en este rango llega a 100px — demasiado grande. El override lo fija en 85px. Todo lo demás (containers, grid, tipografía) es idéntico al tier desktop.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Ultra-wide */}
+      <div style={{ marginTop: 8, padding: "24px 0", borderTop: "1px solid var(--border)" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="ds-device-unit" style={{ alignItems: "flex-start" }}>
+            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <div className="ds-device-badge" style={{ background: "rgba(168,85,247,0.12)", border: "1.5px solid rgba(168,85,247,0.4)", color: "#a855f7" }}>🖥 Ultra-wide</div>
+              <div className="ds-device-range">≥ 1921px · @media (min-width: 1921px)</div>
+            </div>
+          </div>
+          <MonitorDevice />
+          <div style={{ padding: 16, borderRadius: 12, background: "rgba(168,85,247,0.04)", border: "1px solid rgba(168,85,247,0.18)", maxWidth: 580 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#a855f7", marginBottom: 10, letterSpacing: "0.06em", textTransform: "uppercase" }}>Decisiones de diseño para ultra-wide</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 20px", fontSize: 12, color: "var(--txt2)", lineHeight: 1.6 }}>
+              <div>✓ <strong>.section</strong>: max-w 1400px, pad 96px 80px</div>
+              <div>✗ <strong>.hero-wrap</strong>: QUEDA en 1160px (intencional)</div>
+              <div>✓ <strong>.blog-grid</strong>: 4 columnas</div>
+              <div>✗ <strong>.blog-preview-grid</strong>: QUEDA 3 cols (intencional)</div>
+              <div>✓ <strong>.blog-post-layout</strong>: editorial 2-col</div>
+              <div>✓ <strong>.about-grid</strong>: 380px + 1fr, gap 72px</div>
+              <div>✓ <strong>.brands-gallery</strong>: max-w 1380px</div>
+              <div>✓ <strong>.hero-title</strong>: 85px (mismo que QHD)</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ── Blog post layout ── */}
