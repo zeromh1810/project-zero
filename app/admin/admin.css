@@ -978,8 +978,8 @@
   to   { transform: translateX(0) }
 }
 
-/* ── ULTRA-WIDE (≥1440px) — 2560×1440 ────────────────────────────────────── */
-@media (min-width: 1440px) {
+/* ── ULTRA-WIDE (≥1921px) — por encima de Full HD 1920×1080 ─────────────── */
+@media (min-width: 1921px) {
   .admin-container {
     max-width: 1200px;
     padding: 48px 64px 80px;

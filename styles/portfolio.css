@@ -4887,11 +4887,12 @@ html {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   ULTRA-WIDE — 1440p / 2560×1440 (≥1440px)
+   ULTRA-WIDE — ≥1440p / 2560×1440 (≥1921px)
+   Solo activo por encima de Full HD (1920×1080).
    Estrategia: expandir containers de 1160px→1400px, blog 4 cols,
-   tipografía liberada, admin más ancho, DS viewer aprovecha el espacio.
+   tipografía liberada, DS viewer aprovecha el espacio.
    ════════════════════════════════════════════════════════════════════════════ */
-@media (min-width: 1440px) {
+@media (min-width: 1921px) {
 
   /* ── Containers ─────────────────────────────────────────────────── */
   .section {
