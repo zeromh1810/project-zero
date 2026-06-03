@@ -2339,7 +2339,7 @@ html {
 /* Grid de logos — auto-fill para escalar de 6 a 12 sin cambios */
 .brands-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 24px 16px;
   max-width: 1000px;
   margin: 0 auto;
@@ -2754,9 +2754,50 @@ html {
   min-height: 100vh;
 }
 
+/* Wrapper transparente por defecto — se activa como grid solo a ≥1921px */
+.blog-post-layout {
+  display: block;
+}
+
 .blog-post {
   max-width: 720px;
   margin: 0 auto;
+}
+
+/* ── Sidebar del post — oculto en todas las vistas excepto 1921px+ ── */
+.blog-post-sidebar {
+  display: none;
+}
+
+.blog-sidebar-back {
+  font-size: 13px;
+  color: var(--txt3);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.blog-sidebar-back:hover {
+  color: var(--txt);
+}
+
+.blog-sidebar-section {
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.blog-sidebar-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--txt3);
+  margin-bottom: 10px;
+}
+
+.blog-sidebar-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .blog-post-back {
@@ -4931,10 +4972,43 @@ html {
     gap: 20px;
   }
 
-  /* ── Blog grid — 4 columnas ─────────────────────────────────────── */
-  .blog-grid,
-  .blog-preview-grid {
+  /* ── Blog grid — 4 columnas (solo el listado /blog, no el home preview) ── */
+  .blog-grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* ── Blog post — layout editorial 2 columnas ────────────────────── */
+  .blog-post-layout {
+    display: grid;
+    grid-template-columns: 720px 260px;
+    gap: 56px;
+    align-items: start;
+    /* centrado dentro de blog-post-main */
+    max-width: 1036px;
+    margin: 0 auto;
+  }
+
+  /* El artículo ya tiene max-width:720px; en el grid solo necesita ocupar su col */
+  .blog-post-layout .blog-post {
+    max-width: 720px;
+    margin: 0;
+  }
+
+  /* Ocultar back link y meta del artículo (se muestran en la sidebar) */
+  .blog-post-layout .blog-post-back,
+  .blog-post-layout .blog-post-meta {
+    display: none;
+  }
+
+  /* Sidebar visible y sticky */
+  .blog-post-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 96px;
+    /* alinear verticalmente con el título del artículo */
+    padding-top: 0;
   }
 
   /* ── Related posts — head alineado con el artículo (720px) ─────── */

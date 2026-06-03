@@ -101,38 +101,75 @@ export default function BlogPostPage() {
 
         {post && (
           <>
-            <article className="blog-post">
+            {/* Wrapper que se convierte en grid 2 cols a ≥1921px */}
+            <div className="blog-post-layout">
 
-              <Link href="/blog" className="blog-post-back">← Volver al blog</Link>
+              <article className="blog-post">
 
-              <div className="blog-post-meta">
-                <span className="blog-card-cat">{post.category}</span>
-                <span className="blog-post-date">{formatDate(post.publishedAt)}</span>
-              </div>
+                <Link href="/blog" className="blog-post-back">← Volver al blog</Link>
 
-              <h1 className="blog-post-title">{post.title}</h1>
-
-              {post.image && (
-                <div className="blog-post-img">
-                  <img src={post.image} alt={post.title} />
+                <div className="blog-post-meta">
+                  <span className="blog-card-cat">{post.category}</span>
+                  <span className="blog-post-date">{formatDate(post.publishedAt)}</span>
                 </div>
-              )}
 
-              <div className="blog-post-content">{post.content}</div>
+                <h1 className="blog-post-title">{post.title}</h1>
 
-              {tags.length > 0 && (
-                <footer className="blog-post-tags" aria-label="Tags">
-                  {tags.map(tag => (
-                    <Link
-                      key={tag}
-                      href={`/blog?tag=${encodeURIComponent(tag)}`}
-                      className="blog-tag"
-                    >#{tag}</Link>
-                  ))}
-                </footer>
-              )}
+                {post.image && (
+                  <div className="blog-post-img">
+                    <img src={post.image} alt={post.title} />
+                  </div>
+                )}
 
-            </article>
+                <div className="blog-post-content">{post.content}</div>
+
+                {tags.length > 0 && (
+                  <footer className="blog-post-tags" aria-label="Tags">
+                    {tags.map(tag => (
+                      <Link
+                        key={tag}
+                        href={`/blog?tag=${encodeURIComponent(tag)}`}
+                        className="blog-tag"
+                      >#{tag}</Link>
+                    ))}
+                  </footer>
+                )}
+
+              </article>
+
+              {/* Sidebar — solo visible a ≥1921px */}
+              <aside className="blog-post-sidebar" aria-label="Información del artículo">
+                <Link href="/blog" className="blog-sidebar-back">← Blog</Link>
+
+                <div className="blog-sidebar-section">
+                  <div className="blog-sidebar-label">Categoría</div>
+                  <span className="blog-card-cat" style={{ display: "block" }}>
+                    {post.category}
+                  </span>
+                </div>
+
+                <div className="blog-sidebar-section">
+                  <div className="blog-sidebar-label">Publicado</div>
+                  <span className="blog-post-date">{formatDate(post.publishedAt)}</span>
+                </div>
+
+                {tags.length > 0 && (
+                  <div className="blog-sidebar-section">
+                    <div className="blog-sidebar-label">Etiquetas</div>
+                    <div className="blog-sidebar-tags">
+                      {tags.map(tag => (
+                        <Link
+                          key={tag}
+                          href={`/blog?tag=${encodeURIComponent(tag)}`}
+                          className="blog-tag"
+                        >#{tag}</Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </aside>
+
+            </div>
 
             <RelatedPosts
               currentSlug={post.slug}
