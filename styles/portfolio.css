@@ -37,6 +37,37 @@
   --portfolio-font: "DM Sans", "Helvetica Neue", sans-serif;
   --portfolio-heading-font: "Plus Jakarta Sans", sans-serif;
 
+  /* ── Spacing scale ── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-7:  28px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ── Border-radius scale ── */
+  --r-sm:   8px;
+  --r-md:   12px;
+  --r-lg:   16px;
+  --r-xl:   20px;
+  --r-2xl:  24px;
+  --r-full: 9999px;
+
+  /* ── Glassmorphism blur scale ── */
+  --glass-blur-xs: 6px;
+  --glass-blur-sm: 12px;
+  --glass-blur-md: 20px;
+  --glass-blur-lg: 28px;
+  --glass-blur-xl: 48px;
+
   /* ── Shadow scale ── */
   --shadow-xs:     0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-sm:     0 4px 12px rgba(0,0,0,0.08);
@@ -273,6 +304,14 @@ html {
   color: var(--txt3);
   transition: background 200ms ease, color 200ms ease, box-shadow 200ms ease;
   flex-shrink: 0;
+  position: relative;
+}
+
+/* Extiende el área de tap a 44×44px (WCAG 2.5.5 / Apple HIG) sin afectar el visual */
+.theme-toggle-btn::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
 }
 
 .theme-toggle-btn svg {
@@ -2367,7 +2406,7 @@ html {
 /* Grid de logos — auto-fill para escalar de 6 a 12 sin cambios */
 .brands-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 24px 16px;
   max-width: 1000px;
   margin: 0 auto;

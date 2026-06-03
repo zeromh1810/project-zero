@@ -16,8 +16,10 @@ function getInitialTheme(): boolean {
   if (typeof window !== "undefined") {
     const stored = localStorage.getItem(THEME_STORAGE_KEY)
     if (stored !== null) return stored === "dark"
+    // No stored preference — respect OS preference
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
   }
-  return false // Default to light
+  return false // SSR default: light
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

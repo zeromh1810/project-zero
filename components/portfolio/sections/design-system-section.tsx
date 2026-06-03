@@ -6,29 +6,30 @@ import { EmailIcon } from "../icons"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type DSPageId =
-  | "overview" | "colors" | "typography" | "darkmode" | "primitivos"
-  | "buttons" | "cards" | "forms" | "navigation" | "badges" | "toast" | "patterns" | "brands"
+  | "overview" | "colors" | "typography" | "darkmode" | "primitivos" | "animaciones"
+  | "buttons" | "cards" | "forms" | "navigation" | "badges" | "toast" | "patterns" | "brands" | "blog"
 
 const DS_GROUPS: { label: string; items: { id: DSPageId; label: string }[] }[] = [
   {
     label: "Fundamentos",
     items: [
-      { id: "overview",   label: "Overview" },
-      { id: "colors",     label: "Colores" },
-      { id: "typography", label: "Tipografía" },
-      { id: "darkmode",   label: "Modo Oscuro" },
-      { id: "primitivos", label: "Tokens Primitivos" },
+      { id: "overview",    label: "Overview" },
+      { id: "colors",      label: "Colores" },
+      { id: "typography",  label: "Tipografía" },
+      { id: "darkmode",    label: "Modo Oscuro" },
+      { id: "primitivos",  label: "Tokens Primitivos" },
+      { id: "animaciones", label: "Animaciones" },
     ],
   },
   {
     label: "Componentes",
     items: [
-      { id: "buttons", label: "Botones" },
-      { id: "cards", label: "Tarjetas" },
-      { id: "forms", label: "Formularios" },
+      { id: "buttons",    label: "Botones" },
+      { id: "cards",      label: "Tarjetas" },
+      { id: "forms",      label: "Formularios" },
       { id: "navigation", label: "Navegación" },
-      { id: "badges", label: "Badges & Tags" },
-      { id: "toast", label: "Toast" },
+      { id: "badges",     label: "Badges & Tags" },
+      { id: "toast",      label: "Toast" },
     ],
   },
   {
@@ -36,6 +37,7 @@ const DS_GROUPS: { label: string; items: { id: DSPageId; label: string }[] }[] =
     items: [
       { id: "patterns", label: "Layouts" },
       { id: "brands",   label: "Brands Section" },
+      { id: "blog",     label: "Blog" },
     ],
   },
 ]
@@ -90,21 +92,21 @@ function PageOverview() {
   return (
     <div className="ds-page-body">
       <div className="ds-page-header">
-        <div className="ds-page-badge">v1.7.0</div>
+        <div className="ds-page-badge">v1.8.0</div>
         <h2 className="ds-page-title">Project Zero Design System</h2>
         <p className="ds-page-desc">
           Sistema de diseño del portafolio de <strong>Carlos Felipe Rojas Hickmann</strong>. Arquitectura de tokens de 3 capas
           (Primitivos → Semánticos → Componentes), construido sobre Next.js 16 + React 19 + CSS Variables.
-          Todos los componentes son dark-mode ready y accesibles WCAG AA.
+          Todos los componentes son dark-mode ready, accesibles WCAG AA y diseñados para escalar.
         </p>
       </div>
 
       <div className="ds-overview-grid">
         {[
-          { label: "Tokens", value: "90+", desc: "Variables CSS documentadas en 3 capas" },
-          { label: "Componentes", value: "14", desc: "UI components en el sistema" },
-          { label: "WCAG", value: "AA", desc: "Nivel de accesibilidad mínimo" },
-          { label: "Modos", value: "2", desc: "Light & Dark mode nativos" },
+          { label: "Tokens CSS", value: "120+", desc: "CSS custom properties reales en :root/.dark" },
+          { label: "Páginas DS", value: "15",   desc: "Secciones documentadas en el viewer" },
+          { label: "WCAG",       value: "AA",   desc: "Nivel de accesibilidad mínimo" },
+          { label: "Modos",      value: "2",    desc: "Light & Dark mode con OS preference" },
         ].map(({ label, value, desc }) => (
           <div className="ds-overview-card" key={label}>
             <div className="ds-overview-value">{value}</div>
@@ -1219,6 +1221,8 @@ function PageBrands() {
       </PreviewBox>
       <CodeBlock code={`.brands-gallery {
   display: grid;
+  /* auto-fill (NO auto-fit) — preserva tracks vacíos para que los logos
+     mantengan su tamaño mínimo de 130px aunque haya pocos items */
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 24px 16px;
   max-width: 1000px;
@@ -1357,8 +1361,8 @@ function PageDarkMode() {
         <h2 className="ds-page-title">Modo Oscuro</h2>
         <p className="ds-page-desc">
           Sistema de dark mode basado en <strong>CSS variables + clase <code>.dark</code> en el elemento html</strong>.
-          Los 14 tokens semánticos sobrescriben sus valores sin necesidad de JavaScript en el render path.
-          El tema persiste en <code>localStorage</code> y respeta <code>prefers-color-scheme</code>.
+          Los tokens semánticos sobrescriben sus valores sin JS en el render path.
+          El tema persiste en <code>localStorage</code>. Si no hay preferencia guardada, respeta <code>prefers-color-scheme</code> del SO.
         </p>
       </div>
 
@@ -1405,7 +1409,7 @@ function PageDarkMode() {
           <span>Uso</span>
         </div>
         {TOKEN_PAIRS.map(({ token, light, dark, usage }) => {
-          const isColor = !light.includes(" ")
+          const isColor = light.startsWith("#")
           return (
             <div key={token} className="ds-dm-row">
               <code className="ds-dm-token">{token}</code>
@@ -1474,12 +1478,13 @@ function PageDarkMode() {
       </PreviewBox>
       <div className="ds-spec-table" style={{ marginTop: 16 }}>
         {[
-          { prop: "btn-size",       val: "28px",   desc: "Tamaño visual del botón" },
-          { prop: "icon-size",      val: "14px",   desc: "SVG sol / luna" },
-          { prop: "pill-padding",   val: "3px",    desc: "Padding del contenedor pill" },
-          { prop: "gap",            val: "2px",    desc: "Espacio entre botones" },
-          { prop: "active-bg",      val: "var(--bg2)", desc: "Fondo botón activo" },
+          { prop: "btn-size",       val: "32px",        desc: "Tamaño visual del botón (hit area real: 44px vía ::before)" },
+          { prop: "icon-size",      val: "15px",        desc: "SVG sol / luna" },
+          { prop: "pill-padding",   val: "4px",         desc: "Padding del contenedor pill" },
+          { prop: "gap",            val: "2px",         desc: "Espacio entre botones" },
+          { prop: "active-bg",      val: "var(--bg2)",  desc: "Fondo botón activo" },
           { prop: "active-shadow",  val: "0 1px 4px rgba(0,0,0,0.14)", desc: "Sombra botón activo" },
+          { prop: "hit-area",       val: "44×44px",     desc: "::before extiende el tap area WCAG 2.5.5 sin modificar el visual" },
         ].map(({ prop, val, desc }) => (
           <div key={prop} className="ds-spec-row">
             <span className="ds-spec-name">{prop}</span>
@@ -1534,84 +1539,111 @@ function PageDarkMode() {
       {/* ── ThemeContext API ── */}
       <SectionHeading title="ThemeContext API" />
       <CodeBlock code={`// lib/context/theme-context.tsx
+
+// Prioridad de resolución del tema inicial:
+// 1. localStorage["portfolio-theme"] si existe → "dark" o "light"
+// 2. window.matchMedia("(prefers-color-scheme: dark)").matches → OS preference
+// 3. false (light) → SSR default
+
+function getInitialTheme(): boolean {
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("portfolio-theme")
+    if (stored !== null) return stored === "dark"
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+  }
+  return false // SSR default: light
+}
+
+// Hook de uso en componentes
 import { useTheme } from "@/lib/context/theme-context"
 
 function MyComponent() {
   const { isDark, toggleTheme } = useTheme()
-
-  return (
-    <div style={{ color: isDark ? "#f5f5f7" : "#1d1d1f" }}>
-      {/* Mejor: usar var(--txt) directamente en CSS */}
-    </div>
-  )
+  // Mejor: usar var(--txt) directamente en CSS — no necesita isDark
+  return <div style={{ color: "var(--txt)" }}>...</div>
 }
 
-// El ThemeProvider en app/admin/layout.tsx wrappea la app.
-// El estado persiste en localStorage bajo la key "theme".
-// Valor por defecto: "light" (definido en theme-context.tsx).`} />
+// El ThemeProvider wrappea la app en app/layout.tsx.
+// toggleTheme() persiste en localStorage y actualiza document.documentElement.classList.`} />
     </div>
   )
 }
 
 // ── Page: Primitivos ─────────────────────────────────────────────────────────
 function PagePrimitivos() {
-  const SHADOW_TOKENS = [
-    { name: "--shadow-xs",     val: "0 1px 3px rgba(0,0,0,0.06)", usage: "Inputs, chips — elevación mínima" },
-    { name: "--shadow-sm",     val: "0 4px 12px rgba(0,0,0,0.08)", usage: "Cards en reposo, badges" },
-    { name: "--shadow-md",     val: "0 8px 24px rgba(0,0,0,0.10)", usage: "Dropdowns, panels flotantes" },
-    { name: "--shadow-lg",     val: "0 12px 40px rgba(0,0,0,0.07) + inset", usage: "Form card, about-photo — glass con highlight" },
-    { name: "--shadow-xl",     val: "0 16px 40px rgba(0,0,0,0.14)", usage: "Card hover estándar — blog, preview" },
-    { name: "--shadow-2xl",    val: "0 24px 64px rgba(0,0,0,0.28) …", usage: "Project card hover — máxima elevación" },
-    { name: "--shadow-up",     val: "0 -6px 24px rgba(0,0,0,0.07)", usage: "Bottom nav, sticky footer" },
-    { name: "--shadow-accent", val: "0 8px 24px rgba(41,151,255,0.35)", usage: "Botón primario hover — glow accent" },
-    { name: "--shadow-focus",  val: "0 0 0 3px rgba(41,151,255,0.15)", usage: "Focus ring inputs (box-shadow approach)" },
-  ]
-
-  const Z_TOKENS = [
-    { name: "--z-base",         val: "0",    usage: "Canvas WebGL, fondos sin stacking context" },
-    { name: "--z-content",      val: "10",   usage: "Hero, cards, secciones en flujo" },
-    { name: "--z-raised",       val: "20",   usage: "Projects sheet, panels sobre contenido" },
-    { name: "--z-sticky",       val: "100",  usage: "Navbar, detail-navbar — persisten al scroll" },
-    { name: "--z-navigation",   val: "150",  usage: "Bottom nav mobile" },
-    { name: "--z-dropdown",     val: "200",  usage: "Sidebars, popovers, DS sidebar" },
-    { name: "--z-notification", val: "400",  usage: "Toasts, snackbars, admin-toast" },
-    { name: "--z-modal",        val: "500",  usage: "Overlays: profile modal, project-view" },
-    { name: "--z-emergency",    val: "9999", usage: "Tooltips forzados — solo emergencias" },
+  const SPACING_TOKENS = [
+    { name: "--space-1",  val: "4px",  usage: "Micro — gap entre iconos, badge padding interno" },
+    { name: "--space-2",  val: "8px",  usage: "Base unit — gap entre elementos hermanos" },
+    { name: "--space-3",  val: "12px", usage: "Gap en grids compactos, badge padding" },
+    { name: "--space-4",  val: "16px", usage: "Padding estándar de componente" },
+    { name: "--space-5",  val: "20px", usage: "Padding toast, admin-toast" },
+    { name: "--space-6",  val: "24px", usage: "Gap entre tarjetas, padding de secciones mobile" },
+    { name: "--space-7",  val: "28px", usage: "Toast position, gap secciones" },
+    { name: "--space-8",  val: "32px", usage: "Padding de card, modal, form-card" },
+    { name: "--space-10", val: "40px", usage: "Separación de bloques de contenido" },
+    { name: "--space-12", val: "48px", usage: "Padding horizontal de sección (section-x)" },
+    { name: "--space-14", val: "56px", usage: "Padding vertical inter-sección" },
+    { name: "--space-16", val: "64px", usage: "Altura navbar y bottom-nav" },
+    { name: "--space-20", val: "80px", usage: "Padding vertical de sección (section-y)" },
+    { name: "--space-24", val: "96px", usage: "Navbar offset para contenido under-sticky" },
   ]
 
   const RADIUS_TOKENS = [
-    { name: "sm  (--r-sm)",   val: "8px",    usage: "Nav items, tags, botones pequeños" },
-    { name: "md  (--r-md)",   val: "12px",   usage: "Form inputs, chips" },
-    { name: "lg  (--r-lg)",   val: "16px",   usage: "Stat cards, toast" },
-    { name: "xl  (--r-xl)",   val: "20px",   usage: "Project cards" },
-    { name: "2xl (--r-2xl)",  val: "24px",   usage: "Form card, about-photo, modales" },
-    { name: "full",           val: "9999px", usage: "Pills, badges, botones primarios" },
+    { name: "--r-sm",   val: "8px",    usage: "Nav items, tags, botones pequeños" },
+    { name: "--r-md",   val: "12px",   usage: "Form inputs, chips, detail-btn" },
+    { name: "--r-lg",   val: "16px",   usage: "Stat cards, toast, KPI cards" },
+    { name: "--r-xl",   val: "20px",   usage: "Project cards bento" },
+    { name: "--r-2xl",  val: "24px",   usage: "Form card, about-photo-wrap, modal" },
+    { name: "--r-full", val: "9999px", usage: "Pills, badges, botones primarios y secundarios" },
+  ]
+
+  const SHADOW_TOKENS = [
+    { name: "--shadow-xs",     val: "0 1px 3px rgba(0,0,0,0.06)",  usage: "Inputs, chips — elevación mínima" },
+    { name: "--shadow-sm",     val: "0 4px 12px rgba(0,0,0,0.08)", usage: "Cards en reposo, badges" },
+    { name: "--shadow-md",     val: "0 8px 24px rgba(0,0,0,0.10)", usage: "Dropdowns, panels flotantes" },
+    { name: "--shadow-lg",     val: "0 12px 40px … + inset",       usage: "Form card, about-photo — glass con highlight" },
+    { name: "--shadow-xl",     val: "0 16px 40px rgba(0,0,0,0.14)",usage: "Card hover estándar — blog, preview, related" },
+    { name: "--shadow-2xl",    val: "0 24px 64px rgba(0,0,0,0.28)",usage: "Project card hover — máxima elevación" },
+    { name: "--shadow-up",     val: "0 -6px 24px rgba(0,0,0,0.07)",usage: "Bottom nav, sticky footer (sombra hacia arriba)" },
+    { name: "--shadow-accent", val: "0 8px 24px rgba(41,151,255,0.35)", usage: "Botón primario hover — glow accent azul" },
+    { name: "--shadow-focus",  val: "0 0 0 3px rgba(41,151,255,0.15)", usage: "Focus ring inputs (no desplaza layout)" },
+  ]
+
+  const Z_TOKENS = [
+    { name: "--z-base",         val: "0",    usage: "Canvas WebGL, fondos sin stacking context propio" },
+    { name: "--z-content",      val: "10",   usage: "Hero, cards, secciones en flujo normal" },
+    { name: "--z-raised",       val: "20",   usage: "Projects sheet, panels sobre contenido" },
+    { name: "--z-sticky",       val: "100",  usage: "Navbar, detail-navbar — persisten en scroll" },
+    { name: "--z-navigation",   val: "150",  usage: "Bottom nav mobile" },
+    { name: "--z-dropdown",     val: "200",  usage: "Sidebars, popovers, DS sidebar drawer" },
+    { name: "--z-notification", val: "400",  usage: "Toasts, snackbars, admin-toast" },
+    { name: "--z-modal",        val: "500",  usage: "Overlays: profile modal, project-view panel" },
+    { name: "--z-emergency",    val: "9999", usage: "Tooltips forzados — solo en emergencias reales" },
+  ]
+
+  const GLASS_BLUR_TOKENS = [
+    { name: "--glass-blur-xs", val: "6px",  usage: "Project-view backdrop — scrim sutil" },
+    { name: "--glass-blur-sm", val: "12px", usage: "Toast, about-badge, chips glass" },
+    { name: "--glass-blur-md", val: "20px", usage: "Contact form card, modal" },
+    { name: "--glass-blur-lg", val: "28px", usage: "Bottom nav — blur más denso en mobile" },
+    { name: "--glass-blur-xl", val: "48px", usage: "Navbar — blur máximo + saturate(180%)" },
   ]
 
   const DURATION_TOKENS = [
-    { name: "instant",   val: "80ms",    usage: "Card tilt activo" },
-    { name: "fast",      val: "160ms",   usage: "Section crossfade" },
-    { name: "normal",    val: "200ms",   usage: "Hover states, transiciones estándar" },
-    { name: "slow",      val: "300ms",   usage: "Overlays, modales" },
-    { name: "slower",    val: "400ms",   usage: "Retorno magnético, transiciones largas" },
-    { name: "entrance",  val: "650ms",   usage: "Animaciones de scroll (anim-up)" },
-    { name: "ripple-idle","val": "2000ms", usage: "Auto-ripple WebGL idle" },
+    { name: "instant (80ms)",    val: "80ms",   usage: "Card tilt activo, press feedback" },
+    { name: "fast (160ms)",      val: "160ms",  usage: "Section crossfade entrada/salida" },
+    { name: "normal (200ms)",    val: "200ms",  usage: "Hover states — borde, color, fondo" },
+    { name: "slow (300ms)",      val: "300ms",  usage: "Overlays fadeIn/fadeOut, modales" },
+    { name: "slower (400ms)",    val: "400ms",  usage: "Retorno magnético del btn-magnetic" },
+    { name: "entrance (650ms)",  val: "650ms",  usage: "anim-up scroll entrance (opacity + translateY)" },
+    { name: "ripple-idle (2s)",  val: "2000ms", usage: "Auto-ripple WebGL en estado idle" },
   ]
 
   const EASING_TOKENS = [
-    { name: "spring",   val: "cubic-bezier(0.16, 1, 0.3, 1)",       usage: "Entradas, expansiones — main easing" },
-    { name: "out",      val: "cubic-bezier(0.25, 0.46, 0.45, 0.94)", usage: "Botones hover, transiciones suaves" },
-    { name: "snap",     val: "cubic-bezier(0.34, 1.56, 0.64, 1)",    usage: "Pop animations, sliding pill" },
-    { name: "linear",   val: "linear",                                usage: "Solo para valores que no necesitan ease" },
-  ]
-
-  const BLUR_TOKENS = [
-    { name: "sm",  val: "8px",  usage: "Cards hover glass" },
-    { name: "md",  val: "12px", usage: "Toast backdrop-filter" },
-    { name: "lg",  val: "16px", usage: "About badge" },
-    { name: "xl",  val: "20px", usage: "Contact form card" },
-    { name: "2xl", val: "24px", usage: "Project view backdrop" },
-    { name: "3xl", val: "48px", usage: "Navbar blur — máximo" },
+    { name: "spring",  val: "cubic-bezier(0.16, 1, 0.3, 1)",       usage: "Entradas principales — el easing default del DS" },
+    { name: "out",     val: "cubic-bezier(0.25, 0.46, 0.45, 0.94)", usage: "Botones hover, transiciones suaves de salida" },
+    { name: "snap",    val: "cubic-bezier(0.34, 1.56, 0.64, 1)",    usage: "Pop-in animations, sliding pill, modal enter" },
+    { name: "linear",  val: "linear",                                usage: "Progreso de barra, valores sin aceleración" },
   ]
 
   return (
@@ -1620,16 +1652,88 @@ function PagePrimitivos() {
         <div className="ds-page-badge">Primitivos</div>
         <h2 className="ds-page-title">Tokens Primitivos</h2>
         <p className="ds-page-desc">
-          Capa base del sistema de tokens. Valores raw que <strong>nunca se usan directamente</strong> en componentes —
-          siempre se referencian a través de tokens semánticos. Incluye sombras, z-index, radios, duraciones, easings y blurs.
+          Capa base del sistema. Todos los tokens de esta página <strong>son CSS custom properties reales</strong> — úsalos con <code>var(--nombre)</code> en cualquier componente. Nunca escribas valores raw; referencia el token para que dark mode, refactors y escala futura funcionen automáticamente.
         </p>
       </div>
 
-      {/* Shadow scale */}
-      <SectionHeading title="Escala de sombras" />
+      {/* ── Spacing ── */}
+      <SectionHeading title="Escala de espaciado — var(--space-*)" />
       <p className="ds-pattern-desc">
-        Las sombras en dark mode se definen en <code>:root</code> y sobrescriben en <code>.dark</code> con opacidad ×3–4.
-        Disponibles como <code>var(--shadow-*)</code> en todo el CSS.
+        14 pasos basados en la unidad de 4px. El espaciado consistente es lo que hace que el ojo perciba orden. Cada gap, padding y margin debe venir de esta escala.
+      </p>
+      <div className="ds-spec-table">
+        <div className="ds-spec-row">
+          <span className="ds-spec-name">Token</span>
+          <span className="ds-spec-val">Valor</span>
+          <span className="ds-spec-val">Uso principal</span>
+        </div>
+        {SPACING_TOKENS.map(({ name, val, usage }) => (
+          <div key={name} className="ds-spec-row">
+            <span className="ds-spec-name">{name}</span>
+            <span className="ds-spec-val">{val}</span>
+            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{usage}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 4, flexWrap: "wrap", alignItems: "flex-end", marginTop: 16 }}>
+        {[1,2,3,4,6,8,10,12].map((step) => {
+          const px = [4,8,12,16,24,32,40,48][step > 8 ? 7 : step - 1]
+          return (
+            <div key={step} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+              <div style={{ width: px, height: 24, background: "rgba(0,98,204,0.35)", borderRadius: 3 }} />
+              <span style={{ fontSize: 9, color: "var(--txt3)", fontFamily: "monospace" }}>{px}px</span>
+            </div>
+          )
+        })}
+      </div>
+      <div className="ds-rules" style={{ marginTop: 16 }}>
+        <RuleChip rule="padding: var(--space-8)  ← 32px semántico" variant="do" />
+        <RuleChip rule="gap: var(--space-3)  ← 12px semántico" variant="do" />
+        <RuleChip rule="padding: 32px  ← hardcodeado, no responde a futuros cambios de escala" variant="dont" />
+      </div>
+
+      {/* ── Border radius ── */}
+      <SectionHeading title="Escala border-radius — var(--r-*)" />
+      <p className="ds-pattern-desc">
+        6 pasos de radio. El uso consistente es clave — mezclar radios arbitrarios rompe la coherencia visual. Regla: los elementos de menor tamaño usan menor radio.
+      </p>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 16 }}>
+        {RADIUS_TOKENS.map(({ name, val }) => (
+          <div key={name} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+            <div style={{
+              width: 56, height: 56,
+              background: "rgba(0,98,204,0.09)",
+              border: "1.5px solid rgba(0,98,204,0.30)",
+              borderRadius: val,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 10, color: "var(--accent)", fontWeight: 700, textAlign: "center",
+            }}>
+              {val}
+            </div>
+            <span style={{ fontSize: 10, color: "var(--txt3)", fontFamily: "monospace" }}>{name}</span>
+          </div>
+        ))}
+      </div>
+      <div className="ds-spec-table" style={{ marginTop: 16 }}>
+        {RADIUS_TOKENS.map(({ name, val, usage }) => (
+          <div key={name} className="ds-spec-row">
+            <span className="ds-spec-name">{name}</span>
+            <span className="ds-spec-val">{val}</span>
+            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{usage}</span>
+          </div>
+        ))}
+      </div>
+      <div className="ds-rules" style={{ marginTop: 16 }}>
+        <RuleChip rule="border-radius: var(--r-xl)  ← project cards" variant="do" />
+        <RuleChip rule="border-radius: var(--r-full)  ← pills y badges" variant="do" />
+        <RuleChip rule="border-radius: 18px  ← valor arbitrario no en la escala" variant="dont" />
+        <RuleChip rule="Mezclar --r-xl y --r-2xl en el mismo componente sin razón semántica" variant="dont" />
+      </div>
+
+      {/* ── Shadow scale ── */}
+      <SectionHeading title="Escala de sombras — var(--shadow-*)" />
+      <p className="ds-pattern-desc">
+        Las sombras en dark mode sobrescriben automáticamente con opacidad ×3–4 en <code>.dark</code>. Usa siempre el token — el cambio de tema es gratuito.
       </p>
       <div className="ds-spec-table">
         <div className="ds-spec-row">
@@ -1640,7 +1744,7 @@ function PagePrimitivos() {
         {SHADOW_TOKENS.map(({ name, val, usage }) => (
           <div key={name} className="ds-spec-row">
             <span className="ds-spec-name">{name}</span>
-            <span className="ds-spec-val" style={{ fontSize: 11 }}>{val}</span>
+            <span className="ds-spec-val" style={{ fontSize: 10 }}>{val}</span>
             <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{usage}</span>
           </div>
         ))}
@@ -1658,11 +1762,31 @@ function PagePrimitivos() {
         ))}
       </div>
 
-      {/* Z-index scale */}
-      <SectionHeading title="Escala Z-index" />
+      {/* ── Glassmorphism blur ── */}
+      <SectionHeading title="Escala blur glassmorphism — var(--glass-blur-*)" />
       <p className="ds-pattern-desc">
-        9 capas semánticas. Usar siempre <code>var(--z-*)</code> — nunca valores numéricos hardcodeados.
-        Esto evita conflictos de stacking context entre componentes.
+        5 niveles de <code>backdrop-filter: blur()</code>. Elegir el nivel correcto según el contexto visual: mayor blur = mayor énfasis en el panel sobre el fondo. No ir más allá de <code>--glass-blur-xl</code> (navbar) — en hardware limitado el blur es costoso.
+      </p>
+      <div className="ds-spec-table">
+        {GLASS_BLUR_TOKENS.map(({ name, val, usage }) => (
+          <div key={name} className="ds-spec-row">
+            <span className="ds-spec-name">{name}</span>
+            <span className="ds-spec-val">{val}</span>
+            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{usage}</span>
+          </div>
+        ))}
+      </div>
+      <div className="ds-rules" style={{ marginTop: 16 }}>
+        <RuleChip rule="backdrop-filter: blur(var(--glass-blur-sm))  ← toast, badges" variant="do" />
+        <RuleChip rule="backdrop-filter: blur(var(--glass-blur-xl)) saturate(180%)  ← navbar" variant="do" />
+        <RuleChip rule="backdrop-filter: blur(16px)  ← valor fuera de la escala, inconsistente" variant="dont" />
+        <RuleChip rule="blur > 48px — supera el navbar, no hay contexto que lo justifique" variant="dont" />
+      </div>
+
+      {/* ── Z-index ── */}
+      <SectionHeading title="Escala Z-index — var(--z-*)" />
+      <p className="ds-pattern-desc">
+        9 capas semánticas. Nunca uses un número hardcodeado — cuando dos componentes compiten en z-index, el sistema de tokens es la única fuente de verdad que evita conflictos.
       </p>
       <div className="ds-layer-diagram">
         {Z_TOKENS.map(({ name, val, usage }) => (
@@ -1672,30 +1796,14 @@ function PagePrimitivos() {
           </div>
         ))}
       </div>
-
-      {/* Border radius */}
-      <SectionHeading title="Escala border-radius" />
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
-        {RADIUS_TOKENS.map(({ name, val }) => {
-          const size = val === "9999px" ? 44 : parseInt(val, 10)
-          return (
-            <div key={name} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-              <div style={{
-                width: 56, height: 56, background: "rgba(0,98,204,0.10)",
-                border: "1.5px solid rgba(0,98,204,0.28)",
-                borderRadius: val,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 10, color: "var(--accent)", fontWeight: 700,
-              }}>
-                {val}
-              </div>
-              <span style={{ fontSize: 10, color: "var(--txt3)", textAlign: "center", maxWidth: 60 }}>{name.split(" ")[0]}</span>
-            </div>
-          )
-        })}
+      <div className="ds-rules" style={{ marginTop: 16 }}>
+        <RuleChip rule="z-index: var(--z-sticky)  ← navbar y detail-navbar" variant="do" />
+        <RuleChip rule="z-index: var(--z-modal)  ← profile modal, project-view panel" variant="do" />
+        <RuleChip rule="z-index: 100  ← número mágico que choca con --z-sticky sin saberlo" variant="dont" />
+        <RuleChip rule="z-index: 9999 en componentes de UI — reservado solo para emergencias reales" variant="dont" />
       </div>
 
-      {/* Duration */}
+      {/* ── Duration ── */}
       <SectionHeading title="Duraciones de animación" />
       <div className="ds-spec-table">
         {DURATION_TOKENS.map(({ name, val, usage }) => (
@@ -1707,37 +1815,537 @@ function PagePrimitivos() {
         ))}
       </div>
 
-      {/* Easing */}
+      {/* ── Easing ── */}
       <SectionHeading title="Curvas de easing" />
+      <p className="ds-pattern-desc">
+        Regla: <strong>spring</strong> para entradas, <strong>out</strong> para hover/salidas, <strong>snap</strong> para pop-ins. <strong>linear</strong> solo para barras de progreso.
+      </p>
       <div className="ds-spec-table">
         {EASING_TOKENS.map(({ name, val, usage }) => (
           <div key={name} className="ds-spec-row">
             <span className="ds-spec-name">{name}</span>
-            <span className="ds-spec-val" style={{ fontSize: 11, fontFamily: "monospace" }}>{val}</span>
+            <span className="ds-spec-val" style={{ fontSize: 10, fontFamily: "monospace" }}>{val}</span>
             <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{usage}</span>
           </div>
         ))}
       </div>
+      <div className="ds-rules" style={{ marginTop: 16 }}>
+        <RuleChip rule="Entradas de elementos: cubic-bezier(0.16, 1, 0.3, 1) — spring" variant="do" />
+        <RuleChip rule="Hover de botón: cubic-bezier(0.25, 0.46, 0.45, 0.94) — out" variant="do" />
+        <RuleChip rule="transition: all 0.3s ease  ← 'all' anima props innecesarias, usa propiedades específicas" variant="dont" />
+        <RuleChip rule="ease-in para entradas — se siente lento al inicio, poco natural" variant="dont" />
+      </div>
+    </div>
+  )
+}
 
-      {/* Blur */}
-      <SectionHeading title="Escala blur (backdrop-filter)" />
+// ── Page: Animaciones ─────────────────────────────────────────────────────────
+function PageAnimaciones() {
+  return (
+    <div className="ds-page-body">
+      <div className="ds-page-header">
+        <div className="ds-page-badge">Animaciones</div>
+        <h2 className="ds-page-title">Sistema de Animaciones</h2>
+        <p className="ds-page-desc">
+          Dos sistemas complementarios: <strong>anim-up</strong> (scroll entrance vía IntersectionObserver + clase <code>.in</code>) y <strong>CSS keyframes</strong> (hero, indicadores, pulsos). Todos respetan <code>prefers-reduced-motion</code> sin excepción.
+        </p>
+      </div>
+
+      {/* ── anim-up pattern ── */}
+      <SectionHeading title="Patrón anim-up — Scroll Entrance" />
+      <p className="ds-pattern-desc">
+        El patrón de entrada por scroll más usado en el sitio. El elemento parte invisible y desplazado 16px hacia abajo. Cuando entra en el viewport, el observer global en <code>portfolio.tsx</code> añade la clase <code>.in</code> y el CSS anima a visible+posición natural.
+      </p>
+      <PreviewBox label="Estado reposo → entrada (simula el trigger)">
+        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+          <div style={{
+            padding: "12px 20px", borderRadius: "var(--r-md)",
+            border: "1px solid var(--border)", background: "var(--bg3)",
+            fontSize: 13, color: "var(--txt3)", opacity: 0.4,
+          }}>
+            opacity: 0 · translateY(16px) — antes del .in
+          </div>
+          <span style={{ color: "var(--txt3)", fontSize: 18 }}>→</span>
+          <div style={{
+            padding: "12px 20px", borderRadius: "var(--r-md)",
+            border: "1px solid var(--accent)", background: "rgba(0,98,204,0.06)",
+            fontSize: 13, color: "var(--accent)", fontWeight: 600,
+          }}>
+            opacity: 1 · translateY(0) — con .in
+          </div>
+        </div>
+      </PreviewBox>
+      <CodeBlock code={`/* CSS — portfolio.css */
+.anim-up {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity  0.65s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.anim-up.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger: el 2º hijo de .s-head entra 60ms después */
+.s-head .anim-up.in:last-child {
+  transition-delay: 60ms;
+}`} />
+
+      {/* ── Observer registration ── */}
+      <SectionHeading title="Registro en el Observer global" />
+      <p className="ds-pattern-desc">
+        El observer está en <code>portfolio.tsx</code> y observa automáticamente <strong>todos los elementos con la clase <code>.anim-up</code></strong> que existan en el DOM al montar. Para una nueva sección, solo agrega la clase — el resto es automático.
+      </p>
+      <CodeBlock code={`// portfolio.tsx — observer global (NO modificar)
+useEffect(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add("in")
+          observer.unobserve(e.target) // se dispara solo una vez
+        }
+      })
+    },
+    { threshold: 0.15 }
+  )
+  document.querySelectorAll(".anim-up").forEach(el => observer.observe(el))
+  return () => observer.disconnect()
+}, [])
+
+// TSX — nueva sección (solo agregar la clase)
+<div className="s-head">
+  <div className="s-label anim-up">Etiqueta</div>
+  <h2 className="s-title anim-up">Título de la sección</h2>
+</div>
+<div className="anim-up">Contenido del bloque</div>`} />
+
+      {/* ── Stagger ── */}
+      <SectionHeading title="Stagger — entrada escalonada" />
+      <p className="ds-pattern-desc">
+        Dos formas de hacer stagger. La primera es automática vía CSS (<code>.s-head</code>). La segunda es manual vía <code>transition-delay</code> inline para colecciones de N items.
+      </p>
+      <CodeBlock code={`/* Forma 1 — CSS automático: label + título con 60ms de diferencia */
+.s-head .anim-up.in:last-child {
+  transition-delay: 60ms;
+}
+
+/* Forma 2 — Stagger manual para colecciones (máx 12 items) */
+{items.map((item, idx) => (
+  <div
+    key={item.id}
+    className="anim-up"
+    style={{ transitionDelay: \`\${idx * 60}ms\` }}
+  >
+    {item.content}
+  </div>
+))}
+/* Límite: 12 items × 60ms = 720ms total — arriba de eso se siente lento */`} />
+
+      {/* ── Hero animations ── */}
+      <SectionHeading title="Hero — Line-rise (text reveal)" />
+      <p className="ds-pattern-desc">
+        Técnica de texto que emerge desde abajo de un clip. El <code>.hero-line-wrap</code> hace <code>overflow: hidden</code> y el <code>.hero-line-inner</code> sube desde <code>translateY(112%)</code> hasta 0. Cada línea tiene un <code>animationDelay</code> escalonado.
+      </p>
+      <CodeBlock code={`/* CSS */
+.hero-line-wrap {
+  display: inline-block;
+  overflow: hidden;        /* el clip que oculta el texto */
+  padding-bottom: 0.06em;  /* espacio para descendentes (g, p, y) */
+  vertical-align: bottom;
+}
+.hero-line-inner {
+  display: inline-block;
+  transform: translateY(112%);
+  animation: lineRise 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes lineRise {
+  to { transform: translateY(0); }
+}
+
+/* TSX — delay escalonado por línea */
+<span className="hero-line-wrap">
+  <span className="hero-line-inner" style={{ animationDelay: "0.05s" }}>
+    Diseño
+  </span>
+</span>
+<br />
+<span className="hero-line-wrap">
+  <span className="hero-line-inner" style={{ animationDelay: "0.18s" }}>
+    <em>experiencias</em>
+  </span>
+</span>`} />
+
+      {/* ── Keyframes disponibles ── */}
+      <SectionHeading title="Keyframes disponibles en portfolio.css" />
       <div className="ds-spec-table">
-        {BLUR_TOKENS.map(({ name, val, usage }) => (
+        {[
+          { name: "fadeUp",             desc: "opacity 0→1 + translateY(16px)→0. Usado en hero-tag, hero-sub, hero-cta (CSS animation fill: both)." },
+          { name: "lineRise",           desc: "translateY(112%)→0. Hero text-reveal. Activado por CSS animation en .hero-line-inner." },
+          { name: "hero-gradient-shift",desc: "background-position 0%→100%→0%. Anima el gradiente del texto hero. Ciclo de 12-16s." },
+          { name: "fadeIn",             desc: "opacity 0→1. Overlays, project-view backdrop." },
+          { name: "popIn",              desc: "scale(0.88)+opacity 0 → scale(1)+opacity 1. Modal profile, snap easing." },
+          { name: "popOut",             desc: "Reverso de popIn. Salida del modal." },
+          { name: "slideInRight",       desc: "translateX(100%)→0. Project-view panel slide-in (0.45s spring)." },
+          { name: "slideOutRight",      desc: "Reverso de slideInRight. Salida del panel." },
+          { name: "sectionEnter",       desc: "translateY(10px)+opacity 0 → normal. Entrada de secciones (página nav)." },
+          { name: "scrollBounce",       desc: "Animación del dot en el scroll-indicator. Loop 1.6s." },
+          { name: "blink",              desc: "Pulso del hero-dot (available indicator). Loop 2s." },
+          { name: "badgePulse",         desc: "box-shadow expanding pulse. about-badge, avail-dot. Loop 2s." },
+          { name: "titleWordRise",      desc: "translateY(105%)→0. Projects title scroll-driven (Chrome 115+, Safari 18+)." },
+          { name: "swipeDrop",          desc: "Hint de swipe mobile — dot baja desde arriba. Loop 1.8s." },
+          { name: "ds-fade-in",         desc: "Fade-in del DS viewer al cambiar de página (150ms)." },
+          { name: "toastSlideUp",       desc: "Entrada del AdminToast. 300ms spring." },
+          { name: "toastSlideDown",     desc: "Salida del AdminToast (clase .leaving). 200ms ease-in." },
+        ].map(({ name, desc }) => (
           <div key={name} className="ds-spec-row">
-            <span className="ds-spec-name">blur-{name}</span>
-            <span className="ds-spec-val">{val}</span>
-            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{usage}</span>
+            <span className="ds-spec-name">{name}</span>
+            <span className="ds-spec-val" style={{ flex: 1, color: "var(--txt3)", fontSize: 12 }}>{desc}</span>
           </div>
         ))}
       </div>
 
-      <SectionHeading title="Reglas" />
+      {/* ── Scroll-driven ── */}
+      <SectionHeading title="Scroll-Driven Animations (CSS nativo)" />
+      <p className="ds-pattern-desc">
+        El título de la sección Proyectos usa <code>animation-timeline: view()</code> — la animación avanza en función del scroll en lugar del tiempo. Solo Chrome 115+ y Safari 18+. El fallback activa via IntersectionObserver + clase <code>.in</code>.
+      </p>
+      <CodeBlock code={`/* Chrome 115+ / Safari 18+ — sin JS */
+@supports (animation-timeline: view()) {
+  .p-title-word-inner {
+    animation: titleWordRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-timeline: view(block);
+  }
+  /* Stagger por palabra vía animation-range */
+  .p-title-word:nth-child(1) .p-title-word-inner { animation-range: entry 0%  entry 60%; }
+  .p-title-word:nth-child(2) .p-title-word-inner { animation-range: entry 8%  entry 65%; }
+}
+
+/* Fallback — IntersectionObserver trigger */
+@supports not (animation-timeline: view()) {
+  .p-title-word-inner {
+    transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .s-label.in ~ .projects-title .p-title-word-inner {
+    transform: translateY(0);
+  }
+}`} />
+
+      {/* ── prefers-reduced-motion ── */}
+      <SectionHeading title="prefers-reduced-motion — obligatorio" />
+      <p className="ds-pattern-desc">
+        Toda animación en el DS tiene su override. El bloque en <code>portfolio.css</code> cubre: anim-up, hero elements, cards, modal, toast, pulsos decorativos. Al agregar una nueva animación <strong>siempre agregar su override</strong> en el bloque <code>@media (prefers-reduced-motion: reduce)</code>.
+      </p>
+      <CodeBlock code={`/* portfolio.css — bloque obligatorio para cada nueva animación */
+@media (prefers-reduced-motion: reduce) {
+  /* Patrón general — anim-up */
+  .anim-up {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Pulsos decorativos — off */
+  .badge-pulse,
+  .avail-dot,
+  .hero-dot,
+  .scroll-dot {
+    animation: none !important;
+  }
+
+  /* Hero text — mostrar directamente sin clip */
+  .hero-line-wrap { overflow: visible !important; }
+  .hero-line-inner {
+    transform: none !important;
+    animation: none !important;
+  }
+
+  /* Tu nueva animación — patrón a seguir */
+  .mi-nuevo-elemento {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}`} />
+
+      {/* ── Reglas ── */}
+      <SectionHeading title="Reglas de uso" />
       <div className="ds-rules">
-        <RuleChip rule="Siempre usar var(--shadow-xl) no un valor shadow manual en componentes" variant="do" />
-        <RuleChip rule="Siempre usar var(--z-sticky) no z-index: 100 hardcodeado" variant="do" />
-        <RuleChip rule="Las sombras dark mode se definen en .dark { } — el override es automático" variant="do" />
-        <RuleChip rule="box-shadow: 0 8px 24px rgba(0,0,0,0.10)  ← hardcodeado" variant="dont" />
-        <RuleChip rule="z-index: 999  ← sin semántica, genera conflictos" variant="dont" />
+        <RuleChip rule="Agregar .anim-up a elementos que necesiten entrada — el observer global lo detecta automáticamente" variant="do" />
+        <RuleChip rule="Usar animationDelay escalonado en colecciones de items (idx × 60ms, máx 12)" variant="do" />
+        <RuleChip rule="Siempre agregar override en @media (prefers-reduced-motion: reduce)" variant="do" />
+        <RuleChip rule="Usar transform + opacity únicamente — nunca animar width, height, top, left (layout thrashing)" variant="do" />
+        <RuleChip rule="Crear un segundo IntersectionObserver — el global en portfolio.tsx ya cubre todo" variant="dont" />
+        <RuleChip rule="Animar más de 2 propiedades simultáneamente en un mismo elemento" variant="dont" />
+        <RuleChip rule="Animaciones decorativas sin causa-efecto — cada motion debe comunicar algo" variant="dont" />
+        <RuleChip rule="duration > 500ms para micro-interacciones (hover, press, toggle)" variant="dont" />
+      </div>
+    </div>
+  )
+}
+
+// ── Page: Blog ────────────────────────────────────────────────────────────────
+function PageBlog() {
+  const [activePill, setActivePill] = useState<string>("Todos")
+  const PILLS = ["Todos", "UX/UI", "Frontend", "Proceso"]
+
+  return (
+    <div className="ds-page-body">
+      <div className="ds-page-header">
+        <div className="ds-page-badge">Patrones</div>
+        <h2 className="ds-page-title">Blog — Sistema de componentes</h2>
+        <p className="ds-page-desc">
+          Todos los componentes del sistema de blog tokenizados y documentados. Usarlos como referencia canónica al agregar features al blog — categorías, series, newsletter, author cards, featured posts.
+        </p>
+      </div>
+
+      {/* ── Blog Filter Pills ── */}
+      <SectionHeading title="BlogFilterPill — Filtros de categoría" />
+      <p className="ds-pattern-desc">
+        Pills de filtro en la parte superior de <code>/blog</code>. El estado <code>active</code> invierte: fondo accent, texto blanco. El estado idle es ghost (sin fondo).
+      </p>
+      <PreviewBox label="Interactivo — click para cambiar estado">
+        <div className="blog-pills">
+          {PILLS.map(p => (
+            <button
+              key={p}
+              className={`blog-pill${activePill === p ? " active" : ""}`}
+              onClick={() => setActivePill(p)}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      </PreviewBox>
+      <div className="ds-spec-table" style={{ marginTop: 12 }}>
+        {[
+          { state: "idle",   bg: "transparent", border: "var(--border)", fg: "var(--txt2)" },
+          { state: "hover",  bg: "transparent", border: "var(--border-h)", fg: "var(--txt)" },
+          { state: "active", bg: "var(--accent)", border: "var(--accent)", fg: "white" },
+        ].map(({ state, bg, border, fg }) => (
+          <div key={state} className="ds-spec-row">
+            <span className="ds-spec-name">.blog-pill{state !== "idle" ? `.${state}` : ""}</span>
+            <span className="ds-spec-val">bg: {bg}</span>
+            <span className="ds-spec-val">border: {border}</span>
+            <span className="ds-spec-val">color: {fg}</span>
+          </div>
+        ))}
+      </div>
+      <CodeBlock code={`<div className="blog-pills">
+  <button className="blog-pill active">Todos</button>
+  <button className="blog-pill">UX/UI</button>
+  <button className="blog-pill">Frontend</button>
+</div>`} />
+
+      {/* ── Blog Tag ── */}
+      <SectionHeading title="BlogTag — Etiquetas inline" />
+      <p className="ds-pattern-desc">
+        Tag clickeable que filtra el blog por esa categoría. Máximo 3 tags por card (<code>tags.slice(0,3)</code>). Estado active = border+color accent. Funciona como <code>&lt;Link href=&quot;/blog?tag=X&quot;&gt;</code>.
+      </p>
+      <PreviewBox>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <a href="#" onClick={e => e.preventDefault()} className="blog-tag">#design-system</a>
+          <a href="#" onClick={e => e.preventDefault()} className="blog-tag active">#frontend</a>
+          <a href="#" onClick={e => e.preventDefault()} className="blog-tag">#ux</a>
+        </div>
+      </PreviewBox>
+      <div className="ds-spec-table" style={{ marginTop: 12 }}>
+        {[
+          { prop: "padding",     val: "3px 9px" },
+          { prop: "font-size",   val: "11px / w500" },
+          { prop: "radius",      val: "var(--r-full)" },
+          { prop: "color idle",  val: "var(--txt3)" },
+          { prop: "color active",val: "var(--accent)" },
+          { prop: "border",      val: "var(--border) → var(--accent) active" },
+        ].map(({ prop, val }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+          </div>
+        ))}
+      </div>
+      <CodeBlock code={`{/* Uso en BlogCard — máx 3 tags */}
+{post.tags.slice(0, 3).map(tag => (
+  <Link
+    key={tag}
+    href={\`/blog?tag=\${encodeURIComponent(tag)}\`}
+    className="blog-tag"
+  >
+    #{tag}
+  </Link>
+))}
+
+{/* Tag activo (cuando coincide con el filtro actual) */}
+<Link href="/blog?tag=frontend" className="blog-tag active">
+  #frontend
+</Link>`} />
+
+      {/* ── BlogCard ── */}
+      <SectionHeading title="BlogCard — Listado /blog" />
+      <p className="ds-pattern-desc">
+        Card completa del listado de posts. Grid de 3 columnas desktop (4 a ≥1921px), 2 columnas tablet, 1 columna mobile. Hover: <code>translateY(-4px)</code> + <code>var(--shadow-xl)</code> + zoom imagen 1.04.
+      </p>
+      <div className="ds-spec-table">
+        {[
+          { prop: "radius",        val: "18px",                    desc: "Entre --r-xl y --r-2xl" },
+          { prop: "img ratio",     val: "16 / 9",                  desc: "aspect-ratio de .blog-card-img" },
+          { prop: "img zoom hover",val: "scale(1.04)",              desc: "Más sutil que project cards (1.05)" },
+          { prop: "cat font",      val: "10px / w700 / 0.1em",     desc: "Uppercase, accent color" },
+          { prop: "title font",    val: "17px / w700 / -0.025em",  desc: "Plus Jakarta Sans" },
+          { prop: "excerpt",       val: "14px / DM Sans",          desc: "Máx 100 chars (slice en data layer)" },
+          { prop: "hover lift",    val: "translateY(-4px)",         desc: "Coherente con blog-preview-card" },
+          { prop: "hover shadow",  val: "var(--shadow-xl)",         desc: "Token shadow — automático en dark" },
+        ].map(({ prop, val, desc }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{desc}</span>
+          </div>
+        ))}
+      </div>
+      <CodeBlock code={`{/* Anatomía de BlogCard */}
+<article className="blog-card" onClick={() => router.push(\`/blog/\${post.slug}\`)}>
+  <div className="blog-card-img">
+    {post.image
+      ? <img src={post.image} alt={post.title} />
+      : <div className="blog-card-img-placeholder" />
+    }
+  </div>
+  <div className="blog-card-body">
+    <span className="blog-card-cat">{post.category}</span>
+    <h2 className="blog-card-title">{post.title}</h2>
+    <p className="blog-card-excerpt">{post.excerpt?.slice(0,100)}</p>
+    <div className="blog-tags">
+      {post.tags.slice(0, 3).map(tag => <Link href={\`/blog?tag=\${tag}\`} className="blog-tag">#{tag}</Link>)}
+    </div>
+    <div className="blog-card-meta">
+      <span className="blog-card-date">{formatDate(post.publishedAt)}</span>
+      <span className="blog-card-read">Leer →</span>
+    </div>
+  </div>
+</article>`} />
+
+      {/* ── BlogPreviewCard ── */}
+      <SectionHeading title="BlogPreviewCard — Sección home" />
+      <p className="ds-pattern-desc">
+        Versión compacta de BlogCard para la sección "Últimas entradas" del home. Sin categoría pill, sin tags, sin meta row. Grid de 3 columnas siempre (no cambia a 4 en ultra-wide — intencional para dar espacio a la sección sin saturarla).
+      </p>
+      <div className="ds-spec-table">
+        {[
+          { prop: "radius",         val: "16px (--r-lg)",  desc: "Más compacto que BlogCard (18px)" },
+          { prop: "title font",     val: "16px / w700",    desc: "Un paso menor que BlogCard (17px)" },
+          { prop: "excerpt font",   val: "13px / w400",    desc: "Un paso menor que BlogCard (14px)" },
+          { prop: "CTA",            val: ".blog-preview-cta", desc: "13px accent — 'Leer →' al final del body" },
+          { prop: "grid ultra-wide","val": "3 cols (fijo)", desc: "Mantiene 3 cols incluso a ≥1921px (intencional)" },
+        ].map(({ prop, val, desc }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{desc}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── BlogPostLayout ── */}
+      <SectionHeading title="BlogPostLayout — Artículo individual" />
+      <p className="ds-pattern-desc">
+        Contenedor outer de <code>/blog/[slug]</code>. Por defecto es <code>display: block</code> con el artículo centrado en <code>max-width: 720px</code>. A ≥1921px se convierte en grid editorial 2 columnas (<code>720px + 260px sidebar</code>).
+      </p>
+      <div className="ds-layer-diagram">
+        {[
+          { z: "blog-post-main (1160px)", label: "Contenedor outer — permite que related-posts tenga ancho completo" },
+          { z: "blog-post-layout", label: "Display block en <1921px / grid 2-col a ≥1921px" },
+          { z: "article.blog-post", label: "Artículo — max-width: 720px, ~65 chars/línea a 17px" },
+          { z: "aside.blog-post-sidebar", label: "Sidebar 260px — solo visible a ≥1921px (display:none abajo)" },
+          { z: "div.related-posts (full width)", label: "Related posts fuera del layout — ancho completo del blog-post-main" },
+        ].map(({ z, label }) => (
+          <div key={z} className="ds-layer-row">
+            <span className="ds-layer-z">{z}</span>
+            <span className="ds-layer-label">{label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="ds-spec-table" style={{ marginTop: 12 }}>
+        {[
+          { prop: "content font",    val: "17px / lh 1.85",  desc: "Mayor que body (15px) — comodidad de lectura larga" },
+          { prop: "title font",      val: "clamp(28px,4vw,44px)", desc: "-0.04em tracking, lh 1.15" },
+          { prop: "img ratio",       val: "16 / 8",          desc: "Más panorámico que 16/9 — no es excesivamente alto" },
+          { prop: "img radius",      val: "18px",            desc: "Fuera de la escala estándar — intencional para el artículo" },
+          { prop: "sidebar top",     val: "96px sticky",     desc: "Alineado con el título del artículo" },
+          { prop: "sidebar width",   val: "260px",           desc: "Fijo — no crece con el viewport" },
+        ].map(({ prop, val, desc }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{desc}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Related Posts ── */}
+      <SectionHeading title="Related Posts — Grid estático" />
+      <p className="ds-pattern-desc">
+        Grid de 3 columnas al final del artículo. Prioriza posts de la misma categoría, rellena con otros. Excluye el slug actual. Desktop 3-col → tablet 2-col → mobile 1-col.
+      </p>
+      <CodeBlock code={`/* CSS */
+.related-posts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 860px) {
+  .related-posts-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .related-posts-grid { grid-template-columns: 1fr; gap: 14px; }
+}
+
+/* Cada tarjeta reutiliza .blog-preview-img y .blog-preview-body */
+.related-grid-card {
+  border-radius: 16px;  /* --r-lg */
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+.related-grid-card:hover {
+  border-color: var(--border-h);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);  /* token — auto dark mode */
+}`} />
+
+      {/* ── Responsive ── */}
+      <SectionHeading title="Breakpoints del sistema blog" />
+      <div className="ds-spec-table">
+        {[
+          { bp: "≥1921px",  blog_grid: "4 cols",       preview_grid: "3 cols (fijo)", post_layout: "editorial 2-col" },
+          { bp: "≥1440px",  blog_grid: "3 cols",        preview_grid: "3 cols",        post_layout: "single col" },
+          { bp: "≥900px",   blog_grid: "3 cols",        preview_grid: "3 cols",        post_layout: "single col" },
+          { bp: "641–900px",blog_grid: "2 cols",        preview_grid: "2 cols",        post_layout: "single col" },
+          { bp: "≤640px",   blog_grid: "1 col (gap 14px)", preview_grid: "1 col",     post_layout: "single col" },
+        ].map(({ bp, blog_grid, preview_grid, post_layout }) => (
+          <div key={bp} className="ds-spec-row">
+            <span className="ds-spec-name">{bp}</span>
+            <span className="ds-spec-val">/blog: {blog_grid}</span>
+            <span className="ds-spec-val">home: {preview_grid}</span>
+            <span className="ds-spec-val">artículo: {post_layout}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Reglas ── */}
+      <SectionHeading title="Reglas de uso y escala" />
+      <div className="ds-rules">
+        <RuleChip rule="Reutilizar .blog-preview-card para cualquier card compacta de blog fuera de /blog" variant="do" />
+        <RuleChip rule="Máximo 3 tags por card (slice 0,3) — más de 3 satura visualmente" variant="do" />
+        <RuleChip rule="box-shadow en hover usando var(--shadow-xl) — el token ajusta automático dark mode" variant="do" />
+        <RuleChip rule="blog-post-sidebar solo se activa a ≥1921px — no añadir media queries intermedios" variant="do" />
+        <RuleChip rule="Mostrar 4+ tags por card — solo mostrar los 3 más relevantes (slice)" variant="dont" />
+        <RuleChip rule="Usar blog-grid para la sección home — usar blog-preview-grid allí" variant="dont" />
+        <RuleChip rule="hardcodear box-shadow en hover de cards — usar var(--shadow-xl)" variant="dont" />
+        <RuleChip rule="Cambiar blog-preview-grid a 4 cols en ultra-wide — ya es intencional que quede en 3" variant="dont" />
       </div>
     </div>
   )
@@ -1745,19 +2353,21 @@ function PagePrimitivos() {
 
 // ── Page map ──────────────────────────────────────────────────────────────────
 const PAGE_MAP: Record<DSPageId, React.ComponentType> = {
-  overview: PageOverview,
-  colors: PageColors,
-  typography: PageTypography,
-  darkmode: PageDarkMode,
-  primitivos: PagePrimitivos,
-  buttons: PageButtons,
-  cards: PageCards,
-  forms: PageForms,
-  navigation: PageNavigation,
-  badges: PageBadges,
-  toast: PageToast,
-  patterns: PagePatterns,
-  brands: PageBrands,
+  overview:    PageOverview,
+  colors:      PageColors,
+  typography:  PageTypography,
+  darkmode:    PageDarkMode,
+  primitivos:  PagePrimitivos,
+  animaciones: PageAnimaciones,
+  buttons:     PageButtons,
+  cards:       PageCards,
+  forms:       PageForms,
+  navigation:  PageNavigation,
+  badges:      PageBadges,
+  toast:       PageToast,
+  patterns:    PagePatterns,
+  brands:      PageBrands,
+  blog:        PageBlog,
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
@@ -1786,7 +2396,7 @@ export function DesignSystemSection({ adminMode }: { adminMode?: boolean }) {
           </div>
           <div className="ds-brand-info">
             <div className="ds-brand-title">Project Zero DS</div>
-            <div className="ds-brand-version">v1.7.0</div>
+            <div className="ds-brand-version">v1.8.0</div>
           </div>
         </div>
         <nav className="ds-nav">
