@@ -3,9 +3,9 @@
   "$meta": {
     "project": "Project Zero Portafolio de trabajos Carlos Felipe Rojas Hickmann",
     "author": "Carlos Felipe Rojas Hickmann",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "source": "Extracted from portfolio.css — do not edit CSS directly",
-    "changelog": "v1.5.0: BrandsSection rediseño completo — grid auto-fill (6→12 logos sin cambios), eyebrow label editorial con líneas decorativas, stagger entrance via IntersectionObserver, hover scale(1.06)+grayscale lift. Nuevos tokens: section-eyebrow-label, stagger-entrance, blog-preview-section. brand-item y brands-section actualizados. Primitivos brands-dark (#03070e, #060b16) y blog-dark (#0c1325, #07090e) añadidos. Dark mode blog-preview-section homologado. DS viewer: página Brands añadida al grupo Patrones. Docs: docs/brands-section.md. v1.4.0: Blog system completo (BlogCard, BlogPreviewSection, BlogNavbar, AppNavbar unificado), BrandsSection inter-sección, ThemeToggle dual-icon sun/moon, tokens bg4 + content-sheet + inter-section (superficies blue-tinted), scroll-driven alpha en projects-sheet y footer, auto-ripple idle 2s en WebGL, modo light como default, partículas dust deshabilitadas en light mode, sección .page--solid-bg para About y Contact, CV link en About admin. Docs: docs/components.md, docs/blog.md. v1.3.0: AdminToast tokens completados — border/shadow-dark tokenizados, title-size corregido a 14px, close-radius 6px, anim-enter/anim-exit como tokens CSS, admin.css refactorizado a 100% token-first, documentación docs/toast.md. v1.2.0: AdminToast component (4 estados: success/error/warning/info), token --warning #f59e0b amber, glassmorphism toast con progress bar y animación exit. v1.1.0: hero-title line-height 1.05, anim-enter-translate 16px, scroll-indicator opacity 0.65, card hover shadow + thumb scale, nav-item hover glass bg, theme-toggle 44px touch target, DS layout navbar offset, hardcoded colors → tokens"
+    "changelog": "v1.6.0: DS Audit completo — escala z-index semántica (9 capas), escala shadows (9 niveles), focus-ring tokens, section-heading patrón universal, bottom-nav componente, modal/overlay, related-posts-slider, about-photo-card, btn-ghost + btn-magnetic, floating-label form, blog-filter-pill + blog-tag + blog-post-layout. Consolidación fadeInUp→fadeUp. Docs: docs/ds-audit-2026.md. v1.5.0: BrandsSection rediseño completo — grid auto-fill (6→12 logos sin cambios), eyebrow label editorial con líneas decorativas, stagger entrance via IntersectionObserver, hover scale(1.06)+grayscale lift. Nuevos tokens: section-eyebrow-label, stagger-entrance, blog-preview-section. brand-item y brands-section actualizados. Primitivos brands-dark (#03070e, #060b16) y blog-dark (#0c1325, #07090e) añadidos. Dark mode blog-preview-section homologado. DS viewer: página Brands añadida al grupo Patrones. Docs: docs/brands-section.md. v1.4.0: Blog system completo (BlogCard, BlogPreviewSection, BlogNavbar, AppNavbar unificado), BrandsSection inter-sección, ThemeToggle dual-icon sun/moon, tokens bg4 + content-sheet + inter-section (superficies blue-tinted), scroll-driven alpha en projects-sheet y footer, auto-ripple idle 2s en WebGL, modo light como default, partículas dust deshabilitadas en light mode, sección .page--solid-bg para About y Contact, CV link en About admin. Docs: docs/components.md, docs/blog.md. v1.3.0: AdminToast tokens completados — border/shadow-dark tokenizados, title-size corregido a 14px, close-radius 6px, anim-enter/anim-exit como tokens CSS, admin.css refactorizado a 100% token-first, documentación docs/toast.md. v1.2.0: AdminToast component (4 estados: success/error/warning/info), token --warning #f59e0b amber, glassmorphism toast con progress bar y animación exit. v1.1.0: hero-title line-height 1.05, anim-enter-translate 16px, scroll-indicator opacity 0.65, card hover shadow + thumb scale, nav-item hover glass bg, theme-toggle 44px touch target, DS layout navbar offset, hardcoded colors → tokens"
   },
 
   "primitive": {
@@ -138,6 +138,30 @@
       "xl":   { "$value": "20px", "$type": "dimension" },
       "2xl":  { "$value": "24px", "$type": "dimension" },
       "3xl":  { "$value": "48px", "$type": "dimension", "$description": "Navbar blur" }
+    },
+
+    "zIndex": {
+      "base":         { "$value": 0,    "$type": "number", "$description": "Canvas, backgrounds — sin stacking context propio" },
+      "content":      { "$value": 10,   "$type": "number", "$description": "Hero, cards, secciones en flujo normal" },
+      "raised":       { "$value": 20,   "$type": "number", "$description": "Projects sheet, panels sobre contenido" },
+      "sticky":       { "$value": 100,  "$type": "number", "$description": "Navbar, detail-navbar — persisten en scroll" },
+      "navigation":   { "$value": 150,  "$type": "number", "$description": "Bottom nav mobile" },
+      "dropdown":     { "$value": 200,  "$type": "number", "$description": "Sidebars, popovers, DS sidebar" },
+      "notification": { "$value": 400,  "$type": "number", "$description": "Toasts, snackbars, admin-toast" },
+      "modal":        { "$value": 500,  "$type": "number", "$description": "Overlays: profile modal, project-view panel" },
+      "emergency":    { "$value": 9999, "$type": "number", "$description": "Tooltips forzados — solo en emergencias" }
+    },
+
+    "shadow": {
+      "xs":     { "$value": "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)", "$type": "shadow", "$description": "Inputs, chips — elevación mínima" },
+      "sm":     { "$value": "0 4px 12px rgba(0,0,0,0.08)", "$type": "shadow", "$description": "Cards en reposo, badges" },
+      "md":     { "$value": "0 8px 24px rgba(0,0,0,0.10)", "$type": "shadow", "$description": "Dropdowns, panels flotantes" },
+      "lg":     { "$value": "0 12px 40px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)", "$type": "shadow", "$description": "Form card, about-photo-wrap — glass con highlight superior" },
+      "xl":     { "$value": "0 16px 40px rgba(0,0,0,0.14)", "$type": "shadow", "$description": "Card hover estándar — blog-card, preview-card, related-slider" },
+      "2xl":    { "$value": "0 24px 64px rgba(0,0,0,0.28), 0 4px 16px rgba(0,0,0,0.14)", "$type": "shadow", "$description": "Project card hover — máxima elevación" },
+      "up":     { "$value": "0 -6px 24px rgba(0,0,0,0.07)", "$type": "shadow", "$description": "Bottom nav, sticky footer — sombra hacia arriba" },
+      "accent": { "$value": "0 8px 24px rgba(41,151,255,0.35)", "$type": "shadow", "$description": "Botón primario hover — glow accent" },
+      "focus":  { "$value": "0 0 0 3px rgba(41,151,255,0.15)", "$type": "shadow", "$description": "Focus ring para inputs — box-shadow approach" }
     }
   },
 
@@ -180,6 +204,13 @@
     "font": {
       "body":    { "$value": "'DM Sans', 'Helvetica Neue', sans-serif",       "$type": "fontFamily" },
       "heading": { "$value": "'Plus Jakarta Sans', sans-serif",                "$type": "fontFamily" }
+    },
+
+    "focus-ring": {
+      "$description": "Estándar de focus para accesibilidad. Botones e interactivos usan outline, inputs usan box-shadow para no desplazar el layout. Aplicar siempre con :focus-visible (no :focus) para no afectar clicks con mouse.",
+      "outline":        { "$value": "2px solid {semantic.color.accent}", "$type": "string" },
+      "outline-offset": { "$value": "3px", "$type": "dimension" },
+      "input-ring":     { "$value": "{primitive.shadow.focus}", "$type": "shadow", "$description": "Focus ring para inputs via box-shadow" }
     }
   },
 
@@ -408,10 +439,161 @@
       "accent-warning": { "$value": "{semantic.color.warning}", "$type": "color" },
       "accent-error":   { "$value": "{semantic.color.error}",   "$type": "color" },
       "accent-info":    { "$value": "{semantic.color.accent}",  "$type": "color" }
+    },
+
+    "section-heading": {
+      "$description": "Patrón universal de cabecera de sección — el más repetido en todo el portafolio. Siempre la misma estructura: .s-head > .s-label + h2.s-title, ambos con .anim-up para scroll entrance. El título entra con 60ms de delay (CSS rule .s-head .anim-up.in:last-child). Uso: Hero, Projects, About, CV, Contact, Blog, DS viewer.\n\nHTML:\n<div class='s-head'>\n  <div class='s-label anim-up'>Etiqueta</div>\n  <h2 class='s-title anim-up'>Título</h2>\n</div>\n\nAnti-patrones: (1) No usar h2 en .s-label — es semánticamente div. (2) No omitir .s-label — siempre hay etiqueta contextual arriba del título. (3) No agregar .anim-up al .s-head directamente — el observer debe estar en los hijos.",
+      "label-size":       { "$value": "{primitive.fontSize.xs}", "$description": "11px uppercase" },
+      "label-weight":     { "$value": "600", "$type": "number" },
+      "label-tracking":   { "$value": "{primitive.letterSpacing.widest}", "$description": "0.12em" },
+      "label-color":      { "$value": "{semantic.color.accent}" },
+      "title-size":       { "$value": "clamp(28px, 4vw, 44px)", "$description": "Responsive entre 28px (mobile) y 44px (desktop)" },
+      "title-weight":     { "$value": "700", "$type": "number" },
+      "title-tracking":   { "$value": "{primitive.letterSpacing.tight}", "$description": "-0.03em" },
+      "title-lh":         { "$value": "{primitive.lineHeight.snug}", "$description": "1.1" },
+      "head-gap":         { "$value": "{primitive.spacing.12}", "$description": "48px margin-bottom de .s-head" },
+      "stagger-delay":    { "$value": "60ms", "$description": "Delay del título respecto al label" }
+    },
+
+    "bottom-nav": {
+      "$description": "Barra de navegación inferior — solo en mobile (≤640px). Glassmorphism idéntico al navbar pero anclada al bottom. z-index: --z-navigation. Máximo 5 tabs (Material Design). Cada tab muestra icono 20px + label 10px. Estado active tiene pill background con tinte accent. CSS: .bottom-nav, .bottom-tab, .bottom-tab.active.",
+      "height":              { "$value": "64px", "$type": "dimension" },
+      "tab-height":          { "$value": "48px", "$type": "dimension", "$description": "Touch target real — cumple 44pt mínimo" },
+      "tab-radius":          { "$value": "14px", "$type": "dimension" },
+      "icon-size":           { "$value": "20px", "$type": "dimension" },
+      "label-size":          { "$value": "10px", "$type": "dimension" },
+      "label-weight-idle":   { "$value": "500", "$type": "number" },
+      "label-weight-active": { "$value": "600", "$type": "number" },
+      "color-idle":          { "$value": "{semantic.color.txt3}" },
+      "color-active":        { "$value": "{semantic.color.accent}" },
+      "active-bg-light":     { "$value": "rgba(41,151,255,0.10)", "$description": "Pill background active — modo claro" },
+      "active-bg-dark":      { "$value": "rgba(41,151,255,0.15)", "$description": "Pill background active — modo oscuro" },
+      "press-opacity":       { "$value": "0.65", "$type": "number" },
+      "press-scale":         { "$value": "0.95", "$type": "number" },
+      "press-duration":      { "$value": "{primitive.duration.instant}", "$description": "80ms — feedback táctil inmediato" },
+      "blur":                { "$value": "28px", "$type": "dimension" },
+      "saturate":            { "$value": "200%", "$type": "string" },
+      "z-index":             { "$value": "{primitive.zIndex.navigation}" }
+    },
+
+    "modal": {
+      "$description": "Modal de perfil — overlay de pantalla completa con diálogo centrado. Animación entrada: overlay fadeIn 200ms + modal popIn 300ms snap. Salida: popOut 180ms + fadeOut 200ms. ESC y click en overlay cierran con animación. CSS: .overlay, .modal, .overlay--exiting, .modal-x.\n\nAnatomía:\n  .overlay  → fondo oscuro + blur\n  .modal    → card centrada max-w 340px\n    .modal-x → botón cerrar ×\n    .m-av    → avatar circle 88px\n    .m-name  → nombre 18px heading\n    .m-role  → rol 13px txt2\n    .m-links → links sociales\n    .btn-p   → CTA full-width",
+      "overlay-bg":     { "$value": "rgba(0,0,0,0.55)", "$description": "Scrim — cumple legibilidad 40-60% MD standard" },
+      "overlay-blur":   { "$value": "10px", "$type": "dimension" },
+      "overlay-z":      { "$value": "{primitive.zIndex.modal}" },
+      "bg-light":       { "$value": "rgba(255,255,255,0.96)" },
+      "bg-dark":        { "$value": "rgba(18,18,20,0.95)" },
+      "max-width":      { "$value": "340px", "$type": "dimension" },
+      "radius":         { "$value": "{primitive.radius.2xl}", "$description": "24px" },
+      "padding":        { "$value": "{primitive.spacing.8}", "$description": "32px" },
+      "avatar-size":    { "$value": "88px", "$type": "dimension" },
+      "avatar-radius":  { "$value": "{primitive.radius.full}" },
+      "close-size":     { "$value": "36px", "$type": "dimension", "$description": "Visual — min-width/height 44px para touch" },
+      "anim-enter":     { "$value": "popIn 300ms cubic-bezier(0.34,1.56,0.64,1)", "$description": "snap-easing — rebote natural" },
+      "anim-exit":      { "$value": "popOut 180ms ease-in forwards" },
+      "scale-enter":    { "$value": "0.88", "$type": "number" },
+      "scale-exit":     { "$value": "0.92", "$type": "number" }
+    },
+
+    "btn-ghost": {
+      "$description": "Botón terciario compacto. Uso actual: navbar (botón de perfil). Menor padding que btn-secondary para contextos reducidos. Visual idéntico a btn-secondary pero más pequeño. CSS: .btn-profile.",
+      "px":     { "$value": "18px", "$type": "dimension" },
+      "py":     { "$value": "7px",  "$type": "dimension" },
+      "size":   { "$value": "{primitive.fontSize.sm}", "$description": "13px" },
+      "weight": { "$value": "500", "$type": "number" },
+      "radius": { "$value": "{primitive.radius.full}" }
+    },
+
+    "btn-magnetic": {
+      "$description": "Modificador de efecto magnético. Aplicar clase .btn-magnetic junto a .btn-p o .btn-g en zonas de alto impacto (hero CTA). JS en portfolio.tsx registra mousemove y aplica translateX/Y proporcional a la distancia del cursor desde el centro del botón. NO usar en formularios, nav ni botones de sistema.\n\nImplementación JS:\n  offset = (cursor - center) * 0.3  (máx ±8px)\n  btn.style.transform = `translate(${x}px, ${y}px)`\n  al mouseleave → transform: '' con transition 400ms spring",
+      "max-offset":  { "$value": "8px", "$type": "dimension" },
+      "return-ease": { "$value": "{primitive.easing.spring}", "$description": "Retorno suave al centro — cubic-bezier(0.16,1,0.3,1)" },
+      "return-dur":  { "$value": "400ms", "$type": "duration" }
+    },
+
+    "floating-label": {
+      "$description": "Patrón de label flotante para el formulario de contacto. La .fl comienza centrada verticalmente (estado idle) y flota arriba al :focus-within o cuando .fld tiene .has-value (añadida por JS en handleChange).\n\nHTML:\n<div class='fld'>\n  <input class='fi' type='text' />\n  <label class='fl'>Nombre completo</label>\n</div>\n\nEstados:\n  Idle:    top:50% translateY(-50%) · 15px · rgba(0,0,0,0.38)\n  Active:  top:8px · 11px · 0.08em tracking · accent\n  Error:   border accent→error · focus-ring error tint\n\nAnti-patrón: nunca usar placeholder como sustituto del label.",
+      "idle-top":       { "$value": "50%", "$description": "top + translateY(-50%) = centrado vertical" },
+      "idle-size":      { "$value": "{primitive.fontSize.base}", "$description": "15px — igual al input" },
+      "idle-color":     { "$value": "rgba(0,0,0,0.38)" },
+      "active-top":     { "$value": "8px", "$type": "dimension" },
+      "active-size":    { "$value": "{primitive.fontSize.xs}", "$description": "11px" },
+      "active-tracking":{ "$value": "{primitive.letterSpacing.wider}", "$description": "0.08em" },
+      "active-color":   { "$value": "{semantic.color.accent}" },
+      "transition":     { "$value": "top 180ms ease, font-size 180ms ease, letter-spacing 180ms ease, color 180ms ease" }
+    },
+
+    "related-posts-slider": {
+      "$description": "Sección 'También te puede interesar' al final de cada post del blog (/blog/[slug]). Slider horizontal con scroll snap, flechas de navegación y cards reutilizando .blog-preview-card. Máximo 4 cards — prioriza misma categoría, rellena con otras. CSS: .related-posts, .related-posts-head, .related-posts-title, .related-posts-nav, .related-nav-btn, .related-posts-slider, .related-slider-card.\n\nComportamiento:\n  - Fetch paralelo con el post actual en BlogPostPage\n  - Excluye slug actual, ordena: misma categoría primero\n  - canScrollLeft/canScrollRight controlan disabled de arrows\n  - cursor: grab / grabbing en el track\n  - scroll-snap-type: x mandatory · snap-align: start\n  - Sin scrollbar visible (-webkit-scrollbar: none)",
+      "section-margin-top":  { "$value": "64px", "$type": "dimension" },
+      "section-padding-top": { "$value": "56px", "$type": "dimension" },
+      "head-max-width":      { "$value": "720px", "$description": "Alineado con el ancho del artículo" },
+      "title-size":          { "$value": "{primitive.fontSize.2xl}", "$description": "22px" },
+      "title-weight":        { "$value": "700", "$type": "number" },
+      "title-tracking":      { "$value": "{primitive.letterSpacing.tight}", "$description": "-0.03em" },
+      "card-width":          { "$value": "270px", "$type": "dimension" },
+      "card-width-mobile":   { "$value": "240px", "$type": "dimension" },
+      "gap":                 { "$value": "20px", "$type": "dimension" },
+      "scroll-amount":       { "$value": "290px", "$description": "card-width + gap = un step de navegación" },
+      "nav-btn-size":        { "$value": "40px", "$type": "dimension", "$description": "Visual — hits area real 44px por padding" },
+      "nav-btn-radius":      { "$value": "{primitive.radius.full}" },
+      "disabled-opacity":    { "$value": "0.30", "$type": "number" }
+    },
+
+    "about-photo-card": {
+      "$description": "Card de perfil en la sección Sobre mí. Columna izquierda sticky en desktop, estática en tablet/mobile. Contiene: foto/placeholder (gradient mesh) + badge de disponibilidad + links sociales. Tiene borde con tinte accent (rgba(41,151,255,0.18)) y glow sutil.\n\nCSS: .about-photo-wrap, .about-photo-fallback, .about-badge, .badge-pulse, .about-social, .about-social-link.\n\nAspect ratios:\n  Desktop:        3/4 (portrait)\n  Tablet (160px): 3/4\n  Mobile:         2/1 (landscape — ocupa ancho completo)",
+      "radius":          { "$value": "{primitive.radius.2xl}", "$description": "24px desktop / 20px mobile" },
+      "border":          { "$value": "1px solid rgba(41,151,255,0.18)" },
+      "border-dark":     { "$value": "1px solid rgba(41,151,255,0.20)" },
+      "aspect-desktop":  { "$value": "3/4", "$description": "Portrait — reservado para foto real" },
+      "aspect-mobile":   { "$value": "2/1", "$description": "Landscape — ahorra espacio vertical en mobile" },
+      "badge-py":        { "$value": "14px", "$type": "dimension" },
+      "badge-px":        { "$value": "18px", "$type": "dimension" },
+      "badge-size":      { "$value": "{primitive.fontSize.sm}", "$description": "13px" },
+      "badge-blur":      { "$value": "{primitive.blur.lg}", "$description": "16px backdrop-filter" },
+      "pulse-size":      { "$value": "7px", "$type": "dimension" },
+      "pulse-color":     { "$value": "{semantic.color.success}" },
+      "social-padding":  { "$value": "16px 0", "$description": "DS-aligned: 2×8px arriba y abajo" },
+      "social-gap":      { "$value": "{primitive.spacing.2}", "$description": "8px entre iconos" },
+      "social-btn-size": { "$value": "44px", "$type": "dimension", "$description": "Touch target mínimo WCAG" },
+      "social-btn-radius":{ "$value": "{primitive.radius.full}" },
+      "social-icon-size":{ "$value": "15px", "$type": "dimension" }
+    },
+
+    "blog-filter-pill": {
+      "$description": "Pill de filtro por categoría en /blog. Apariencia similar a btn-secondary pero con menor padding. Estado active usa accent fill (igual que btn-primary). CSS: .blog-pill, .blog-pill.active.",
+      "px":     { "$value": "16px", "$type": "dimension" },
+      "py":     { "$value": "7px",  "$type": "dimension" },
+      "size":   { "$value": "{primitive.fontSize.sm}", "$description": "13px" },
+      "weight": { "$value": "500", "$type": "number" },
+      "radius": { "$value": "{primitive.radius.full}" }
+    },
+
+    "blog-tag": {
+      "$description": "Tag inline de categorización de posts. Uso dual: (1) dentro de blog-cards como links clickeables para filtrar, (2) footer del post individual. En el post actúa como anchor link a /blog?tag=X. CSS: .blog-tag, .blog-tag.active.\n\nAnti-patrón: no usar más de 3 tags por card (slice(0,3) en BlogCard).",
+      "px":     { "$value": "9px",  "$type": "dimension" },
+      "py":     { "$value": "3px",  "$type": "dimension" },
+      "size":   { "$value": "11px", "$type": "dimension" },
+      "weight": { "$value": "500",  "$type": "number" },
+      "radius": { "$value": "{primitive.radius.full}" },
+      "color-idle":   { "$value": "{semantic.color.txt3}" },
+      "color-active": { "$value": "{semantic.color.accent}" }
+    },
+
+    "blog-post-layout": {
+      "$description": "Layout de la página de detalle de un post (/blog/[slug]). El contenedor outer (.blog-post-main) usa el ancho máximo del sitio (1160px) para que el related-slider tenga espacio. El article (.blog-post) es más estrecho (720px) para legibilidad óptima (~65 chars/línea a 17px).\n\nCSS: .blog-post-main, .blog-post, .blog-post-back, .blog-post-meta, .blog-post-title, .blog-post-content, .blog-post-img, .blog-post-tags.",
+      "outer-max-width":  { "$value": "{semantic.layout.max-width}", "$description": "1160px — mismo que sections" },
+      "article-max-width":{ "$value": "720px", "$description": "Ancho óptimo de lectura — ~65 chars/línea a 17px" },
+      "content-size":     { "$value": "{primitive.fontSize.lg}", "$description": "17px — mayor que body para comodidad de lectura larga" },
+      "content-lh":       { "$value": "1.85", "$description": "Line-height más generoso que body (1.65) para textos largos" },
+      "title-size":       { "$value": "clamp(28px, 4vw, 44px)" },
+      "title-tracking":   { "$value": "-0.04em" },
+      "title-lh":         { "$value": "1.15" },
+      "img-ratio":        { "$value": "16/8", "$description": "Más panorámico que 16/9 para no ser excesivamente alto" },
+      "img-radius":       { "$value": "18px", "$type": "dimension" },
+      "back-link-size":   { "$value": "{primitive.fontSize.sm}", "$description": "14px · txt3 → txt en hover" }
     }
   },
-
-  "dark": {
     "semantic": {
       "color": {
         "bg":          { "$value": "{primitive.color.neutral.950}",  "$type": "color" },

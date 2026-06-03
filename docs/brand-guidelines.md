@@ -3,10 +3,10 @@
 ## Identity
 
 **Studio Name:** Project Zero  
-**Author:** Alejandro Silva  
+**Author:** Carlos Felipe Rojas Hickmann  
 **Role:** Product Designer & Frontend Developer  
 **Location:** Santiago, Chile  
-**Experience:** 5+ años · 40+ proyectos · 18 clientes  
+**Experience:** 5+ años · 40+ proyectos  
 
 ## Mission
 
@@ -54,16 +54,20 @@ Escala de grises con temperatura ligeramente fría (HSL ~240°).
 | Body / UI | DM Sans | 400, 500, 600 |
 
 ### Scale
-| Token | px | Uso |
-|-------|----|-----|
-| `--font-xs` | 11px | Labels uppercase, stats label |
-| `--font-sm` | 13px | Skill tags, metadata |
-| `--font-base` | 15px | Body text, buttons |
-| `--font-md` | 16px | Bio text, form inputs |
-| `--font-lg` | 18–20px | Subtítulos |
-| `--font-xl` | 22–24px | Card titles |
-| `--font-hero` | clamp(52px, 7.5vw, 100px) | Hero title |
-| `--font-section` | clamp(28px, 4vw, 44px) | Section titles |
+Tokens en `design-tokens.json > primitive.fontSize`. Variables CSS en `design-tokens.css`.
+
+| Token JSON | CSS var | px | Uso |
+|------------|---------|-----|-----|
+| `primitive.fontSize.xs` | `--primitive-fontSize-xs` | 11px | Labels uppercase, stat labels |
+| `primitive.fontSize.sm` | `--primitive-fontSize-sm` | 13px | Skill tags, metadata, blog-tag |
+| `primitive.fontSize.base` | `--primitive-fontSize-base` | 15px | Body, botones |
+| `primitive.fontSize.md` | `--primitive-fontSize-md` | 16px | Bio text, form inputs |
+| `primitive.fontSize.lg` | `--primitive-fontSize-lg` | 17px | Blog post content |
+| `primitive.fontSize.xl` | `--primitive-fontSize-xl` | 20px | — |
+| `primitive.fontSize.2xl` | `--primitive-fontSize-2xl` | 22px | Related posts title |
+| `primitive.fontSize.3xl` | `--primitive-fontSize-3xl` | 28px | Stat numbers |
+| *(clamp, CSS only)* | — | clamp(52px,7.5vw,100px) | Hero title |
+| *(clamp, CSS only)* | — | clamp(28px,4vw,44px) | Section titles (.s-title) |
 
 ### Line Heights
 | Token | Valor | Uso |
@@ -75,22 +79,24 @@ Escala de grises con temperatura ligeramente fría (HSL ~240°).
 | `--lh-loose` | 1.8 | Texto largo (bio) |
 
 ## Spacing System
-Base 8dp. Múltiplos de 8 para ritmo visual consistente.
+Base 8dp. Múltiplos de 8 para ritmo visual consistente.  
+Tokens en `design-tokens.json > primitive.spacing`. Variables CSS: `--primitive-spacing-{n}`.
 
-| Token | px | Uso |
-|-------|----|-----|
-| `--space-1` | 4px | Micro gaps |
-| `--space-2` | 8px | Gaps internos |
-| `--space-3` | 12px | Gaps de componentes |
-| `--space-4` | 16px | Padding estándar |
-| `--space-5` | 20px | Padding cómodo |
-| `--space-6` | 24px | Padding generoso |
-| `--space-8` | 32px | Gaps de sección chica |
-| `--space-10` | 40px | Padding de cards |
-| `--space-12` | 48px | Padding de sección |
-| `--space-16` | 64px | Gaps entre secciones |
-| `--space-20` | 80px | Padding vertical sección |
-| `--space-24` | 96px | Offset navbar |
+| Token JSON | CSS var | px | Uso |
+|------------|---------|-----|-----|
+| `primitive.spacing.1` | `--primitive-spacing-1` | 4px | Micro gaps, badge-pulse |
+| `primitive.spacing.2` | `--primitive-spacing-2` | 8px | Gaps internos, gap botones |
+| `primitive.spacing.3` | `--primitive-spacing-3` | 12px | Gaps de componentes |
+| `primitive.spacing.4` | `--primitive-spacing-4` | 16px | Padding estándar, social-padding |
+| `primitive.spacing.5` | `--primitive-spacing-5` | 20px | Padding cómodo, toast px |
+| `primitive.spacing.6` | `--primitive-spacing-6` | 24px | Padding generoso |
+| `primitive.spacing.8` | `--primitive-spacing-8` | 32px | Form card padding, modal padding |
+| `primitive.spacing.10` | `--primitive-spacing-10` | 40px | Padding de cards |
+| `primitive.spacing.12` | `--primitive-spacing-12` | 48px | Section heading gap (.s-head) |
+| `primitive.spacing.14` | `--primitive-spacing-14` | 56px | Related posts padding-top |
+| `primitive.spacing.16` | `--primitive-spacing-16` | 64px | Related posts margin-top, gap secciones |
+| `primitive.spacing.20` | `--primitive-spacing-20` | 80px | Padding vertical sección |
+| `primitive.spacing.24` | `--primitive-spacing-24` | 96px | Offset navbar |
 
 ## Border Radius
 | Token | Valor | Uso |
