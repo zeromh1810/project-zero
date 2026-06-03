@@ -6,16 +6,18 @@ import { EmailIcon } from "../icons"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type DSPageId =
-  | "overview" | "colors" | "typography"
+  | "overview" | "colors" | "typography" | "darkmode" | "primitivos"
   | "buttons" | "cards" | "forms" | "navigation" | "badges" | "toast" | "patterns" | "brands"
 
 const DS_GROUPS: { label: string; items: { id: DSPageId; label: string }[] }[] = [
   {
     label: "Fundamentos",
     items: [
-      { id: "overview", label: "Overview" },
-      { id: "colors", label: "Colores" },
+      { id: "overview",   label: "Overview" },
+      { id: "colors",     label: "Colores" },
       { id: "typography", label: "Tipografía" },
+      { id: "darkmode",   label: "Modo Oscuro" },
+      { id: "primitivos", label: "Tokens Primitivos" },
     ],
   },
   {
@@ -88,7 +90,7 @@ function PageOverview() {
   return (
     <div className="ds-page-body">
       <div className="ds-page-header">
-        <div className="ds-page-badge">v1.3</div>
+        <div className="ds-page-badge">v1.7.0</div>
         <h2 className="ds-page-title">Project Zero Design System</h2>
         <p className="ds-page-desc">
           Sistema de diseño del portafolio de <strong>Carlos Felipe Rojas Hickmann</strong>. Arquitectura de tokens de 3 capas
@@ -99,10 +101,10 @@ function PageOverview() {
 
       <div className="ds-overview-grid">
         {[
-          { label: "Tokens", value: "70+", desc: "Variables CSS documentadas" },
-          { label: "Componentes", value: "13", desc: "UI components en el sistema" },
+          { label: "Tokens", value: "90+", desc: "Variables CSS documentadas en 3 capas" },
+          { label: "Componentes", value: "14", desc: "UI components en el sistema" },
           { label: "WCAG", value: "AA", desc: "Nivel de accesibilidad mínimo" },
-          { label: "Modos", value: "2", desc: "Light & Dark mode" },
+          { label: "Modos", value: "2", desc: "Light & Dark mode nativos" },
         ].map(({ label, value, desc }) => (
           <div className="ds-overview-card" key={label}>
             <div className="ds-overview-value">{value}</div>
@@ -1321,11 +1323,433 @@ useEffect(() => {
   )
 }
 
+// ── Page: Dark Mode ───────────────────────────────────────────────────────────
+function PageDarkMode() {
+  const { isDark } = useTheme()
+
+  const TOKEN_PAIRS: { token: string; light: string; dark: string; usage: string }[] = [
+    { token: "--bg",        light: "#f8f8f8",              dark: "#000000",              usage: "Fondo principal de página" },
+    { token: "--bg2",       light: "#ffffff",              dark: "#0a0a0a",              usage: "Superficie elevada (cards, modales)" },
+    { token: "--bg3",       light: "#f0f0f0",              dark: "#141414",              usage: "Superficie deprimida (inputs, chips)" },
+    { token: "--bg4",       light: "#e4e4e4",              dark: "#1e1e1e",              usage: "Profundidad máxima" },
+    { token: "--txt",       light: "#1d1d1f",              dark: "#f5f5f7",              usage: "Texto primario" },
+    { token: "--txt2",      light: "#3a3a40",              dark: "#b0b0b5",              usage: "Texto secundario" },
+    { token: "--txt3",      light: "#5e5e64",              dark: "#8e8e93",              usage: "Labels, placeholders, muted" },
+    { token: "--accent",    light: "#0062cc",              dark: "#2997ff",              usage: "Interactivo primario, links, CTAs" },
+    { token: "--accent-h",  light: "#1a7fd4",              dark: "#5ac8fa",              usage: "Hover de accent" },
+    { token: "--border",    light: "rgba(0,0,0,0.08)",     dark: "rgba(255,255,255,0.11)", usage: "Bordes de componentes" },
+    { token: "--border-h",  light: "rgba(0,0,0,0.18)",     dark: "rgba(255,255,255,0.18)", usage: "Borde en hover" },
+    { token: "--glass",     light: "rgba(0,0,0,0.03)",     dark: "rgba(255,255,255,0.04)", usage: "Superficie glass mínima" },
+    { token: "--glass-hover",light:"rgba(0,0,0,0.06)",     dark: "rgba(255,255,255,0.07)", usage: "Glass hover feedback" },
+    { token: "--shadow",    light: "rgba(0,0,0,0.12)",     dark: "rgba(0,0,0,0.60)",     usage: "Sombras generales" },
+  ]
+
+  const SHADOW_PAIRS: { token: string; light: string; dark: string }[] = [
+    { token: "--shadow-xs",  light: "0 1px 3px rgba(0,0,0,0.06)",  dark: "0 1px 3px rgba(0,0,0,0.20)" },
+    { token: "--shadow-sm",  light: "0 4px 12px rgba(0,0,0,0.08)", dark: "0 4px 12px rgba(0,0,0,0.30)" },
+    { token: "--shadow-xl",  light: "0 16px 40px rgba(0,0,0,0.14)",dark: "0 16px 40px rgba(0,0,0,0.50)" },
+    { token: "--shadow-2xl", light: "0 24px 64px rgba(0,0,0,0.28)",dark: "0 24px 64px rgba(0,0,0,0.70)" },
+  ]
+
+  return (
+    <div className="ds-page-body">
+      <div className="ds-page-header">
+        <h2 className="ds-page-title">Modo Oscuro</h2>
+        <p className="ds-page-desc">
+          Sistema de dark mode basado en <strong>CSS variables + clase <code>.dark</code> en el elemento html</strong>.
+          Los 14 tokens semánticos sobrescriben sus valores sin necesidad de JavaScript en el render path.
+          El tema persiste en <code>localStorage</code> y respeta <code>prefers-color-scheme</code>.
+        </p>
+      </div>
+
+      {/* ── Mecanismo ── */}
+      <SectionHeading title="Mecanismo de activación" />
+      <p className="ds-pattern-desc">
+        La clase <code>.dark</code> se aplica a <code>&lt;html&gt;</code> por <code>ThemeContext</code>.
+        Al estar presente, todos los tokens semánticos sobrescriben sus valores vía el bloque <code>.dark &#123;&#125;</code>
+        en <code>design-tokens.css</code>. Sin re-renders, sin flashes, sin JS en el crítico render path.
+      </p>
+      <CodeBlock code={`/* design-tokens.css */
+:root {
+  --txt: #1d1d1f;   /* light */
+  --accent: #0062cc;
+}
+
+.dark {
+  --txt: #f5f5f7;   /* override dark */
+  --accent: #2997ff;
+}
+
+/* En cualquier componente — funciona en ambos modos */
+.my-component {
+  color: var(--txt);         /* ✓ responde al tema */
+  background: var(--bg2);    /* ✓ responde al tema */
+}
+
+/* ✗ Jamás hardcodear */
+.my-component {
+  color: #1d1d1f;            /* roto en dark mode */
+  background: white;         /* roto en dark mode */
+}`} />
+
+      {/* ── Token pairs ── */}
+      <SectionHeading title="Pares de tokens — claro / oscuro" />
+      <p className="ds-pattern-desc" style={{ marginBottom: 16 }}>
+        Modo activo: <strong>{isDark ? "🌙 Oscuro" : "☀️ Claro"}</strong> — los valores resaltados son los vigentes.
+      </p>
+      <div className="ds-dm-table">
+        <div className="ds-dm-header">
+          <span>Token</span>
+          <span style={{ textAlign: "center" }}>Claro</span>
+          <span style={{ textAlign: "center" }}>Oscuro</span>
+          <span>Uso</span>
+        </div>
+        {TOKEN_PAIRS.map(({ token, light, dark, usage }) => {
+          const isColor = !light.includes(" ")
+          return (
+            <div key={token} className="ds-dm-row">
+              <code className="ds-dm-token">{token}</code>
+              <div className={`ds-dm-val${!isDark ? " ds-dm-val--active" : ""}`}>
+                {isColor && (
+                  <span className="ds-dm-swatch" style={{ background: light }} />
+                )}
+                <span className="ds-dm-hex">{light}</span>
+              </div>
+              <div className={`ds-dm-val${isDark ? " ds-dm-val--active" : ""}`}>
+                {isColor && (
+                  <span className="ds-dm-swatch ds-dm-swatch--dark" style={{ background: dark }} />
+                )}
+                <span className="ds-dm-hex">{dark}</span>
+              </div>
+              <span className="ds-dm-usage">{usage}</span>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* ── Shadow pairs ── */}
+      <SectionHeading title="Sombras — escalado de opacidad" />
+      <p className="ds-pattern-desc">
+        Las sombras en dark mode multiplican la opacidad ×3–4 para ser visibles sobre fondos oscuros.
+        En claro, sombras sutiles; en oscuro, sombras densas.
+      </p>
+      <div className="ds-dm-table ds-dm-table--3col">
+        <div className="ds-dm-header">
+          <span>Token</span>
+          <span>Claro (opacidad baja)</span>
+          <span>Oscuro (opacidad alta)</span>
+        </div>
+        {SHADOW_PAIRS.map(({ token, light, dark }) => (
+          <div key={token} className="ds-dm-row">
+            <code className="ds-dm-token">{token}</code>
+            <span className="ds-dm-hex" style={{ fontSize: 11 }}>{light}</span>
+            <span className="ds-dm-hex" style={{ fontSize: 11 }}>{dark}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Theme toggle ── */}
+      <SectionHeading title="Theme Toggle — componente" />
+      <p className="ds-pattern-desc">
+        Pill dual con dos botones (sol / luna). El botón activo recibe fondo <code>--bg2</code> + sombra sutil.
+        El botón inactivo desaparece visualmente pero es clicable. Usado en <code>AppNavbar</code>, <code>Navbar</code> y <code>BlogNavbar</code>.
+      </p>
+      <PreviewBox label="Vista actual">
+        <div className="theme-toggle" role="group" aria-label="Modo de color (preview)">
+          <button className={`theme-toggle-btn${!isDark ? " active" : ""}`} aria-label="Modo claro" style={{ cursor: "default" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </svg>
+          </button>
+          <button className={`theme-toggle-btn${isDark ? " active" : ""}`} aria-label="Modo oscuro" style={{ cursor: "default" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+        </div>
+      </PreviewBox>
+      <div className="ds-spec-table" style={{ marginTop: 16 }}>
+        {[
+          { prop: "btn-size",       val: "28px",   desc: "Tamaño visual del botón" },
+          { prop: "icon-size",      val: "14px",   desc: "SVG sol / luna" },
+          { prop: "pill-padding",   val: "3px",    desc: "Padding del contenedor pill" },
+          { prop: "gap",            val: "2px",    desc: "Espacio entre botones" },
+          { prop: "active-bg",      val: "var(--bg2)", desc: "Fondo botón activo" },
+          { prop: "active-shadow",  val: "0 1px 4px rgba(0,0,0,0.14)", desc: "Sombra botón activo" },
+        ].map(({ prop, val, desc }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{desc}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Reglas ── */}
+      <SectionHeading title="Reglas de implementación" />
+      <div className="ds-rules">
+        <RuleChip rule="Siempre usa tokens semánticos — nunca hex directo en componentes" variant="do" />
+        <RuleChip rule="Testea contraste en AMBOS modos (4.5:1 AA para texto)" variant="do" />
+        <RuleChip rule="Usa var(--shadow-xl) dark mode sobrescribe automáticamente la opacidad" variant="do" />
+        <RuleChip rule="Para glassmorphism oscuro: rgba(255,255,255,0.04) en vez de rgba(0,0,0,0.03)" variant="do" />
+        <RuleChip rule='color: #1d1d1f — roto en dark mode, usa var(--txt)' variant="dont" />
+        <RuleChip rule='background: white — usa var(--bg2)' variant="dont" />
+        <RuleChip rule='border: 1px solid #e0e0e0 — usa var(--border)' variant="dont" />
+        <RuleChip rule='Invertir colores con filter:invert() — distorsiona imágenes y videos' variant="dont" />
+      </div>
+
+      {/* ── Dark mode específico por componente ── */}
+      <SectionHeading title="Overrides por componente" />
+      <p className="ds-pattern-desc">
+        Algunos componentes necesitan overrides adicionales más allá de los tokens base.
+        El patrón es <code>.dark .component &#123;&#125;</code> directamente en el CSS del componente.
+      </p>
+      <CodeBlock code={`/* Glassmorphism — distinto en cada modo */
+.navbar {
+  background: var(--navbar-bg);   /* rgba(248,248,248,0.82) / rgba(0,0,0,0.75) */
+  backdrop-filter: blur(48px);
+}
+
+/* Formulario de contacto — más opaco en dark */
+.contact-form-card {
+  background: rgba(255, 255, 255, 0.85);
+}
+.dark .contact-form-card {
+  background: rgba(255, 255, 255, 0.035);   /* muy translúcido en dark */
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+/* Badge de disponibilidad — tinte oscuro */
+.about-badge {
+  background: rgba(255, 255, 255, 0.88);
+}
+.dark .about-badge {
+  background: rgba(8, 12, 20, 0.82);
+}`} />
+
+      {/* ── ThemeContext API ── */}
+      <SectionHeading title="ThemeContext API" />
+      <CodeBlock code={`// lib/context/theme-context.tsx
+import { useTheme } from "@/lib/context/theme-context"
+
+function MyComponent() {
+  const { isDark, toggleTheme } = useTheme()
+
+  return (
+    <div style={{ color: isDark ? "#f5f5f7" : "#1d1d1f" }}>
+      {/* Mejor: usar var(--txt) directamente en CSS */}
+    </div>
+  )
+}
+
+// El ThemeProvider en app/admin/layout.tsx wrappea la app.
+// El estado persiste en localStorage bajo la key "theme".
+// Valor por defecto: "light" (definido en theme-context.tsx).`} />
+    </div>
+  )
+}
+
+// ── Page: Primitivos ─────────────────────────────────────────────────────────
+function PagePrimitivos() {
+  const SHADOW_TOKENS = [
+    { name: "--shadow-xs",     val: "0 1px 3px rgba(0,0,0,0.06)", usage: "Inputs, chips — elevación mínima" },
+    { name: "--shadow-sm",     val: "0 4px 12px rgba(0,0,0,0.08)", usage: "Cards en reposo, badges" },
+    { name: "--shadow-md",     val: "0 8px 24px rgba(0,0,0,0.10)", usage: "Dropdowns, panels flotantes" },
+    { name: "--shadow-lg",     val: "0 12px 40px rgba(0,0,0,0.07) + inset", usage: "Form card, about-photo — glass con highlight" },
+    { name: "--shadow-xl",     val: "0 16px 40px rgba(0,0,0,0.14)", usage: "Card hover estándar — blog, preview" },
+    { name: "--shadow-2xl",    val: "0 24px 64px rgba(0,0,0,0.28) …", usage: "Project card hover — máxima elevación" },
+    { name: "--shadow-up",     val: "0 -6px 24px rgba(0,0,0,0.07)", usage: "Bottom nav, sticky footer" },
+    { name: "--shadow-accent", val: "0 8px 24px rgba(41,151,255,0.35)", usage: "Botón primario hover — glow accent" },
+    { name: "--shadow-focus",  val: "0 0 0 3px rgba(41,151,255,0.15)", usage: "Focus ring inputs (box-shadow approach)" },
+  ]
+
+  const Z_TOKENS = [
+    { name: "--z-base",         val: "0",    usage: "Canvas WebGL, fondos sin stacking context" },
+    { name: "--z-content",      val: "10",   usage: "Hero, cards, secciones en flujo" },
+    { name: "--z-raised",       val: "20",   usage: "Projects sheet, panels sobre contenido" },
+    { name: "--z-sticky",       val: "100",  usage: "Navbar, detail-navbar — persisten al scroll" },
+    { name: "--z-navigation",   val: "150",  usage: "Bottom nav mobile" },
+    { name: "--z-dropdown",     val: "200",  usage: "Sidebars, popovers, DS sidebar" },
+    { name: "--z-notification", val: "400",  usage: "Toasts, snackbars, admin-toast" },
+    { name: "--z-modal",        val: "500",  usage: "Overlays: profile modal, project-view" },
+    { name: "--z-emergency",    val: "9999", usage: "Tooltips forzados — solo emergencias" },
+  ]
+
+  const RADIUS_TOKENS = [
+    { name: "sm  (--r-sm)",   val: "8px",    usage: "Nav items, tags, botones pequeños" },
+    { name: "md  (--r-md)",   val: "12px",   usage: "Form inputs, chips" },
+    { name: "lg  (--r-lg)",   val: "16px",   usage: "Stat cards, toast" },
+    { name: "xl  (--r-xl)",   val: "20px",   usage: "Project cards" },
+    { name: "2xl (--r-2xl)",  val: "24px",   usage: "Form card, about-photo, modales" },
+    { name: "full",           val: "9999px", usage: "Pills, badges, botones primarios" },
+  ]
+
+  const DURATION_TOKENS = [
+    { name: "instant",   val: "80ms",    usage: "Card tilt activo" },
+    { name: "fast",      val: "160ms",   usage: "Section crossfade" },
+    { name: "normal",    val: "200ms",   usage: "Hover states, transiciones estándar" },
+    { name: "slow",      val: "300ms",   usage: "Overlays, modales" },
+    { name: "slower",    val: "400ms",   usage: "Retorno magnético, transiciones largas" },
+    { name: "entrance",  val: "650ms",   usage: "Animaciones de scroll (anim-up)" },
+    { name: "ripple-idle","val": "2000ms", usage: "Auto-ripple WebGL idle" },
+  ]
+
+  const EASING_TOKENS = [
+    { name: "spring",   val: "cubic-bezier(0.16, 1, 0.3, 1)",       usage: "Entradas, expansiones — main easing" },
+    { name: "out",      val: "cubic-bezier(0.25, 0.46, 0.45, 0.94)", usage: "Botones hover, transiciones suaves" },
+    { name: "snap",     val: "cubic-bezier(0.34, 1.56, 0.64, 1)",    usage: "Pop animations, sliding pill" },
+    { name: "linear",   val: "linear",                                usage: "Solo para valores que no necesitan ease" },
+  ]
+
+  const BLUR_TOKENS = [
+    { name: "sm",  val: "8px",  usage: "Cards hover glass" },
+    { name: "md",  val: "12px", usage: "Toast backdrop-filter" },
+    { name: "lg",  val: "16px", usage: "About badge" },
+    { name: "xl",  val: "20px", usage: "Contact form card" },
+    { name: "2xl", val: "24px", usage: "Project view backdrop" },
+    { name: "3xl", val: "48px", usage: "Navbar blur — máximo" },
+  ]
+
+  return (
+    <div className="ds-page-body">
+      <div className="ds-page-header">
+        <div className="ds-page-badge">Primitivos</div>
+        <h2 className="ds-page-title">Tokens Primitivos</h2>
+        <p className="ds-page-desc">
+          Capa base del sistema de tokens. Valores raw que <strong>nunca se usan directamente</strong> en componentes —
+          siempre se referencian a través de tokens semánticos. Incluye sombras, z-index, radios, duraciones, easings y blurs.
+        </p>
+      </div>
+
+      {/* Shadow scale */}
+      <SectionHeading title="Escala de sombras" />
+      <p className="ds-pattern-desc">
+        Las sombras en dark mode se definen en <code>:root</code> y sobrescriben en <code>.dark</code> con opacidad ×3–4.
+        Disponibles como <code>var(--shadow-*)</code> en todo el CSS.
+      </p>
+      <div className="ds-spec-table">
+        <div className="ds-spec-row">
+          <span className="ds-spec-name">Token</span>
+          <span className="ds-spec-val">Valor light</span>
+          <span className="ds-spec-val">Uso</span>
+        </div>
+        {SHADOW_TOKENS.map(({ name, val, usage }) => (
+          <div key={name} className="ds-spec-row">
+            <span className="ds-spec-name">{name}</span>
+            <span className="ds-spec-val" style={{ fontSize: 11 }}>{val}</span>
+            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{usage}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
+        {["xs","sm","md","xl","2xl"].map((s) => (
+          <div key={s} style={{
+            width: 72, height: 72, borderRadius: 12, background: "var(--bg2)",
+            boxShadow: `var(--shadow-${s})`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 11, color: "var(--txt3)", fontWeight: 600,
+          }}>
+            {s}
+          </div>
+        ))}
+      </div>
+
+      {/* Z-index scale */}
+      <SectionHeading title="Escala Z-index" />
+      <p className="ds-pattern-desc">
+        9 capas semánticas. Usar siempre <code>var(--z-*)</code> — nunca valores numéricos hardcodeados.
+        Esto evita conflictos de stacking context entre componentes.
+      </p>
+      <div className="ds-layer-diagram">
+        {Z_TOKENS.map(({ name, val, usage }) => (
+          <div key={name} className="ds-layer-row">
+            <span className="ds-layer-z"><code>{name}: {val}</code></span>
+            <span className="ds-layer-label">{usage}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Border radius */}
+      <SectionHeading title="Escala border-radius" />
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
+        {RADIUS_TOKENS.map(({ name, val }) => {
+          const size = val === "9999px" ? 44 : parseInt(val, 10)
+          return (
+            <div key={name} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+              <div style={{
+                width: 56, height: 56, background: "rgba(0,98,204,0.10)",
+                border: "1.5px solid rgba(0,98,204,0.28)",
+                borderRadius: val,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 10, color: "var(--accent)", fontWeight: 700,
+              }}>
+                {val}
+              </div>
+              <span style={{ fontSize: 10, color: "var(--txt3)", textAlign: "center", maxWidth: 60 }}>{name.split(" ")[0]}</span>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Duration */}
+      <SectionHeading title="Duraciones de animación" />
+      <div className="ds-spec-table">
+        {DURATION_TOKENS.map(({ name, val, usage }) => (
+          <div key={name} className="ds-spec-row">
+            <span className="ds-spec-name">{name}</span>
+            <span className="ds-spec-val">{val}</span>
+            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{usage}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Easing */}
+      <SectionHeading title="Curvas de easing" />
+      <div className="ds-spec-table">
+        {EASING_TOKENS.map(({ name, val, usage }) => (
+          <div key={name} className="ds-spec-row">
+            <span className="ds-spec-name">{name}</span>
+            <span className="ds-spec-val" style={{ fontSize: 11, fontFamily: "monospace" }}>{val}</span>
+            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{usage}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Blur */}
+      <SectionHeading title="Escala blur (backdrop-filter)" />
+      <div className="ds-spec-table">
+        {BLUR_TOKENS.map(({ name, val, usage }) => (
+          <div key={name} className="ds-spec-row">
+            <span className="ds-spec-name">blur-{name}</span>
+            <span className="ds-spec-val">{val}</span>
+            <span className="ds-spec-val" style={{ color: "var(--txt3)" }}>{usage}</span>
+          </div>
+        ))}
+      </div>
+
+      <SectionHeading title="Reglas" />
+      <div className="ds-rules">
+        <RuleChip rule="Siempre usar var(--shadow-xl) no un valor shadow manual en componentes" variant="do" />
+        <RuleChip rule="Siempre usar var(--z-sticky) no z-index: 100 hardcodeado" variant="do" />
+        <RuleChip rule="Las sombras dark mode se definen en .dark { } — el override es automático" variant="do" />
+        <RuleChip rule="box-shadow: 0 8px 24px rgba(0,0,0,0.10)  ← hardcodeado" variant="dont" />
+        <RuleChip rule="z-index: 999  ← sin semántica, genera conflictos" variant="dont" />
+      </div>
+    </div>
+  )
+}
+
 // ── Page map ──────────────────────────────────────────────────────────────────
 const PAGE_MAP: Record<DSPageId, React.ComponentType> = {
   overview: PageOverview,
   colors: PageColors,
   typography: PageTypography,
+  darkmode: PageDarkMode,
+  primitivos: PagePrimitivos,
   buttons: PageButtons,
   cards: PageCards,
   forms: PageForms,
@@ -1362,7 +1786,7 @@ export function DesignSystemSection({ adminMode }: { adminMode?: boolean }) {
           </div>
           <div className="ds-brand-info">
             <div className="ds-brand-title">Project Zero DS</div>
-            <div className="ds-brand-version">v1.3</div>
+            <div className="ds-brand-version">v1.7.0</div>
           </div>
         </div>
         <nav className="ds-nav">

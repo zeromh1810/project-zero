@@ -36,6 +36,28 @@
   --shadow: rgba(0, 0, 0, 0.12);
   --portfolio-font: "DM Sans", "Helvetica Neue", sans-serif;
   --portfolio-heading-font: "Plus Jakarta Sans", sans-serif;
+
+  /* ── Shadow scale ── */
+  --shadow-xs:     0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm:     0 4px 12px rgba(0,0,0,0.08);
+  --shadow-md:     0 8px 24px rgba(0,0,0,0.10);
+  --shadow-lg:     0 12px 40px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
+  --shadow-xl:     0 16px 40px rgba(0,0,0,0.14);
+  --shadow-2xl:    0 24px 64px rgba(0,0,0,0.28), 0 4px 16px rgba(0,0,0,0.14);
+  --shadow-up:     0 -6px 24px rgba(0,0,0,0.07);
+  --shadow-accent: 0 8px 24px rgba(41,151,255,0.35);
+  --shadow-focus:  0 0 0 3px rgba(41,151,255,0.15);
+
+  /* ── Z-index scale ── */
+  --z-base:         0;
+  --z-content:      10;
+  --z-raised:       20;
+  --z-sticky:       100;
+  --z-navigation:   150;
+  --z-dropdown:     200;
+  --z-notification: 400;
+  --z-modal:        500;
+  --z-emergency:    9999;
 }
 
 .dark {
@@ -59,6 +81,14 @@
   --content-sheet-rgb: 6, 12, 26;
   --navbar-bg: rgba(0, 0, 0, 0.75);
   --shadow: rgba(0, 0, 0, 0.6);
+
+  /* Shadow scale — opacidad amplificada en dark */
+  --shadow-xs:  0 1px 3px rgba(0,0,0,0.20), 0 1px 2px rgba(0,0,0,0.15);
+  --shadow-sm:  0 4px 12px rgba(0,0,0,0.30);
+  --shadow-md:  0 8px 24px rgba(0,0,0,0.40);
+  --shadow-xl:  0 16px 40px rgba(0,0,0,0.50);
+  --shadow-2xl: 0 24px 64px rgba(0,0,0,0.70), 0 4px 16px rgba(0,0,0,0.40);
+  --shadow-up:  0 -6px 24px rgba(0,0,0,0.45);
 }
 
 /* ── BASE STYLES ── */
@@ -224,17 +254,15 @@ html {
   align-items: center;
   border: 1px solid var(--border);
   border-radius: 980px;
-  padding: 3px;
+  padding: 4px;
   gap: 2px;
   background: var(--glass);
   flex-shrink: 0;
 }
 
 .theme-toggle-btn {
-  width: 34px;
-  height: 34px;
-  min-width: 44px;
-  min-height: 44px;
+  width: 32px;
+  height: 32px;
   border-radius: 980px;
   border: none;
   background: transparent;
@@ -248,8 +276,8 @@ html {
 }
 
 .theme-toggle-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
 }
 
 .theme-toggle-btn.active {
@@ -4916,6 +4944,100 @@ html {
   .ds-layer-z { min-width: unset; }
 }
 
+/* ── Dark Mode comparison table (.ds-dm-*) ─────────────────────────────────── */
+.ds-dm-table {
+  border: 1px solid #e8eaed;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+.dark .ds-dm-table {
+  border-color: rgba(255,255,255,0.09);
+}
+.ds-dm-header {
+  display: grid;
+  grid-template-columns: 180px 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #f5f6fa;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--txt3);
+}
+.dark .ds-dm-header {
+  background: rgba(255,255,255,0.04);
+  color: var(--txt3);
+}
+.ds-dm-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid #e8eaed;
+  font-size: 12px;
+  transition: background 100ms ease;
+}
+.dark .ds-dm-row {
+  border-top-color: rgba(255,255,255,0.07);
+}
+.ds-dm-row:hover {
+  background: rgba(0,98,204,0.025);
+}
+.dark .ds-dm-row:hover {
+  background: rgba(41,151,255,0.04);
+}
+.ds-dm-token {
+  font-family: "SF Mono", "Consolas", monospace;
+  font-size: 11.5px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.ds-dm-val {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: transparent;
+  transition: background 160ms ease;
+}
+.ds-dm-val--active {
+  background: rgba(41,151,255,0.09);
+  border-radius: 6px;
+}
+.ds-dm-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,0.10);
+}
+.ds-dm-swatch--dark {
+  border-color: rgba(255,255,255,0.12);
+}
+.ds-dm-hex {
+  font-family: "SF Mono", "Consolas", monospace;
+  font-size: 11px;
+  color: var(--txt2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ds-dm-usage {
+  font-size: 11.5px;
+  color: var(--txt3);
+  line-height: 1.4;
+}
+
+/* Table sin columna de uso (shadows) */
+.ds-dm-table--3col .ds-dm-header,
+.ds-dm-table--3col .ds-dm-row {
+  grid-template-columns: 180px 1fr 1fr;
+}
+
 /* ── DS — Admin mode overrides ─────────────────────────────────────────────── */
 /* Navbar (fixed 64px) + admin tabbar (~46px) = 110px total offset            */
 .ds-layout--admin {
@@ -4925,6 +5047,17 @@ html {
 .ds-layout--admin .ds-sidebar {
   top: 110px;
   height: calc(100vh - 110px);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   1440p / QHD — 1440px–1920px
+   Hero title fijado a 85px: el clamp base llega a 100px en este rango
+   y resulta desproporcionado. 85px es el óptimo visual a estas resoluciones.
+   ════════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1440px) and (max-width: 1920px) {
+  .hero-title {
+    font-size: 85px;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
