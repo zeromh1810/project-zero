@@ -1461,6 +1461,12 @@ html {
     radial-gradient(ellipse at 60% 50%, rgba(14, 138, 106, 0.15) 0%, transparent 60%), #080c14;
 }
 
+/* Avatar SVG escala para llenar el fallback (análogo a object-fit: contain en un <img>) */
+.about-photo-fallback svg {
+  width: 100%;
+  height: 100%;
+}
+
 /* Glass badge overlaid on the photo bottom */
 .about-badge {
   padding: 14px 18px;
