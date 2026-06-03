@@ -1461,6 +1461,15 @@ html {
     radial-gradient(ellipse at 60% 50%, rgba(14, 138, 106, 0.15) 0%, transparent 60%), #080c14;
 }
 
+/* Foto de perfil real — object-fit:cover para llenar el 3/4 container */
+.about-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
 /* Glass badge overlaid on the photo bottom */
 .about-badge {
   padding: 14px 18px;
@@ -2933,14 +2942,10 @@ html {
   padding-bottom: 16px;
 }
 
-/* Header row: label+title left, arrow nav right — constrained to article width */
+/* Header — label + título, alineado al ancho del artículo */
 .related-posts-head {
   max-width: 720px;
   margin: 0 auto 32px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
 }
 
 .related-posts-title {
@@ -2953,66 +2958,14 @@ html {
   margin: 8px 0 0;
 }
 
-/* Arrow buttons — 40×40 circle, meets 44pt touch target via padding */
-.related-posts-nav {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-  padding-bottom: 3px;
-}
-
-.related-nav-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1.5px solid var(--border);
-  background: transparent;
-  color: var(--txt2);
-  cursor: pointer;
-  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
-  flex-shrink: 0;
-}
-
-.related-nav-btn:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(41, 151, 255, 0.06);
-}
-
-.related-nav-btn:disabled {
-  opacity: 0.3;
-  cursor: default;
-  pointer-events: none;
-}
-
-/* Horizontal scroll track — full container width, no scrollbar */
-.related-posts-slider {
-  display: flex;
+/* Grid estático de 3 columnas */
+.related-posts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  padding-bottom: 16px;  /* breathe room for hover box-shadow */
-  margin-bottom: -8px;
-  cursor: grab;
 }
 
-.related-posts-slider:active {
-  cursor: grabbing;
-}
-
-.related-posts-slider::-webkit-scrollbar {
-  display: none;
-}
-
-/* Individual card in slider */
-.related-slider-card {
-  flex: 0 0 270px;
-  scroll-snap-align: start;
+.related-grid-card {
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -3022,17 +2975,22 @@ html {
   transition: border-color 250ms ease, transform 250ms ease, box-shadow 250ms ease;
 }
 
-.related-slider-card:hover {
+.related-grid-card:hover {
   border-color: var(--border-h);
   transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
 }
 
-.related-slider-card:hover .blog-preview-img img {
+.related-grid-card:hover .blog-preview-img img {
   transform: scale(1.04);
 }
 
-/* Mobile: narrower cards, easier thumb swipe */
+@media (max-width: 860px) {
+  .related-posts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 640px) {
   .related-posts {
     margin-top: 48px;
@@ -3047,8 +3005,9 @@ html {
     font-size: 19px;
   }
 
-  .related-slider-card {
-    flex: 0 0 240px;
+  .related-posts-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 }
 

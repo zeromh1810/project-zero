@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { AppNavbar } from "@/components/portfolio/app-navbar"
@@ -23,97 +23,36 @@ function excerpt(content: string, n = 88) {
   return clean.length <= n ? clean : clean.slice(0, n).trimEnd() + "…"
 }
 
-// ── Related Posts Slider ────────────────────────────────────────────────────
+// ── Related Posts (grid estático, máx 3) ───────────────────────────────────
 function RelatedPosts({ currentSlug, currentCategory, allPosts }: {
   currentSlug: string
   currentCategory: string
   allPosts: BlogPost[]
 }) {
-  const scrollRef                           = useRef<HTMLDivElement>(null)
-  const [canScrollLeft,  setCanScrollLeft]  = useState(false)
-  const [canScrollRight, setCanScrollRight] = useState(true)
-
-  // Same category first, then others — max 4, exclude current
   const related = useMemo(() => {
     const others = allPosts.filter(p => p.slug !== currentSlug && !p.draft)
     const same   = others.filter(p => p.category === currentCategory)
     const rest   = others.filter(p => p.category !== currentCategory)
-    return [...same, ...rest].slice(0, 4)
+    return [...same, ...rest].slice(0, 3)
   }, [allPosts, currentSlug, currentCategory])
-
-  const checkScroll = useCallback(() => {
-    const el = scrollRef.current
-    if (!el) return
-    setCanScrollLeft(el.scrollLeft > 8)
-    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 8)
-  }, [])
-
-  useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
-    // Re-check after layout stabilises
-    const t = setTimeout(checkScroll, 80)
-    el.addEventListener("scroll", checkScroll, { passive: true })
-    window.addEventListener("resize",  checkScroll)
-    return () => {
-      clearTimeout(t)
-      el.removeEventListener("scroll", checkScroll)
-      window.removeEventListener("resize",  checkScroll)
-    }
-  }, [related, checkScroll])
-
-  const scroll = (dir: "left" | "right") => {
-    scrollRef.current?.scrollBy({ left: dir === "left" ? -290 : 290, behavior: "smooth" })
-  }
 
   if (related.length === 0) return null
 
   return (
     <section className="related-posts" aria-labelledby="related-heading">
-
       <div className="related-posts-head">
-        <div>
-          <div className="s-label">Descubre más</div>
-          <h2 className="related-posts-title" id="related-heading">
-            También te puede interesar
-          </h2>
-        </div>
-
-        <div className="related-posts-nav" aria-label="Navegación del slider">
-          <button
-            className="related-nav-btn"
-            onClick={() => scroll("left")}
-            disabled={!canScrollLeft}
-            aria-label="Artículos anteriores"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2.5"
-              strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <polyline points="15,18 9,12 15,6" />
-            </svg>
-          </button>
-          <button
-            className="related-nav-btn"
-            onClick={() => scroll("right")}
-            disabled={!canScrollRight}
-            aria-label="Más artículos"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2.5"
-              strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <polyline points="9,18 15,12 9,6" />
-            </svg>
-          </button>
-        </div>
+        <div className="s-label">Descubre más</div>
+        <h2 className="related-posts-title" id="related-heading">
+          También te puede interesar
+        </h2>
       </div>
 
-      <div className="related-posts-slider" ref={scrollRef} role="list">
+      <div className="related-posts-grid">
         {related.map(p => (
           <Link
             key={p.id}
             href={`/blog/${p.slug}`}
-            className="related-slider-card"
-            role="listitem"
+            className="related-grid-card"
             aria-label={p.title}
           >
             <div className="blog-preview-img">
@@ -133,7 +72,6 @@ function RelatedPosts({ currentSlug, currentCategory, allPosts }: {
           </Link>
         ))}
       </div>
-
     </section>
   )
 }

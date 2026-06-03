@@ -558,6 +558,23 @@
   color: var(--txt3);
 }
 
+/* Foto de perfil — preview en admin */
+.about-admin-photo-preview {
+  width: 120px;
+  aspect-ratio: 3/4;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+}
+
+.about-admin-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
 /* ── CHIP INPUT ── */
 .admin-chips-wrap {
   display: flex;

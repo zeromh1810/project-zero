@@ -28,6 +28,7 @@ interface AboutData {
   badge: string
   available: boolean
   cvUrl: string
+  photoUrl: string
 }
 
 const DEFAULT: AboutData = {
@@ -38,6 +39,7 @@ const DEFAULT: AboutData = {
   badge: "Disponible para freelance",
   available: true,
   cvUrl: "",
+  photoUrl: "",
 }
 
 interface AboutSectionProps {
@@ -69,18 +71,26 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
           {/* Photo */}
           <div className="about-photo-wrap">
             <div className="about-photo-fallback">
-              <svg width="140" height="140" viewBox="0 0 140 140" fill="none">
-                <circle cx="70" cy="54" r="32"
-                  fill={isDark ? "rgba(41,151,255,0.3)" : "rgba(41,151,255,0.2)"} />
-                <ellipse cx="70" cy="120" rx="52" ry="32"
-                  fill={isDark ? "rgba(41,151,255,0.2)" : "rgba(41,151,255,0.15)"} />
-                <circle cx="70" cy="52" r="22"
-                  fill={isDark ? "rgba(41,151,255,0.55)" : "rgba(41,151,255,0.45)"} />
-                <text x="70" y="60" textAnchor="middle" fontSize="28"
-                  fontFamily="Plus Jakarta Sans" fontWeight="700" fill="white" opacity="0.9">
-                  A
-                </text>
-              </svg>
+              {data.photoUrl ? (
+                <img
+                  src={data.photoUrl}
+                  alt="Foto de perfil"
+                  className="about-photo-img"
+                />
+              ) : (
+                <svg width="140" height="140" viewBox="0 0 140 140" fill="none">
+                  <circle cx="70" cy="54" r="32"
+                    fill={isDark ? "rgba(41,151,255,0.3)" : "rgba(41,151,255,0.2)"} />
+                  <ellipse cx="70" cy="120" rx="52" ry="32"
+                    fill={isDark ? "rgba(41,151,255,0.2)" : "rgba(41,151,255,0.15)"} />
+                  <circle cx="70" cy="52" r="22"
+                    fill={isDark ? "rgba(41,151,255,0.55)" : "rgba(41,151,255,0.45)"} />
+                  <text x="70" y="60" textAnchor="middle" fontSize="28"
+                    fontFamily="Plus Jakarta Sans" fontWeight="700" fill="white" opacity="0.9">
+                    A
+                  </text>
+                </svg>
+              )}
             </div>
             <div className="about-badge">
               {data.available && <span className="badge-pulse" />}

@@ -11,6 +11,7 @@ interface AboutData {
   badge: string
   available: boolean
   cvUrl: string
+  photoUrl: string
 }
 
 const DEFAULT: AboutData = {
@@ -25,6 +26,7 @@ const DEFAULT: AboutData = {
   badge: "Disponible para freelance",
   available: true,
   cvUrl: "",
+  photoUrl: "",
 }
 
 import type { ToastType } from "./admin-toast"
@@ -34,11 +36,13 @@ interface Props {
 }
 
 export default function AboutTab({ onToast }: Props) {
-  const [data, setData] = useState<AboutData>(DEFAULT)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [skillInput, setSkillInput] = useState("")
-  const skillRef = useRef<HTMLInputElement>(null)
+  const [data,           setData]          = useState<AboutData>(DEFAULT)
+  const [loading,        setLoading]        = useState(true)
+  const [saving,         setSaving]         = useState(false)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [skillInput,     setSkillInput]     = useState("")
+  const skillRef  = useRef<HTMLInputElement>(null)
+  const photoRef  = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetch("/api/admin/about", { cache: "no-store" })
@@ -75,6 +79,28 @@ export default function AboutTab({ onToast }: Props) {
     }
   }
 
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingPhoto(true)
+    try {
+      const fd = new FormData()
+      fd.append("file", file)
+      const res  = await fetch("/api/admin/upload", { method: "POST", body: fd })
+      const json = await res.json()
+      if (json.url) {
+        set("photoUrl", json.url)
+      } else {
+        onToast("Error al subir imagen", "error", json.error)
+      }
+    } catch {
+      onToast("Error al subir imagen", "error")
+    } finally {
+      setUploadingPhoto(false)
+      e.target.value = ""
+    }
+  }
+
   async function save() {
     setSaving(true)
     try {
@@ -104,11 +130,58 @@ export default function AboutTab({ onToast }: Props) {
       <div className="admin-section-header">
         <div>
           <div className="admin-section-title">Sobre mí</div>
-          <div className="admin-section-sub">Biografía, habilidades y estadísticas</div>
+          <div className="admin-section-sub">Biografía, foto, habilidades y estadísticas</div>
         </div>
         <button className="btn-p" onClick={save} disabled={saving}>
           {saving ? "Guardando…" : "Guardar cambios"}
         </button>
+      </div>
+
+      {/* Foto de perfil */}
+      <div className="admin-card">
+        <div className="admin-card-title">Foto de perfil</div>
+
+        {data.photoUrl && (
+          <div className="about-admin-photo-preview">
+            <img src={data.photoUrl} alt="Foto de perfil" />
+          </div>
+        )}
+
+        <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: data.photoUrl ? 14 : 0 }}>
+          <input
+            ref={photoRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            style={{ display: "none" }}
+            onChange={handlePhotoUpload}
+          />
+          <button
+            className="btn-g"
+            onClick={() => photoRef.current?.click()}
+            disabled={uploadingPhoto}
+            style={{ fontSize: 13 }}
+          >
+            {uploadingPhoto
+              ? "Subiendo…"
+              : data.photoUrl
+              ? "Cambiar foto"
+              : "Subir foto"}
+          </button>
+
+          {data.photoUrl && !uploadingPhoto && (
+            <button
+              className="btn-profile"
+              onClick={() => set("photoUrl", "")}
+              style={{ color: "var(--error)", borderColor: "var(--error)" }}
+            >
+              Quitar foto
+            </button>
+          )}
+        </div>
+
+        <div className="admin-input-hint" style={{ marginTop: 8 }}>
+          JPG, PNG o WebP · máx. 8 MB · Recomendado: formato retrato (3:4), mínimo 600×800 px
+        </div>
       </div>
 
       {/* Bio */}
