@@ -5090,9 +5090,8 @@ html {
   }
 
   /* ── Typography ─────────────────────────────────────────────────── */
-  /* Liberar el clamp max para pantallas grandes */
   .hero-title {
-    font-size: clamp(52px, 7.5vw, 120px);
+    font-size: 85px;
   }
 
   .s-title {
