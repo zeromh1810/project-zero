@@ -5078,10 +5078,7 @@ html {
     padding-top: 112px;
   }
 
-  .hero-wrap {
-    max-width: 1400px;
-    padding: 140px 80px 96px;
-  }
+  /* hero-wrap mantiene las mismas dimensiones que en 1920px */
 
   .blog-main,
   .blog-post-main {
