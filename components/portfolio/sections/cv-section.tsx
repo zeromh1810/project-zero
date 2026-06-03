@@ -21,10 +21,12 @@ export function CVSection() {
   const [noLinkMsg, setNoLinkMsg] = useState(false)
 
   useEffect(() => {
+    let ignore = false
     fetch("/api/admin/cv", { cache: "no-store" })
       .then(r => r.json())
-      .then(d => setCv({ ...DEFAULT, ...d }))
+      .then(d => { if (!ignore) setCv({ ...DEFAULT, ...d }) })
       .catch(() => {})
+    return () => { ignore = true }
   }, [])
 
   function handleOpen() {

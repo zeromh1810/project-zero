@@ -24,10 +24,12 @@ export function ProjectsSection({ onNavigateContact, onNavigateAbout, onSelectPr
   const sheetRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    let ignore = false
     fetch("/api/admin/projects", { cache: "no-store" })
       .then(r => r.json())
-      .then(d => { if (Array.isArray(d) && d.length) setProjects(d) })
+      .then(d => { if (!ignore && Array.isArray(d) && d.length) setProjects(d) })
       .catch(() => {})
+    return () => { ignore = true }
   }, [])
 
   // Scroll-driven alpha: semitransparente → sólido al entrar al viewport

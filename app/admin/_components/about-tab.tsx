@@ -1,18 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef, KeyboardEvent } from "react"
-
-interface Stat { value: string; label: string }
-interface AboutData {
-  bio1: string
-  bio2: string
-  skills: string[]
-  stats: Stat[]
-  badge: string
-  available: boolean
-  cvUrl: string
-  photoUrl: string
-}
+import type { ToastType } from "./admin-toast"
+import { type AboutData, type Stat } from "@/lib/types/about"
 
 const DEFAULT: AboutData = {
   bio1: "Soy <strong>diseñador de producto y desarrollador frontend</strong> con base en Santiago, Chile.",
@@ -29,8 +19,6 @@ const DEFAULT: AboutData = {
   photoUrl: "",
 }
 
-import type { ToastType } from "./admin-toast"
-
 interface Props {
   onToast: (title: string, type: ToastType, msg?: string) => void
 }
@@ -45,11 +33,13 @@ export default function AboutTab({ onToast }: Props) {
   const photoRef  = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    let ignore = false
     fetch("/api/admin/about", { cache: "no-store" })
       .then(r => r.json())
-      .then(d => setData({ ...DEFAULT, ...d }))
+      .then(d => { if (!ignore) setData({ ...DEFAULT, ...d }) })
       .catch(() => {})
-      .finally(() => setLoading(false))
+      .finally(() => { if (!ignore) setLoading(false) })
+    return () => { ignore = true }
   }, [])
 
   function set<K extends keyof AboutData>(field: K, value: AboutData[K]) {

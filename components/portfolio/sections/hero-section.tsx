@@ -122,10 +122,12 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
   }, [])
 
   useEffect(() => {
+    let ignore = false
     fetch("/api/admin/hero", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d) => setHero({ ...DEFAULT, ...d }))
+      .then(r => r.json())
+      .then(d => { if (!ignore) setHero({ ...DEFAULT, ...d }) })
       .catch(() => {})
+    return () => { ignore = true }
   }, [])
 
   useEffect(() => {

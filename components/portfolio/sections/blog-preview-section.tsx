@@ -2,33 +2,21 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-
-interface BlogPost {
-  id: string; slug: string; title: string; content: string
-  image: string; category: string; publishedAt: string; draft: boolean
-}
-
-function excerpt(content: string, n = 100) {
-  const clean = content.replace(/\n+/g, " ").trim()
-  return clean.length <= n ? clean : clean.slice(0, n).trimEnd() + "…"
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("es-CL", { month: "short", year: "numeric" })
-}
+import { type BlogPost, formatDateShort as formatDate, excerpt } from "@/lib/types/blog"
 
 export function BlogPreviewSection() {
   const router = useRouter()
   const [posts, setPosts] = useState<BlogPost[]>([])
 
   useEffect(() => {
+    let ignore = false
     fetch("/api/admin/blog", { cache: "no-store" })
       .then(r => r.json())
       .then(d => {
-        const pub = (d.posts || []).filter((p: BlogPost) => !p.draft).slice(0, 3)
-        setPosts(pub)
+        if (!ignore) setPosts((d.posts || []).filter((p: BlogPost) => !p.draft).slice(0, 3))
       })
       .catch(() => {})
+    return () => { ignore = true }
   }, [])
 
   if (!posts.length) return null

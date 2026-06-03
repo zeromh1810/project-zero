@@ -15,10 +15,12 @@ export function BrandsSection() {
   const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
+    let ignore = false
     fetch("/api/admin/brands", { cache: "no-store" })
       .then(r => r.json())
-      .then(d => { if (Array.isArray(d.brands) && d.brands.length) setBrands(d.brands) })
+      .then(d => { if (!ignore && Array.isArray(d.brands) && d.brands.length) setBrands(d.brands) })
       .catch(() => {})
+    return () => { ignore = true }
   }, [])
 
   useEffect(() => {

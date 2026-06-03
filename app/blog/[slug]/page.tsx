@@ -4,24 +4,7 @@ import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { AppNavbar } from "@/components/portfolio/app-navbar"
-
-interface BlogPost {
-  id: string; slug: string; title: string; content: string
-  image: string; category: string; tags: string[]; publishedAt: string; draft: boolean
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" })
-}
-
-function formatDateShort(iso: string) {
-  return new Date(iso).toLocaleDateString("es-CL", { month: "short", year: "numeric" })
-}
-
-function excerpt(content: string, n = 88) {
-  const clean = content.replace(/\n+/g, " ").trim()
-  return clean.length <= n ? clean : clean.slice(0, n).trimEnd() + "…"
-}
+import { type BlogPost, formatDate, formatDateShort, excerpt } from "@/lib/types/blog"
 
 // ── Related Posts (grid estático, máx 3) ───────────────────────────────────
 function RelatedPosts({ currentSlug, currentCategory, allPosts }: {
@@ -66,7 +49,7 @@ function RelatedPosts({ currentSlug, currentCategory, allPosts }: {
                 <span className="blog-preview-date">{formatDateShort(p.publishedAt)}</span>
               </div>
               <h3 className="blog-preview-title">{p.title}</h3>
-              <p className="blog-preview-excerpt">{excerpt(p.content)}</p>
+              <p className="blog-preview-excerpt">{excerpt(p.content, 88)}</p>
               <span className="blog-preview-cta">Leer entrada →</span>
             </div>
           </Link>
@@ -86,6 +69,7 @@ export default function BlogPostPage() {
 
   useEffect(() => {
     if (!slug) return
+    let ignore = false
     Promise.all([
       fetch(`/api/admin/blog?slug=${encodeURIComponent(slug)}`, { cache: "no-store" })
         .then(r => { if (!r.ok) throw new Error(); return r.json() }),
@@ -93,9 +77,10 @@ export default function BlogPostPage() {
         .then(r => r.json())
         .then(d => (d.posts || []) as BlogPost[]),
     ])
-      .then(([single, posts]) => { setPost(single); setAllPosts(posts) })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false))
+      .then(([single, posts]) => { if (!ignore) { setPost(single); setAllPosts(posts) } })
+      .catch(() => { if (!ignore) setError(true) })
+      .finally(() => { if (!ignore) setLoading(false) })
+    return () => { ignore = true }
   }, [slug])
 
   const tags = post?.tags || []

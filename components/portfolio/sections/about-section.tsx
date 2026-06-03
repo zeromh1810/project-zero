@@ -5,6 +5,7 @@ import { useTheme } from "@/lib/context/theme-context"
 import { SKILLS, STATS } from "@/lib/data/projects"
 import { useSocial } from "@/lib/hooks/use-social"
 import { LinkedInIcon, InstagramIcon } from "@/components/portfolio/icons"
+import { type AboutData } from "@/lib/types/about"
 
 // Safe renderer: only allows <strong> tags, strips everything else
 function SafeBio({ html }: { html: string }) {
@@ -17,18 +18,6 @@ function SafeBio({ html }: { html: string }) {
       })}
     </>
   )
-}
-
-interface Stat { value: string; label: string }
-interface AboutData {
-  bio1: string
-  bio2: string
-  skills: string[]
-  stats: Stat[]
-  badge: string
-  available: boolean
-  cvUrl: string
-  photoUrl: string
 }
 
 const DEFAULT: AboutData = {
@@ -53,10 +42,12 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
   const [data, setData] = useState<AboutData>(DEFAULT)
 
   useEffect(() => {
+    let ignore = false
     fetch("/api/admin/about", { cache: "no-store" })
       .then(r => r.json())
-      .then(d => setData({ ...DEFAULT, ...d }))
+      .then(d => { if (!ignore) setData({ ...DEFAULT, ...d }) })
       .catch(() => {})
+    return () => { ignore = true }
   }, [])
 
   return (

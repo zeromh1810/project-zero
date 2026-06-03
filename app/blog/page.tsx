@@ -4,23 +4,10 @@ import { useState, useEffect, Fragment, Suspense } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { AppNavbar } from "@/components/portfolio/app-navbar"
-
-interface BlogPost {
-  id: string; slug: string; title: string; content: string
-  image: string; category: string; tags: string[]; publishedAt: string; draft: boolean
-}
+import { type BlogPost, formatDate, excerpt } from "@/lib/types/blog"
 
 const CATEGORIES = ["Todos", "Diseño", "Desarrollo", "Producto", "UX Research", "Case Study"]
 const POSTS_PER_PAGE = 9
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" })
-}
-
-function excerpt(content: string, n = 100) {
-  const clean = content.replace(/\n+/g, " ").trim()
-  return clean.length <= n ? clean : clean.slice(0, n).trimEnd() + "…"
-}
 
 function Paginator({ page, total, onChange }: { page: number; total: number; onChange: (p: number) => void }) {
   if (total <= 1) return null
@@ -110,11 +97,13 @@ function BlogPageInner() {
   const [loading,     setLoading]     = useState(true)
 
   useEffect(() => {
+    let ignore = false
     fetch("/api/admin/blog", { cache: "no-store" })
       .then(r => r.json())
-      .then(d => setPosts((d.posts || []).filter((p: BlogPost) => !p.draft)))
+      .then(d => { if (!ignore) setPosts((d.posts || []).filter((p: BlogPost) => !p.draft)) })
       .catch(() => {})
-      .finally(() => setLoading(false))
+      .finally(() => { if (!ignore) setLoading(false) })
+    return () => { ignore = true }
   }, [])
 
   // Resetear página al cambiar filtros
