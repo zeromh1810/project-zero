@@ -28,6 +28,7 @@ export default function AboutTab({ onToast }: Props) {
   const [loading,        setLoading]        = useState(true)
   const [saving,         setSaving]         = useState(false)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [localPreview,   setLocalPreview]   = useState("")
   const [skillInput,     setSkillInput]     = useState("")
   const skillRef  = useRef<HTMLInputElement>(null)
   const photoRef  = useRef<HTMLInputElement>(null)
@@ -72,7 +73,12 @@ export default function AboutTab({ onToast }: Props) {
   async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+
+    // Immediate local preview before the upload completes
+    const objectUrl = URL.createObjectURL(file)
+    setLocalPreview(objectUrl)
     setUploadingPhoto(true)
+
     try {
       const fd = new FormData()
       fd.append("file", file)
@@ -86,6 +92,8 @@ export default function AboutTab({ onToast }: Props) {
     } catch {
       onToast("Error al subir imagen", "error")
     } finally {
+      URL.revokeObjectURL(objectUrl)
+      setLocalPreview("")
       setUploadingPhoto(false)
       e.target.value = ""
     }
@@ -131,13 +139,13 @@ export default function AboutTab({ onToast }: Props) {
       <div className="admin-card">
         <div className="admin-card-title">Foto de perfil</div>
 
-        {data.photoUrl && (
+        {(localPreview || data.photoUrl) && (
           <div className="about-admin-photo-preview">
-            <img src={data.photoUrl} alt="Foto de perfil" />
+            <img src={localPreview || data.photoUrl} alt="Foto de perfil" />
           </div>
         )}
 
-        <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: data.photoUrl ? 14 : 0 }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: (localPreview || data.photoUrl) ? 14 : 0 }}>
           <input
             ref={photoRef}
             type="file"

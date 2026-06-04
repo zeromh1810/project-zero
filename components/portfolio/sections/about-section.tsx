@@ -40,12 +40,13 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
   const { isDark } = useTheme()
   const social = useSocial()
   const [data, setData] = useState<AboutData>(DEFAULT)
+  const [photoError, setPhotoError] = useState(false)
 
   useEffect(() => {
     let ignore = false
     fetch("/api/admin/about", { cache: "no-store" })
       .then(r => r.json())
-      .then(d => { if (!ignore) setData({ ...DEFAULT, ...d }) })
+      .then(d => { if (!ignore) { setData({ ...DEFAULT, ...d }); setPhotoError(false) } })
       .catch(() => {})
     return () => { ignore = true }
   }, [])
@@ -62,11 +63,12 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
           {/* Photo */}
           <div className="about-photo-wrap">
             <div className="about-photo-fallback">
-              {data.photoUrl ? (
+              {data.photoUrl && !photoError ? (
                 <img
                   src={data.photoUrl}
                   alt="Foto de perfil"
                   className="about-photo-img"
+                  onError={() => setPhotoError(true)}
                 />
               ) : (
                 <svg width="140" height="140" viewBox="0 0 140 140" fill="none">

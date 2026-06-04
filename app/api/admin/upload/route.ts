@@ -42,18 +42,25 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer())
     fs.writeFileSync(filePath, buffer)
 
-    // Persist to GitHub so the file survives Railway deploys
+    // Persist to GitHub so the file survives Railway deploys.
+    // On success use the raw GitHub URL — it works regardless of server filesystem state.
+    let url = `/uploads/${filename}`
     try {
       await commitBinaryToGitHub(
         `public/uploads/${filename}`,
         buffer,
         `chore(assets): upload ${filename} via admin [skip ci]`
       )
+      const repo   = process.env.GITHUB_REPO
+      const branch = process.env.GITHUB_BRANCH ?? "main"
+      if (repo) {
+        url = `https://raw.githubusercontent.com/${repo}/${branch}/public/uploads/${filename}`
+      }
     } catch (err) {
-      console.warn("[upload] GitHub commit failed:", err)
+      console.warn("[upload] GitHub commit failed, using local URL:", err)
     }
 
-    return NextResponse.json({ url: `/uploads/${filename}` })
+    return NextResponse.json({ url })
   } catch (err) {
     console.error("Upload error:", err)
     return NextResponse.json({ error: "Error al subir el archivo" }, { status: 500 })
