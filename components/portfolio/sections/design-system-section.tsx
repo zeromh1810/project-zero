@@ -3623,13 +3623,19 @@ function PageBreakpoints() {
 @media (min-width: 1921px) { ... }`} />
 
       {/* ── About/Contact wireframes ── */}
-      <SectionHeading title="About Grid — layout desktop (300px + 1fr)" />
+      <SectionHeading title="About Grid y Contact Split — layouts desktop" />
       <p className="ds-pattern-desc">
-        Columna izquierda sticky con la foto de perfil en 3:4. La columna de contenido ocupa el espacio restante. En tablet colapsa a horizontal con foto de 160px; en mobile se apila verticalmente con foto en 2:1 landscape.
+        Los dos layouts de contenido más complejos del sitio, lado a lado para comparar su estructura de columnas.
       </p>
-      <div className="ds-anatomy-wrap" style={{ marginTop: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 12 }}>
+
+      {/* ── About Grid ── */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--txt)", letterSpacing: "-0.01em" }}>About Grid <span style={{ color: "var(--txt3)", fontWeight: 400 }}>· 300px + 1fr</span></div>
+        <div style={{ fontSize: 11, color: "var(--txt3)", lineHeight: 1.5 }}>Foto sticky 3:4 · stats · bio · skills · CTAs</div>
+      <div className="ds-anatomy-wrap" style={{ marginTop: 0 }}>
         {/* Main layout */}
-        <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 32, padding: "28px 28px", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: 16, padding: "18px 16px", alignItems: "start" }}>
           {/* Left col — photo */}
           <div style={{ display: "flex", flexDirection: "column", gap: 0, borderRadius: 20, overflow: "hidden", border: "1px solid rgba(41,151,255,0.18)", boxShadow: "0 0 0 1px rgba(41,151,255,0.08), 0 16px 40px rgba(0,0,0,0.08)" }}>
             {/* Photo area */}
@@ -3701,14 +3707,15 @@ function PageBreakpoints() {
           ))}
         </div>
       </div>
+      </div>{/* /column About Grid */}
 
-      <SectionHeading title="Contact Split — layout desktop (1fr + 1.1fr)" />
-      <p className="ds-pattern-desc">
-        El 1.1fr en la columna del formulario le da ligeramente más peso visual que la columna de información — equilibra el formulario glassmorphism visualmente más denso contra el texto de la izquierda. Colapsa a 1 columna a ≤820px.
-      </p>
-      <div className="ds-anatomy-wrap" style={{ marginTop: 12 }}>
+      {/* ── Contact Split ── */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--txt)", letterSpacing: "-0.01em" }}>Contact Split <span style={{ color: "var(--txt3)", fontWeight: 400 }}>· 1fr + 1.1fr</span></div>
+        <div style={{ fontSize: 11, color: "var(--txt3)", lineHeight: 1.5 }}>Info + links · form card glassmorphism</div>
+      <div className="ds-anatomy-wrap" style={{ marginTop: 0 }}>
         {/* Main layout */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: 40, padding: "28px 28px", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: 16, padding: "18px 16px", alignItems: "start" }}>
           {/* Left — info column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Tagline */}
@@ -3778,6 +3785,9 @@ function PageBreakpoints() {
           ))}
         </div>
       </div>
+      </div>{/* /column Contact Split */}
+
+      </div>{/* /grid 2 cols */}
 
       {/* ── Reglas ── */}
       <SectionHeading title="Reglas de implementación responsiva" />
