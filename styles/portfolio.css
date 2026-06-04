@@ -2403,11 +2403,13 @@ html {
   white-space: nowrap;
 }
 
-/* Grid de logos — auto-fill para escalar de 6 a 12 sin cambios */
+/* Flex de logos — justify-content:center garantiza centrado en cualquier viewport */
 .brands-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 24px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 24px 40px;
   max-width: 1000px;
   margin: 0 auto;
   padding: 0 48px;
@@ -2418,6 +2420,7 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
   height: 56px;
   opacity: 0;
   transform: translateY(10px);
@@ -2474,11 +2477,12 @@ html {
     margin-bottom: 32px;
   }
   .brands-gallery {
-    grid-template-columns: repeat(3, 1fr);
     padding: 0 24px;
-    gap: 20px 12px;
+    gap: 16px 12px;
   }
   .brand-item {
+    flex: 0 0 calc(33.33% - 8px);
+    max-width: calc(33.33% - 8px);
     height: 46px;
   }
   .brand-item img {
