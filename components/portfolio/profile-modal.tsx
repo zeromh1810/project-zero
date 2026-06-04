@@ -1,29 +1,55 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 interface ProfileModalProps {
   onClose: () => void
   onNavigateContact: () => void
 }
 
-const SOCIAL_LINKS = [
-  { label: "GitHub",   href: "https://github.com/zeromh1810",               target: "_blank" },
-  { label: "LinkedIn", href: "https://linkedin.com/in/carlos-rojas-hickmann", target: "_blank" },
-  { label: "Email",    href: "mailto:c.hickmann86@gmail.com",                target: undefined },
-]
+interface ProfileData {
+  name:      string
+  role:      string
+  photoUrl:  string
+  github:    string
+  linkedin:  string
+  instagram: string
+}
+
+const DEFAULT: ProfileData = {
+  name:      "Carlos Felipe Rojas Hickmann",
+  role:      "Product Designer & Frontend Developer · Santiago",
+  photoUrl:  "",
+  github:    "https://github.com/zeromh1810",
+  linkedin:  "https://linkedin.com/in/carlos-rojas-hickmann",
+  instagram: "",
+}
 
 const EXIT_DURATION = 200
 
 export function ProfileModal({ onClose, onNavigateContact }: ProfileModalProps) {
-  const [exiting, setExiting] = useState(false)
+  const [exiting, setExiting]       = useState(false)
+  const [profile, setProfile]       = useState<ProfileData>(DEFAULT)
+  const [photoError, setPhotoError] = useState(false)
+  // Ref-based guard prevents double-close when ESC is pressed during exit animation
+  const closingRef = useRef(false)
+
+  useEffect(() => {
+    let ignore = false
+    fetch("/api/admin/profile", { cache: "no-store" })
+      .then(r => { if (!r.ok) throw new Error(); return r.json() })
+      .then(d => { if (!ignore) { setProfile({ ...DEFAULT, ...d }); setPhotoError(false) } })
+      .catch(() => {})
+    return () => { ignore = true }
+  }, [])
 
   const handleClose = () => {
+    if (closingRef.current) return
+    closingRef.current = true
     setExiting(true)
     setTimeout(onClose, EXIT_DURATION)
   }
 
-  // Cerrar con ESC también anima la salida
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleClose()
@@ -33,12 +59,22 @@ export function ProfileModal({ onClose, onNavigateContact }: ProfileModalProps) 
   }, [])
 
   const handleContact = () => {
+    if (closingRef.current) return
+    closingRef.current = true
     setExiting(true)
     setTimeout(() => {
       onClose()
       onNavigateContact()
     }, EXIT_DURATION)
   }
+
+  const initials = profile.name.trim().charAt(0).toUpperCase() || "C"
+
+  const links: { label: string; href: string; external: boolean }[] = [
+    profile.linkedin  && { label: "LinkedIn",  href: profile.linkedin,  external: true },
+    profile.github    && { label: "GitHub",    href: profile.github,    external: true },
+    profile.instagram && { label: "Instagram", href: profile.instagram, external: true },
+  ].filter(Boolean) as { label: string; href: string; external: boolean }[]
 
   return (
     <div
@@ -51,22 +87,40 @@ export function ProfileModal({ onClose, onNavigateContact }: ProfileModalProps) 
         <button className="modal-x" onClick={handleClose} aria-label="Cerrar">
           ✕
         </button>
-        <div className="m-av">C</div>
-        <div className="m-name">Carlos Felipe Rojas Hickmann</div>
-        <div className="m-role">Product Designer & Frontend Developer · Santiago</div>
-        <div className="m-links">
-          {SOCIAL_LINKS.map(({ label, href, target }) => (
-            <a
-              key={label}
-              href={href}
-              target={target}
-              rel={target === "_blank" ? "noopener noreferrer" : undefined}
-              className="m-link"
-            >
-              {label}
-            </a>
-          ))}
+
+        {/* Avatar */}
+        <div className="m-av">
+          {profile.photoUrl && !photoError ? (
+            <img
+              src={profile.photoUrl}
+              alt={profile.name}
+              className="m-av-img"
+              onError={() => setPhotoError(true)}
+            />
+          ) : (
+            initials
+          )}
         </div>
+
+        <div className="m-name">{profile.name}</div>
+        <div className="m-role">{profile.role}</div>
+
+        {links.length > 0 && (
+          <div className="m-links">
+            {links.map(({ label, href, external }) => (
+              <a
+                key={label}
+                href={href}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noopener noreferrer" : undefined}
+                className="m-link"
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+        )}
+
         <button
           className="btn-p"
           style={{ width: "100%", justifyContent: "center" }}

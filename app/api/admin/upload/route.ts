@@ -55,6 +55,8 @@ export async function POST(request: Request) {
       const branch = process.env.GITHUB_BRANCH ?? "main"
       if (repo) {
         url = `https://raw.githubusercontent.com/${repo}/${branch}/public/uploads/${filename}`
+      } else {
+        console.warn("[upload] GITHUB_REPO env var not set — falling back to local URL (won't survive Railway restart)")
       }
     } catch (err) {
       console.warn("[upload] GitHub commit failed, using local URL:", err)

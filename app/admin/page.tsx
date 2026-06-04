@@ -6,25 +6,27 @@ import { useLogo } from "@/lib/hooks/use-logo"
 import dynamic from "next/dynamic"
 import AdminToast, { type ToastType } from "./_components/admin-toast"
 
-const ProjectsTab       = dynamic(() => import("./_components/projects-tab"), { ssr: false })
-const HeroTab           = dynamic(() => import("./_components/hero-tab"),     { ssr: false })
-const AboutTab          = dynamic(() => import("./_components/about-tab"),    { ssr: false })
-const CVTab             = dynamic(() => import("./_components/cv-tab"),       { ssr: false })
-const LogoTab           = dynamic(() => import("./_components/logo-tab"),     { ssr: false })
-const SocialTab         = dynamic(() => import("./_components/social-tab"),   { ssr: false })
-const BrandsTab         = dynamic(() => import("./_components/brands-tab"),   { ssr: false })
-const BlogTab           = dynamic(() => import("./_components/blog-tab"),     { ssr: false })
+const ProjectsTab       = dynamic(() => import("./_components/projects-tab"),  { ssr: false })
+const HeroTab           = dynamic(() => import("./_components/hero-tab"),      { ssr: false })
+const AboutTab          = dynamic(() => import("./_components/about-tab"),     { ssr: false })
+const CVTab             = dynamic(() => import("./_components/cv-tab"),        { ssr: false })
+const LogoTab           = dynamic(() => import("./_components/logo-tab"),      { ssr: false })
+const SocialTab         = dynamic(() => import("./_components/social-tab"),    { ssr: false })
+const BrandsTab         = dynamic(() => import("./_components/brands-tab"),    { ssr: false })
+const BlogTab           = dynamic(() => import("./_components/blog-tab"),      { ssr: false })
+const ProfileTab        = dynamic(() => import("./_components/profile-tab"),   { ssr: false })
 const DesignSystemSection = dynamic(
   () => import("@/components/portfolio/sections/design-system-section").then(m => ({ default: m.DesignSystemSection })),
   { ssr: false }
 )
 
-type Tab = "proyectos" | "hero" | "sobre" | "cv" | "logo" | "footer" | "marcas" | "blog" | "ds"
+type Tab = "proyectos" | "hero" | "sobre" | "cv" | "logo" | "footer" | "marcas" | "blog" | "perfil" | "ds"
 type ToastState = { title: string; msg?: string; type: ToastType } | null
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "proyectos", label: "Proyectos" },
   { id: "hero",      label: "Hero" },
+  { id: "perfil",    label: "Perfil" },
   { id: "sobre",     label: "Sobre mí" },
   { id: "cv",        label: "CV" },
   { id: "logo",      label: "Logo" },
@@ -214,6 +216,7 @@ export default function AdminPage() {
         <div className="admin-container">
           {tab === "proyectos" && <ProjectsTab onToast={showToast} />}
           {tab === "hero"      && <HeroTab     onToast={showToast} />}
+          {tab === "perfil"    && <ProfileTab  onToast={showToast} />}
           {tab === "sobre"     && <AboutTab    onToast={showToast} />}
           {tab === "cv"        && <CVTab       onToast={showToast} />}
           {tab === "logo"      && <LogoTab     onToast={showToast} />}
