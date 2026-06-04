@@ -3627,53 +3627,149 @@ function PageBreakpoints() {
       <p className="ds-pattern-desc">
         Los dos layouts más complejos en desktop. About usa una columna sticky para la foto. Contact usa 1fr + 1.1fr para dar más peso visual al formulario.
       </p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)", marginTop: "var(--space-4)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 16 }}>
 
-        {/* About Grid */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
+        {/* ── About Grid ── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: "var(--txt2)" }}>About Grid · desktop (300px + 1fr)</div>
-          <div style={{ padding: "var(--space-4)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", background: "var(--bg2)", display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: "var(--space-2)", alignItems: "stretch" }}>
-              {/* Photo col */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
-                <WF label="FOTO 3:4 sticky" style={{ flex: 1, minHeight: 110 }} accent />
-                <WF label="BADGE disponible" style={{ height: 24 }} accent />
+          <div className="ds-anatomy-wrap">
+            <div style={{ display: "grid", gridTemplateColumns: "130px 1fr", gap: 16, padding: "20px 18px", alignItems: "start" }}>
+              {/* Left col — photo */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 0, borderRadius: 18, overflow: "hidden", border: "1px solid rgba(41,151,255,0.18)", boxShadow: "0 0 0 1px rgba(41,151,255,0.08), 0 12px 32px rgba(0,0,0,0.07)" }}>
+                <div style={{ aspectRatio: "3/4", background: "radial-gradient(ellipse at 30% 25%, rgba(41,151,255,0.22) 0%, transparent 55%), radial-gradient(ellipse at 80% 75%, rgba(167,139,250,0.18) 0%, transparent 50%), #eef4ff", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(41,151,255,0.15)", border: "1px solid rgba(41,151,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(41,151,255,0.6)" strokeWidth="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                  </div>
+                  <div style={{ position: "absolute", top: 6, left: 6, fontSize: 8, fontFamily: "monospace", color: "rgba(41,151,255,0.6)", background: "rgba(255,255,255,0.85)", padding: "1px 5px", borderRadius: 3 }}>3:4 sticky</div>
+                </div>
+                <div style={{ padding: "10px 12px", background: "rgba(255,255,255,0.88)", backdropFilter: "blur(16px)", borderTop: "1px solid rgba(41,151,255,0.18)", display: "flex", alignItems: "center", justifyContent: "center", gap: 5, fontSize: 11, color: "var(--txt2)" }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--success)", flexShrink: 0 }} />
+                  <span>Disponible <strong style={{ color: "var(--success)" }}>2026</strong></span>
+                </div>
               </div>
-              {/* Content col */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
-                <WF label="STATS · 3 cols" style={{ height: 34 }} />
-                <WF label="BIO text · 16px / 1.8lh" style={{ flex: 1 }} />
-                <WF label="SKILLS · flex wrap" style={{ height: 30 }} />
-                <WF label="CTA buttons" style={{ height: 28 }} />
+              {/* Right col — content */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6 }}>
+                  {[{ n: "5+", l: "Años" }, { n: "40+", l: "Proyectos" }, { n: "98%", l: "Satisf." }].map(({ n, l }) => (
+                    <div key={l} style={{ padding: "10px 8px", textAlign: "center", background: "rgba(255,255,255,0.72)", backdropFilter: "blur(12px)", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 12 }}>
+                      <div style={{ fontFamily: "var(--portfolio-heading-font)", fontSize: 18, fontWeight: 700, letterSpacing: "-0.04em", color: "var(--txt)", marginBottom: 1 }}>{n}</div>
+                      <div style={{ fontSize: 9, color: "var(--txt3)" }}>{l}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                  {[0.9, 1, 0.8, 0.7].map((w, i) => (
+                    <div key={i} style={{ height: 8, width: `${w * 100}%`, borderRadius: 4, background: i % 2 === 0 ? "rgba(0,0,0,0.14)" : "rgba(0,0,0,0.09)" }} />
+                  ))}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                  {["Figma", "React", "Next.js", "TypeScript", "Design Systems"].map(s => (
+                    <div key={s} style={{ padding: "4px 10px", borderRadius: 980, border: "1px solid var(--border)", background: "rgba(255,255,255,0.65)", fontSize: 10, color: "var(--txt2)" }}>{s}</div>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ padding: "8px 16px", borderRadius: 980, background: "var(--accent)", color: "white", fontSize: 12, fontWeight: 500 }}>Ver CV →</div>
+                  <div style={{ padding: "8px 16px", borderRadius: 980, border: "1px solid var(--border)", color: "var(--txt)", fontSize: 12, fontWeight: 500 }}>LinkedIn</div>
+                </div>
               </div>
             </div>
-          </div>
-          <div style={{ fontSize: 9, color: "var(--txt3)", fontFamily: "monospace", lineHeight: 1.6 }}>
-            Mobile: stack vertical · foto 2:1 landscape<br />
-            Tablet: horizontal 160px + stats col<br />
-            Ultra-wide: 380px + 1fr · gap 72px
+            {/* Annotation row */}
+            <div style={{ display: "grid", gridTemplateColumns: "130px 1fr", background: "var(--border)", gap: "1px", borderTop: "1px solid var(--border)" }}>
+              <div style={{ padding: "8px 12px", background: "var(--bg2)" }}>
+                <code style={{ display: "block", fontSize: 9, color: "var(--accent)", fontWeight: 700, marginBottom: 2 }}>.about-photo-wrap</code>
+                <div style={{ fontSize: 9, color: "var(--txt3)", lineHeight: 1.5 }}>sticky · top:88px<br/>border: accent 0.18<br/>r-2xl</div>
+              </div>
+              <div style={{ padding: "8px 12px", background: "var(--bg2)" }}>
+                <code style={{ display: "block", fontSize: 9, color: "var(--accent)", fontWeight: 700, marginBottom: 2 }}>.about-content</code>
+                <div style={{ fontSize: 9, color: "var(--txt3)", lineHeight: 1.5 }}>stats 3-col · bio 16px/1.8 · skills flex-wrap · btn-p + btn-g</div>
+              </div>
+            </div>
+            {/* Breakpoint row */}
+            <div style={{ padding: "8px 14px", background: "var(--bg3)", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 4 }}>
+              {[
+                { bp: "Desktop", col: "300px + 1fr · gap 56px" },
+                { bp: "Tablet",  col: "foto 160px + stats col" },
+                { bp: "Mobile",  col: "stack vertical · foto 2:1" },
+              ].map(({ bp, col }) => (
+                <div key={bp} style={{ display: "flex", gap: 8 }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: "var(--accent)", fontFamily: "monospace", flexShrink: 0, width: 52 }}>{bp}</div>
+                  <div style={{ fontSize: 9, color: "var(--txt3)" }}>{col}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Contact Split */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
+        {/* ── Contact Split ── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: "var(--txt2)" }}>Contact Split · desktop (1fr + 1.1fr)</div>
-          <div style={{ padding: "var(--space-4)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", background: "var(--bg2)", display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: "var(--space-2)", alignItems: "stretch" }}>
-              {/* Info col */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
-                <WF label="TAGLINE · 22–30px / 700" style={{ height: 38 }} />
-                <WF label="SUBTÍTULO · 15px" style={{ height: 30 }} />
-                <WF label="LINKS email / linkedin" style={{ height: 46 }} />
-                <WF label="BADGE disponible" style={{ height: 24 }} />
+          <div className="ds-anatomy-wrap">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: 20, padding: "20px 18px", alignItems: "start" }}>
+              {/* Left — info column */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div>
+                  <div style={{ fontFamily: "var(--portfolio-heading-font)", fontSize: 18, fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.25, color: "var(--txt)", marginBottom: 8 }}>
+                    ¿Tienes un proyecto en <em style={{ fontStyle: "normal", color: "var(--accent)" }}>mente</em>?
+                  </div>
+                  <div style={{ fontSize: 12, lineHeight: 1.7, color: "var(--txt2)" }}>Trabajo con equipos para transformar ideas en productos digitales.</div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                  {[{ label: "Email", value: "c.hickmann86@gmail.com" }, { label: "LinkedIn", value: "linkedin.com/in/carlos-rojas" }].map(({ label, value }) => (
+                    <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderRadius: 10, border: "1px solid var(--border)", background: "rgba(255,255,255,0.7)", backdropFilter: "blur(8px)" }}>
+                      <div style={{ width: 28, height: 28, borderRadius: 6, background: "rgba(41,151,255,0.10)", border: "1px solid rgba(41,151,255,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.75"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--txt3)" }}>{label}</div>
+                        <div style={{ fontSize: 11, fontWeight: 500, color: "var(--txt)" }}>{value}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 980, border: "1px solid rgba(48,209,88,0.3)", background: "rgba(48,209,88,0.07)", fontSize: 11, color: "var(--success)", width: "fit-content" }}>
+                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--success)" }} />
+                  Disponible · 2026
+                </div>
               </div>
-              {/* Form card */}
-              <WF label="FORM CARD glassmorphism · r-2xl · p-32" style={{ flex: 1, minHeight: 138 }} accent />
+              {/* Right — form card */}
+              <div style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(20px)", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 20, padding: 18, boxShadow: "0 12px 40px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {[{ ph: "Nombre completo *" }, { ph: "Email *" }].map((f, i) => (
+                    <div key={i} style={{ position: "relative", height: 46, borderRadius: 9, border: "1.5px solid rgba(0,0,0,0.12)", background: "rgba(0,0,0,0.04)" }}>
+                      <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 12, color: "rgba(0,0,0,0.38)" }}>{f.ph}</div>
+                    </div>
+                  ))}
+                  <div style={{ position: "relative", height: 80, borderRadius: 9, border: "1.5px solid rgba(0,0,0,0.12)", background: "rgba(0,0,0,0.04)" }}>
+                    <div style={{ position: "absolute", left: 12, top: 12, fontSize: 12, color: "rgba(0,0,0,0.38)" }}>Mensaje…</div>
+                  </div>
+                  <div style={{ height: 40, borderRadius: 980, background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: "white", fontWeight: 500 }}>Enviar mensaje →</div>
+                </div>
+              </div>
             </div>
-          </div>
-          <div style={{ fontSize: 9, color: "var(--txt3)", fontFamily: "monospace", lineHeight: 1.6 }}>
-            Colapsa a 1 col a ≤820px · gap 48px mobile<br />
-            Ultra-wide: max-w 1200px · gap 80px
+            {/* Annotation row */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", background: "var(--border)", gap: "1px", borderTop: "1px solid var(--border)" }}>
+              <div style={{ padding: "8px 12px", background: "var(--bg2)" }}>
+                <code style={{ display: "block", fontSize: 9, color: "var(--accent)", fontWeight: 700, marginBottom: 2 }}>.contact-info</code>
+                <div style={{ fontSize: 9, color: "var(--txt3)", lineHeight: 1.5 }}>tagline 22–30px · sub 15px · links flex-col · avail inline-flex</div>
+              </div>
+              <div style={{ padding: "8px 12px", background: "var(--bg2)" }}>
+                <code style={{ display: "block", fontSize: 9, color: "var(--accent)", fontWeight: 700, marginBottom: 2 }}>.contact-form-card</code>
+                <div style={{ fontSize: 9, color: "var(--txt3)", lineHeight: 1.5 }}>rgba(255,255,255,0.85) · blur(20px) · r-2xl · shadow-lg</div>
+              </div>
+            </div>
+            {/* Breakpoint row */}
+            <div style={{ padding: "8px 14px", background: "var(--bg3)", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 4 }}>
+              {[
+                { bp: "Desktop", col: "1fr 1.1fr · gap 64px · max-w 1000px" },
+                { bp: "≤820px",  col: "1 col · gap 48px" },
+                { bp: "≥1921px", col: "max-w 1200px · gap 80px" },
+              ].map(({ bp, col }) => (
+                <div key={bp} style={{ display: "flex", gap: 8 }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: "var(--accent)", fontFamily: "monospace", flexShrink: 0, width: 52 }}>{bp}</div>
+                  <div style={{ fontSize: 9, color: "var(--txt3)" }}>{col}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
