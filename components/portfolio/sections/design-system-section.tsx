@@ -148,6 +148,65 @@ function PageOverview() {
         ))}
       </div>
 
+      <SectionHeading title="Flujo de tokens — referencia visual" />
+      <p className="ds-pattern-desc">
+        Cómo un valor crudo se convierte en un componente. Este flujo garantiza que cambiar un primitivo actualiza todo el sistema automáticamente — dark mode, componentes y variantes incluidos.
+      </p>
+      <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+        {/* Token flow diagram */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 32px 1fr 32px 1fr", gap: 0, alignItems: "stretch" }}>
+          {/* Primitivo */}
+          <div style={{ borderRadius: "var(--r-lg) 0 0 var(--r-lg)", background: "var(--bg3)", border: "1px solid var(--border)", borderRight: "none", padding: "20px 20px" }}>
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--txt3)", marginBottom: 12 }}>1 · Primitivo</div>
+            <div style={{ fontSize: 11, fontFamily: "monospace", color: "var(--accent)", marginBottom: 8, fontWeight: 600 }}>--color-blue-700</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: "#0062cc", flexShrink: 0, boxShadow: "0 2px 8px rgba(0,98,204,0.4)" }} />
+              <div style={{ fontSize: 12, fontFamily: "monospace", color: "var(--txt2)" }}>#0062cc</div>
+            </div>
+            <div style={{ fontSize: 10, color: "var(--txt3)", lineHeight: 1.5 }}>Valor raw. No se usa en componentes directamente.</div>
+          </div>
+          {/* Arrow 1 */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg3)", border: "1px solid var(--border)", borderLeft: "none", borderRight: "none" }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M12 6l4 4-4 4" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </div>
+          {/* Semántico */}
+          <div style={{ background: "rgba(0,98,204,0.05)", border: "1px solid rgba(0,98,204,0.2)", borderLeft: "none", borderRight: "none", padding: "20px 20px" }}>
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 12 }}>2 · Semántico</div>
+            <div style={{ fontSize: 11, fontFamily: "monospace", color: "var(--accent)", marginBottom: 8, fontWeight: 600 }}>--accent</div>
+            <div style={{ fontSize: 11, color: "var(--txt3)", fontFamily: "monospace", marginBottom: 3 }}>☀️ light: #0062cc</div>
+            <div style={{ fontSize: 11, color: "rgba(41,151,255,0.8)", fontFamily: "monospace", marginBottom: 6 }}>🌙 dark: #2997ff</div>
+            <div style={{ fontSize: 10, color: "var(--txt3)", lineHeight: 1.5 }}>Alias con propósito. Cambia entre temas automáticamente.</div>
+          </div>
+          {/* Arrow 2 */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,98,204,0.05)", border: "1px solid rgba(0,98,204,0.2)", borderLeft: "none", borderRight: "none" }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M12 6l4 4-4 4" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </div>
+          {/* Componente */}
+          <div style={{ borderRadius: "0 var(--r-lg) var(--r-lg) 0", background: "rgba(0,98,204,0.09)", border: "1px solid rgba(0,98,204,0.28)", borderLeft: "none", padding: "20px 20px" }}>
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 12 }}>3 · Componente</div>
+            <div style={{ fontSize: 11, fontFamily: "monospace", color: "var(--accent)", marginBottom: 10, fontWeight: 600 }}>--btn-primary-bg</div>
+            <button className="btn-p" style={{ cursor: "default", fontSize: 13, padding: "8px 18px", transform: "none" }}>Acción →</button>
+            <div style={{ fontSize: 10, color: "var(--txt3)", lineHeight: 1.5, marginTop: 8 }}>Token de componente. Permite override sin romper el sistema.</div>
+          </div>
+        </div>
+        {/* Multi-token example */}
+        <div style={{ padding: "16px 20px", background: "var(--bg2)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", display: "flex", gap: 24, flexWrap: "wrap" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--txt3)", alignSelf: "center", flexShrink: 0 }}>Un botón usa:</div>
+          {[
+            { token: "--accent", desc: "bg" },
+            { token: "--accent-h", desc: "bg hover" },
+            { token: "--r-full", desc: "border-radius" },
+            { token: "--shadow-accent", desc: "box-shadow hover" },
+            { token: "--portfolio-font", desc: "font-family" },
+          ].map(({ token, desc }) => (
+            <div key={token} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <code style={{ fontSize: 10, color: "var(--accent)", fontWeight: 700 }}>{token}</code>
+              <div style={{ fontSize: 10, color: "var(--txt3)" }}>{desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <SectionHeading title="Stack técnico" />
       <div className="ds-stack-row">
         {["Next.js 16", "React 19", "TypeScript 5.7", "CSS Variables", "Tailwind v4", "DM Sans", "Plus Jakarta Sans", "WebGL / GLSL"].map(t => (
@@ -567,6 +626,72 @@ function PageCards() {
   <span className="skill-tag">React</span>
 </div>`} />
 
+      <SectionHeading title="Project Card Featured — anatomía completa" />
+      <p className="ds-pattern-desc">
+        La card más compleja del sistema — featured card (span 2, 16:10). Todos los elementos son posicionados absolutos sobre el thumbnail. La capa de información usa un gradiente ascendente para garantizar legibilidad sobre cualquier imagen.
+      </p>
+      <div className="ds-anatomy-wrap">
+        {/* Realistic card mockup */}
+        <div style={{ position: "relative", width: "100%", aspectRatio: "16/8", background: "linear-gradient(135deg, #060d1e 0%, #0a1830 35%, #0c2040 60%, #07111e 100%)", overflow: "hidden", borderRadius: "var(--r-xl) var(--r-xl) 0 0" }}>
+          {/* Simulated image depth */}
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 25% 35%, rgba(41,151,255,0.18) 0%, transparent 55%), radial-gradient(ellipse at 75% 20%, rgba(0,62,128,0.12) 0%, transparent 50%), radial-gradient(ellipse at 60% 70%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%)" }} />
+          {/* Grid lines (subtle) */}
+          <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.04 }} viewBox="0 0 400 200" preserveAspectRatio="none">
+            {[50,100,150,200,250,300,350].map(x => <line key={x} x1={x} y1="0" x2={x} y2="200" stroke="white" strokeWidth="0.5"/>)}
+            {[40,80,120,160].map(y => <line key={y} x1="0" y1={y} x2="400" y2={y} stroke="white" strokeWidth="0.5"/>)}
+          </svg>
+          {/* Overlay gradient */}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.10) 40%, rgba(0,0,0,0.80) 100%)" }} />
+          {/* .p-card-num */}
+          <div style={{ position: "absolute", top: 18, left: 22, fontFamily: "var(--portfolio-heading-font)", fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}>01</div>
+          {/* .p-stat */}
+          <div style={{ position: "absolute", top: 14, right: 16, padding: "4px 10px", borderRadius: 980, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.12)", fontSize: 11, color: "rgba(255,255,255,0.7)", whiteSpace: "nowrap" }}>+34% conversión</div>
+          {/* .p-card-info */}
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "28px 26px 26px", background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.60) 55%, transparent 100%)" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.60)", marginBottom: 5 }}>UX/UI Design</div>
+            <div style={{ fontFamily: "var(--portfolio-heading-font)", fontSize: 20, fontWeight: 700, letterSpacing: "-0.02em", color: "rgba(245,245,247,0.95)", marginBottom: 7, lineHeight: 1.2 }}>E-commerce Redesign Platform</div>
+            <div style={{ fontSize: 13, lineHeight: 1.55, color: "rgba(255,255,255,0.60)", marginBottom: 14, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as React.CSSProperties["WebkitBoxOrient"] }}>Rediseño completo de plataforma con foco en conversión y experiencia de usuario móvil.</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.10)" }}>
+              <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.06em", color: "rgba(255,255,255,0.38)" }}>2024</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.65)", display: "flex", alignItems: "center", gap: 5 }}>Ver caso →</div>
+            </div>
+          </div>
+        </div>
+        {/* Annotation grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", background: "var(--border)", gap: "1px" }}>
+          {[
+            { cls: ".p-card-num", val: "absolute top:18 left:22 · 11px/700 · 0.14em · rgba(255,255,255,0.35)" },
+            { cls: ".p-stat (badge)", val: "absolute top:14 right:16 · blur(8px) · rgba(0,0,0,0.55) · 11px/rgba(255,255,255,0.7)" },
+            { cls: ".p-card-thumb-overlay", val: "gradient to bottom · rgba(0,0,0,0.04)→0.80 · z-index: 2" },
+            { cls: ".p-cat", val: "11px/700 · 0.10em uppercase · rgba(255,255,255,0.60) · mb:5" },
+            { cls: ".p-name (featured)", val: "Plus Jakarta 20px/700 · -0.02em · rgba(245,245,247,0.95)" },
+            { cls: ".p-desc", val: "13px · 1.55lh · rgba(255,255,255,0.60) · -webkit-line-clamp: 2" },
+            { cls: ".p-year", val: "11px/500 · 0.06em · rgba(255,255,255,0.38)" },
+            { cls: ".p-cta-hint", val: "12px/600 · rgba(255,255,255,0.65) · hover: color:#fff + translateX(4px)" },
+            { cls: ".p-card-info (featured)", val: "padding: 28px 26px 26px · gradient to top rgba(0,0,0,0.95)→0" },
+          ].map(({ cls, val }) => (
+            <div key={cls} style={{ padding: "10px 14px", background: "var(--bg2)" }}>
+              <code style={{ display: "block", fontSize: 10, color: "var(--accent)", fontWeight: 700, marginBottom: 3 }}>{cls}</code>
+              <div style={{ fontSize: 10, color: "var(--txt3)", lineHeight: 1.4 }}>{val}</div>
+            </div>
+          ))}
+        </div>
+        {/* Bento grid indicator */}
+        <div style={{ padding: "12px 16px", background: "var(--bg3)", borderTop: "1px solid var(--border)", display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--txt3)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Grid position</div>
+          {[
+            { cls: ".p-card--featured", val: "grid-column: span 2 · aspect-ratio: 16/10" },
+            { cls: ".p-card--compact", val: "grid-column: span 1 · min-height: 280px" },
+            { cls: ".projects-bento", val: "grid-template-columns: repeat(3, 1fr) · gap: 16px" },
+          ].map(({ cls, val }) => (
+            <div key={cls} style={{ display: "flex", gap: 6, alignItems: "baseline" }}>
+              <code style={{ fontSize: 10, color: "var(--accent)", fontWeight: 700, flexShrink: 0 }}>{cls}</code>
+              <div style={{ fontSize: 10, color: "var(--txt3)" }}>{val}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <SectionHeading title="KPI card (project panel)" />
       <PreviewBox>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, maxWidth: 420 }}>
@@ -593,6 +718,59 @@ function PageForms() {
         <p className="ds-page-desc">
           Sistema de floating labels. El label sube y cambia a uppercase cuando el campo tiene foco o contenido. Todos los inputs usan <code>id</code> + <code>htmlFor</code> para accesibilidad.
         </p>
+      </div>
+
+      <SectionHeading title="Floating label — 4 estados en secuencia" />
+      <p className="ds-pattern-desc">
+        El label transiciona entre 4 estados. El CSS detecta <code>:focus</code> y <code>:not(:placeholder-shown)</code> para subir automáticamente. No se necesita JavaScript para el estado Filled.
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginTop: 16 }}>
+        {/* State 1: Idle */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ position: "relative", height: 56, borderRadius: 12, border: "1.5px solid rgba(0,0,0,0.12)", background: "rgba(0,0,0,0.04)", overflow: "hidden" }}>
+            <div style={{ position: "absolute", left: 17, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: "rgba(0,0,0,0.38)", pointerEvents: "none", fontFamily: "var(--portfolio-font)" }}>Nombre *</div>
+          </div>
+          <div style={{ padding: "8px 10px", background: "var(--bg3)", borderRadius: 8, border: "1px solid var(--border)" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--txt3)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>1. Idle</div>
+            <div style={{ fontSize: 9, color: "var(--txt3)", lineHeight: 1.5, fontFamily: "monospace" }}>top: 50% translateY(-50%)<br/>font-size: 15px<br/>color: rgba(0,0,0,0.38)</div>
+          </div>
+        </div>
+        {/* State 2: Focus */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ position: "relative", height: 56, borderRadius: 12, border: "1.5px solid var(--accent)", background: "rgba(41,151,255,0.04)", overflow: "hidden", boxShadow: "0 0 0 3px rgba(41,151,255,0.15)" }}>
+            <div style={{ position: "absolute", left: 17, top: 8, fontSize: 10, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", fontFamily: "var(--portfolio-font)" }}>NOMBRE *</div>
+            <div style={{ position: "absolute", left: 17, bottom: 10, width: 40, height: 2, borderRadius: 1, background: "var(--accent)", animation: "blink 1s step-end infinite" }} />
+          </div>
+          <div style={{ padding: "8px 10px", background: "rgba(0,98,204,0.05)", borderRadius: 8, border: "1px solid rgba(0,98,204,0.2)" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--accent)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>2. Focus</div>
+            <div style={{ fontSize: 9, color: "var(--txt3)", lineHeight: 1.5, fontFamily: "monospace" }}>top: 8px · transform: none<br/>font-size: 10px · uppercase<br/>color: var(--accent)<br/>border: var(--accent)</div>
+          </div>
+        </div>
+        {/* State 3: Filled */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ position: "relative", height: 56, borderRadius: 12, border: "1.5px solid rgba(0,0,0,0.12)", background: "rgba(0,0,0,0.04)", overflow: "hidden" }}>
+            <div style={{ position: "absolute", left: 17, top: 8, fontSize: 10, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", fontFamily: "var(--portfolio-font)" }}>NOMBRE *</div>
+            <div style={{ position: "absolute", left: 17, bottom: 10, fontSize: 15, color: "var(--txt)", fontFamily: "var(--portfolio-font)" }}>Carlos Rojas</div>
+          </div>
+          <div style={{ padding: "8px 10px", background: "var(--bg3)", borderRadius: 8, border: "1px solid var(--border)" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--txt3)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>3. Filled</div>
+            <div style={{ fontSize: 9, color: "var(--txt3)", lineHeight: 1.5, fontFamily: "monospace" }}>:not(:placeholder-shown)<br/>label permanece arriba<br/>sin focus ring<br/>border: normal</div>
+          </div>
+        </div>
+        {/* State 4: Error */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ position: "relative", height: 56, borderRadius: 12, border: "1.5px solid var(--error)", background: "rgba(239,68,68,0.04)", overflow: "hidden" }}>
+              <div style={{ position: "absolute", left: 17, top: 8, fontSize: 10, color: "var(--error)", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", fontFamily: "var(--portfolio-font)" }}>NOMBRE *</div>
+              <div style={{ position: "absolute", left: 17, bottom: 10, fontSize: 15, color: "var(--txt)", fontFamily: "var(--portfolio-font)" }}>123</div>
+            </div>
+            <div style={{ fontSize: 10, color: "var(--error)", paddingLeft: 4, lineHeight: 1.3 }}>El nombre no puede contener números.</div>
+          </div>
+          <div style={{ padding: "8px 10px", background: "rgba(239,68,68,0.05)", borderRadius: 8, border: "1px solid rgba(239,68,68,0.25)" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--error)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>4. Error</div>
+            <div style={{ fontSize: 9, color: "var(--txt3)", lineHeight: 1.5, fontFamily: "monospace" }}>border: var(--error)<br/>label: color: var(--error)<br/>mensaje: role="alert"<br/>aria-live="assertive"</div>
+          </div>
+        </div>
       </div>
 
       <SectionHeading title="Demo interactivo" />
@@ -837,6 +1015,57 @@ function PageBadges() {
           <span className="pv-year">2024</span>
         </div>
       </PreviewBox>
+
+      <SectionHeading title="Badges en su contexto natural — referencia visual" />
+      <p className="ds-pattern-desc">
+        Cada badge/tag tiene un lugar específico en la UI. Este diagrama muestra dónde vive cada uno y con qué otros elementos coexiste.
+      </p>
+      <div className="ds-anatomy-wrap" style={{ padding: 0 }}>
+        {/* Hero section fragment */}
+        <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 12, background: "linear-gradient(135deg, rgba(0,98,204,0.04) 0%, transparent 100%)" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 980, border: "1px solid var(--border)", background: "var(--glass)", fontSize: 12, color: "var(--txt2)" }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--success)", animation: "badgePulse 2s ease infinite" }} />
+            Product Designer
+          </div>
+          <code style={{ fontSize: 10, color: "var(--txt3)", fontFamily: "monospace" }}>hero-tag · hero-dot</code>
+          <div style={{ marginLeft: "auto", fontSize: 10, color: "var(--txt3)" }}>hero section</div>
+        </div>
+        {/* Navbar fragment */}
+        <div style={{ padding: "14px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 12, background: "rgba(248,248,248,0.7)" }}>
+          <div style={{ padding: "4px 10px", borderRadius: 980, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.12)", fontSize: 11, color: "rgba(255,255,255,0.7)", display: "inline-block" }}>+34% conversión</div>
+          <code style={{ fontSize: 10, color: "var(--txt3)", fontFamily: "monospace" }}>p-stat · p-stat--animated</code>
+          <div style={{ marginLeft: "auto", fontSize: 10, color: "var(--txt3)" }}>sobre project-card thumb</div>
+        </div>
+        {/* Contact section */}
+        <div style={{ padding: "14px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 980, border: "1px solid rgba(48,209,88,0.3)", background: "rgba(48,209,88,0.07)", fontSize: 13, color: "var(--success)" }}>
+            <div className="avail-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--success)", flexShrink: 0 }} />
+            Disponible 2026
+          </div>
+          <code style={{ fontSize: 10, color: "var(--txt3)", fontFamily: "monospace" }}>contact-avail · avail-dot</code>
+          <div style={{ marginLeft: "auto", fontSize: 10, color: "var(--txt3)" }}>about y contact</div>
+        </div>
+        {/* Skills section */}
+        <div style={{ padding: "14px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {["Figma", "React", "TypeScript", "Design Systems"].map(s => (
+              <div key={s} style={{ padding: "6px 14px", borderRadius: 980, border: "1px solid var(--border)", background: "rgba(255,255,255,0.65)", backdropFilter: "blur(8px)", fontSize: 13, color: "var(--txt2)" }}>{s}</div>
+            ))}
+          </div>
+          <code style={{ fontSize: 10, color: "var(--txt3)", fontFamily: "monospace" }}>skill-tag</code>
+          <div style={{ marginLeft: "auto", fontSize: 10, color: "var(--txt3)" }}>about section</div>
+        </div>
+        {/* Blog tags */}
+        <div style={{ padding: "14px 24px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 6 }}>
+            {["#design", "#frontend", "#ux"].map((t, i) => (
+              <div key={t} style={{ padding: "3px 9px", borderRadius: 980, border: `1px solid ${i === 0 ? "var(--accent)" : "var(--border)"}`, fontSize: 11, fontWeight: 500, color: i === 0 ? "var(--accent)" : "var(--txt3)", background: i === 0 ? "rgba(0,98,204,0.06)" : "var(--glass)" }}>{t}</div>
+            ))}
+          </div>
+          <code style={{ fontSize: 10, color: "var(--txt3)", fontFamily: "monospace" }}>blog-tag · blog-tag.active</code>
+          <div style={{ marginLeft: "auto", fontSize: 10, color: "var(--txt3)" }}>blog cards y posts</div>
+        </div>
+      </div>
 
       <SectionHeading title="Especificaciones" />
       <div className="ds-spec-table">
@@ -1653,6 +1882,50 @@ function PageDarkMode() {
         ))}
       </div>
 
+      {/* ── Split visual comparison ── */}
+      <SectionHeading title="Comparativa visual — mismo componente en ambos modos" />
+      <p className="ds-pattern-desc">
+        El mismo contact-form-card renderizado en modo claro y oscuro. Los tokens cambian; el componente TSX es idéntico. Esta es la garantía del sistema de tokens.
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3, borderRadius: "var(--r-xl)", overflow: "hidden", border: "1px solid var(--border)", marginTop: 16 }}>
+        {/* Light mode */}
+        <div style={{ background: "#f0f4fb", padding: "24px 20px" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#5e5e64", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5e5e64" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+            Modo Claro
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.85)", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 16, padding: 16, boxShadow: "0 12px 40px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)" }}>
+            <div style={{ fontSize: 9, fontFamily: "monospace", color: "rgba(0,0,0,0.35)", marginBottom: 12, lineHeight: 1.6 }}>bg: rgba(255,255,255,0.85)<br/>border: rgba(0,0,0,0.08)<br/>shadow: --shadow-lg</div>
+            {[{ ph: "Nombre completo", type: "text" }, { ph: "Email", type: "email" }].map((f, i) => (
+              <div key={i} style={{ position: "relative", height: 44, borderRadius: 10, border: "1.5px solid rgba(0,0,0,0.12)", background: "rgba(0,0,0,0.04)", marginBottom: 8, overflow: "hidden" }}>
+                <div style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "rgba(0,0,0,0.38)" }}>{f.ph}</div>
+                <div style={{ position: "absolute", top: 1, left: 6, fontSize: 7, fontFamily: "monospace", color: "rgba(0,0,0,0.25)" }}>rgba(0,0,0,0.04) · rgba(0,0,0,0.12)</div>
+              </div>
+            ))}
+            <div style={{ height: 36, borderRadius: 980, background: "#0062cc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "white", fontWeight: 600, marginTop: 4 }}>Enviar →</div>
+            <div style={{ fontSize: 8, fontFamily: "monospace", color: "rgba(0,0,0,0.35)", marginTop: 8, textAlign: "center" }}>--accent: #0062cc</div>
+          </div>
+        </div>
+        {/* Dark mode */}
+        <div style={{ background: "#060c1a", padding: "24px 20px" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8e8e93", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            Modo Oscuro
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 16, padding: 16, boxShadow: "0 24px 48px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.06)" }}>
+            <div style={{ fontSize: 9, fontFamily: "monospace", color: "rgba(255,255,255,0.3)", marginBottom: 12, lineHeight: 1.6 }}>bg: rgba(255,255,255,0.035)<br/>border: rgba(255,255,255,0.09)<br/>shadow: --shadow-2xl dark</div>
+            {[{ ph: "Nombre completo" }, { ph: "Email" }].map((f, i) => (
+              <div key={i} style={{ position: "relative", height: 44, borderRadius: 10, border: "1.5px solid rgba(255,255,255,0.11)", background: "rgba(255,255,255,0.06)", marginBottom: 8, overflow: "hidden" }}>
+                <div style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "rgba(255,255,255,0.38)" }}>{f.ph}</div>
+                <div style={{ position: "absolute", top: 1, left: 6, fontSize: 7, fontFamily: "monospace", color: "rgba(255,255,255,0.2)" }}>rgba(255,255,255,0.06) · rgba(255,255,255,0.11)</div>
+              </div>
+            ))}
+            <div style={{ height: 36, borderRadius: 980, background: "#2997ff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "white", fontWeight: 600, marginTop: 4 }}>Enviar →</div>
+            <div style={{ fontSize: 8, fontFamily: "monospace", color: "rgba(255,255,255,0.3)", marginTop: 8, textAlign: "center" }}>--accent dark: #2997ff</div>
+          </div>
+        </div>
+      </div>
+
       {/* ── Theme toggle ── */}
       <SectionHeading title="Theme Toggle — componente" />
       <p className="ds-pattern-desc">
@@ -2435,6 +2708,61 @@ function PageAnimaciones() {
       </div>
 
       {/* ── anim-up pattern ── */}
+      <SectionHeading title="Patrón anim-up — referencia visual" />
+      <p className="ds-pattern-desc">
+        Estado <strong>antes</strong> del trigger (opacity: 0, translateY: 16px) vs <strong>después</strong> de que el observer añade <code>.in</code> (opacity: 1, translateY: 0). La transición dura 650ms con spring easing. El elemento es el mismo — solo cambian las propiedades CSS.
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 12, alignItems: "center", marginTop: 16 }}>
+        {/* Before */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ padding: "4px 12px", background: "var(--bg3)", borderRadius: 980, border: "1px solid var(--border)", fontSize: 10, fontWeight: 700, color: "var(--txt3)", letterSpacing: "0.08em", textAlign: "center", textTransform: "uppercase" }}>Antes · sin .in</div>
+          <div style={{ padding: 20, borderRadius: 16, border: "2px dashed rgba(0,0,0,0.12)", background: "var(--bg3)", display: "flex", flexDirection: "column", gap: 8 }}>
+            {/* Label mockup */}
+            <div style={{ opacity: 0.08, transform: "translateY(16px)" }}>
+              <div style={{ height: 10, width: "40%", borderRadius: 4, background: "var(--accent)", marginBottom: 8 }} />
+              <div style={{ height: 24, width: "80%", borderRadius: 6, background: "var(--txt)" }} />
+            </div>
+            <div style={{ fontSize: 10, fontFamily: "monospace", color: "var(--txt3)", textAlign: "center", lineHeight: 1.5 }}>opacity: 0<br/>transform: translateY(16px)</div>
+          </div>
+          <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(0,0,0,0.04)", border: "1px solid var(--border)" }}>
+            <div style={{ fontSize: 10, color: "var(--txt3)", lineHeight: 1.5, fontFamily: "monospace" }}>
+              .anim-up &#123;<br/>
+              &nbsp;&nbsp;opacity: 0;<br/>
+              &nbsp;&nbsp;transform: translateY(16px);<br/>
+              &nbsp;&nbsp;transition: opacity 0.65s spring,<br/>
+              &nbsp;&nbsp;transform 0.65s spring;<br/>
+              &#125;
+            </div>
+          </div>
+        </div>
+        {/* Arrow */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M4 16h24M20 8l8 8-8 8" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <div style={{ fontSize: 9, color: "var(--txt3)", textAlign: "center", lineHeight: 1.4 }}>Observer detecta<br/>viewport entry<br/>→ añade .in</div>
+        </div>
+        {/* After */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ padding: "4px 12px", background: "rgba(0,98,204,0.08)", borderRadius: 980, border: "1px solid rgba(0,98,204,0.25)", fontSize: 10, fontWeight: 700, color: "var(--accent)", letterSpacing: "0.08em", textAlign: "center", textTransform: "uppercase" }}>Después · con .in</div>
+          <div style={{ padding: 20, borderRadius: 16, border: "2px solid rgba(0,98,204,0.25)", background: "rgba(0,98,204,0.04)", display: "flex", flexDirection: "column", gap: 8 }}>
+            {/* Label + title mockup visible */}
+            <div style={{ opacity: 1, transform: "translateY(0)" }}>
+              <div style={{ height: 10, width: "40%", borderRadius: 4, background: "var(--accent)", marginBottom: 8 }} />
+              <div style={{ height: 24, width: "80%", borderRadius: 6, background: "var(--txt)" }} />
+            </div>
+            <div style={{ fontSize: 10, fontFamily: "monospace", color: "var(--accent)", textAlign: "center", lineHeight: 1.5 }}>opacity: 1<br/>transform: translateY(0)</div>
+          </div>
+          <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(0,98,204,0.05)", border: "1px solid rgba(0,98,204,0.2)" }}>
+            <div style={{ fontSize: 10, color: "var(--txt3)", lineHeight: 1.5, fontFamily: "monospace" }}>
+              .anim-up.in &#123;<br/>
+              &nbsp;&nbsp;opacity: 1;<br/>
+              &nbsp;&nbsp;transform: translateY(0);<br/>
+              &#125;<br/>
+              /* 650ms cubic-bezier(0.16,1,0.3,1) */
+            </div>
+          </div>
+        </div>
+      </div>
+
       <SectionHeading title="Patrón anim-up — Scroll Entrance" />
       <p className="ds-pattern-desc">
         El patrón de entrada por scroll más usado en el sitio. El elemento parte invisible y desplazado 16px hacia abajo. Cuando entra en el viewport, el observer global en <code>portfolio.tsx</code> añade la clase <code>.in</code> y el CSS anima a visible+posición natural.
