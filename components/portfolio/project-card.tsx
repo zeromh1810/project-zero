@@ -34,8 +34,7 @@ export function ProjectCard({ project, onClick, variant = "featured", index }: P
     cancelAnimationFrame(frameRef.current)
     const card = cardRef.current
     if (!card) return
-    card.style.transition = "transform 550ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 400ms ease, opacity 0.65s cubic-bezier(0.16,1,0.3,1)"
-    // Restore to the flat CSS state (perspective(1000px) rotateX(0) translateY(0))
+    card.style.transition = "transform 550ms cubic-bezier(0.16, 1, 0.3, 1), filter 400ms ease"
     card.style.transform = "perspective(1000px) rotateX(0deg) translateY(0)"
   }, [])
 

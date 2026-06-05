@@ -853,7 +853,7 @@ html {
 
 /* ── WILL-CHANGE OPTIMIZATIONS ── */
 .hero-wrap        { will-change: transform; }
-.p-card-thumb     { will-change: transform; }
+/* .p-card-thumb: sin will-change — evita GPU sibling layer que escapa el clip */
 .nav-pill         { will-change: left, width; }
 .hero-line-inner  { will-change: transform; }
 .p-title-word-inner { will-change: transform; }
@@ -995,6 +995,8 @@ html {
   position: relative;
   border-radius: 20px;
   overflow: hidden;
+  /* compositor-level rounded clip — clipa GPU sibling layers con esquinas redondeadas */
+  clip-path: inset(0 round 20px);
   cursor: pointer;
   /* 3D tilt entrance: card starts below + tilted forward, corrects to flat */
   transform: perspective(1000px) rotateX(-8deg) translateY(40px);
@@ -1003,12 +1005,13 @@ html {
   transition:
     transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
     opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.4s ease;
+    filter 0.4s ease;
   will-change: transform;
 }
 
 .p-card:hover {
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28), 0 4px 16px rgba(0, 0, 0, 0.14);
+  /* drop-shadow se aplica DESPUÉS de clip-path → sombra visible fuera del clip */
+  filter: drop-shadow(0 20px 56px rgba(0, 0, 0, 0.26)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.13));
 }
 
 .p-card:hover .p-card-thumb {
@@ -5463,6 +5466,14 @@ html {
   .hero-title {
     font-size: 85px;
   }
+
+  .hero-wrap--split .hero-title {
+    font-size: clamp(48px, 6.5vw, 78px);
+  }
+
+  .hero-right {
+    max-width: 620px;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -5483,7 +5494,13 @@ html {
     padding-top: 112px;
   }
 
-  /* hero-wrap mantiene las mismas dimensiones que en 1920px */
+  .hero-wrap--split {
+    max-width: 1620px;
+  }
+
+  .hero-right {
+    max-width: 800px;
+  }
 
   .blog-main,
   .blog-post-main {
@@ -5695,6 +5712,13 @@ html {
   inset: 0;
   border-radius: var(--r-xl);
   overflow: hidden;
+  /*
+    clip-path como fix principal del border-radius en hover:
+    overflow:hidden opera a nivel paint y no afecta capas GPU hijas
+    (deck-card-img tiene will-change:transform → capa separada).
+    clip-path opera a nivel compositor y sí clipea capas hijas.
+  */
+  clip-path: inset(0 round var(--r-xl));
   will-change: transform, opacity;
   transform-origin: top left;
   /* Shadows instead of borders — make-interfaces-feel-better */
@@ -5733,7 +5757,9 @@ html {
 
 .deck-card--front .deck-card-img {
   animation: deck-breathe 13s ease-in-out infinite;
-  will-change: transform;
+  /* will-change eliminado: el browser promueve automáticamente
+     elementos con CSS animations. El will-change explícito creaba
+     una sub-capa GPU separada que escapaba el clip del padre. */
 }
 
 /* Overlay degradado en la carta frontal */
@@ -5948,9 +5974,7 @@ html {
   }
 
   .hero-right {
-    width: 100%;
-    padding-bottom: var(--space-10); /* 40px */
-    padding-right: var(--space-10);  /* 40px */
+    display: none;
   }
 }
 
@@ -5972,15 +5996,5 @@ html {
   /* +10% → 15px × 1.1 = 16.5 → 17px */
   .hero-wrap--split .hero-sub {
     font-size: 17px;
-  }
-
-  .hero-right {
-    padding-bottom: 36px;
-    padding-right: 36px;
-  }
-
-  /* 4:3 en móvil: ancho estrecho, más alto → mejor presencia visual */
-  .deck-stage {
-    aspect-ratio: 4 / 3;
   }
 }
