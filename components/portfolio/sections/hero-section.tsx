@@ -215,11 +215,34 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
 
 function DeckGallery({ slides }: { slides: SlideProject[] }) {
   const [order,  setOrder]  = useState(() => slides.map((_, i) => i))
-  const cardRefs  = useRef<(HTMLDivElement | null)[]>([])
-  const counterRef = useRef<HTMLSpanElement>(null)
-  const titleRef   = useRef<HTMLSpanElement>(null)
-  const busy      = useRef(false)
-  const timerRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const cardRefs    = useRef<(HTMLDivElement | null)[]>([])
+  const counterRef  = useRef<HTMLSpanElement>(null)
+  const titleRef    = useRef<HTMLSpanElement>(null)
+  const busy        = useRef(false)
+  const timerRef    = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const galleryRef  = useRef<HTMLDivElement>(null)
+  const tiltFrameRef = useRef<number>(0)
+
+  const handleTiltMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    cancelAnimationFrame(tiltFrameRef.current)
+    tiltFrameRef.current = requestAnimationFrame(() => {
+      const el = galleryRef.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      const x = (e.clientX - rect.left) / rect.width - 0.5
+      const y = (e.clientY - rect.top) / rect.height - 0.5
+      el.style.transform = `perspective(1000px) rotateX(${-y * 5}deg) rotateY(${x * 5}deg)`
+      el.style.transition = "transform 80ms linear"
+    })
+  }, [])
+
+  const handleTiltLeave = useCallback(() => {
+    cancelAnimationFrame(tiltFrameRef.current)
+    const el = galleryRef.current
+    if (!el) return
+    el.style.transition = "transform 600ms cubic-bezier(0.16, 1, 0.3, 1)"
+    el.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg)"
+  }, [])
 
   // ── Deal ─────────────────────────────────────────────────────────────────────
   const deal = useCallback(() => {
@@ -328,7 +351,7 @@ function DeckGallery({ slides }: { slides: SlideProject[] }) {
   const frontProject = slides[frontIdx]
 
   return (
-    <div className="deck-gallery">
+    <div className="deck-gallery" ref={galleryRef} onMouseMove={handleTiltMove} onMouseLeave={handleTiltLeave}>
 
       {/* ── Eyebrow: label + línea + contador ── */}
       <div className="deck-eyebrow">
