@@ -14,6 +14,9 @@ importers:
       '@vercel/analytics':
         specifier: 1.6.1
         version: 1.6.1(next@16.2.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+      animejs:
+        specifier: ^3.2.2
+        version: 3.2.2
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.24(postcss@8.5.6)
@@ -36,6 +39,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.2.0
         version: 4.2.0
+      '@types/animejs':
+        specifier: ^3.1.13
+        version: 3.1.13
       '@types/node':
         specifier: ^22
         version: 22.19.11
@@ -557,6 +563,9 @@ packages:
   '@tailwindcss/postcss@4.2.0':
     resolution: {integrity: sha512-u6YBacGpOm/ixPfKqfgrJEjMfrYmPD7gEFRoygS/hnQaRtV0VCBdpkx5Ouw9pnaLRwwlgGCuJw8xLpaR0hOrQg==}
 
+  '@types/animejs@3.1.13':
+    resolution: {integrity: sha512-yWg9l1z7CAv/TKpty4/vupEh24jDGUZXv4r26StRkpUPQm04ztJaftgpto8vwdFs8SiTq6XfaPKCSI+wjzNMvQ==}
+
   '@types/node@22.19.11':
     resolution: {integrity: sha512-BH7YwL6rA93ReqeQS1c4bsPpcfOmJasG+Fkr6Y59q83f9M1WcBRHR2vM+P9eOisYRcN3ujQoiZY8uk5W+1WL8w==}
 
@@ -593,6 +602,9 @@ packages:
         optional: true
       vue-router:
         optional: true
+
+  animejs@3.2.2:
+    resolution: {integrity: sha512-Ao95qWLpDPXXM+WrmwcKbl6uNlC5tjnowlaRYtuVDHHoygjtIPfDUoK9NthrlZsQSKjZXlmji2TrBUAVbiH0LQ==}
 
   aria-hidden@1.2.6:
     resolution: {integrity: sha512-ik3ZgC9dY/lYVVM++OISsaYDeg1tb0VtP5uL3ouh1koGOaUMDPpbFIei4JkFimWUFPn90sbMNMXQAIVOlnYKJA==}
@@ -1264,6 +1276,8 @@ snapshots:
       postcss: 8.5.6
       tailwindcss: 4.2.0
 
+  '@types/animejs@3.1.13': {}
+
   '@types/node@22.19.11':
     dependencies:
       undici-types: 6.21.0
@@ -1280,6 +1294,8 @@ snapshots:
     optionalDependencies:
       next: 16.2.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react: 19.2.4
+
+  animejs@3.2.2: {}
 
   aria-hidden@1.2.6:
     dependencies:

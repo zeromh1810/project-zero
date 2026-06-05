@@ -5590,3 +5590,397 @@ html {
     padding: 48px 64px 96px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HERO V2 — TWO-COLUMN SPLIT + STACKED DECK GALLERY
+   Proporciones calculadas:
+   · max-width 1380px → inner = 1380 - 56px(left) - 72px(right) = 1252px
+   · Texto (41%) = ~513px   gap (68px)   Galería (flex:1) = ~671px
+   · Título override: clamp(38px,4.5vw,66px) → a 1440px = 64.8px
+     "experiencias" @65px ≈ 390px → cabe en 513px con margen
+   · Galería stage 4:3 → 671-52px overflow padding = 619px × 464px
+     Esta altura (~464px) equilibra el bloque de texto (~460px) visualmente
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Contenedor: row layout ── */
+/*
+   PROPORCIONES CALCULADAS (referencia hero-wrap--split):
+   max-width: 1600px | padding 48px izq + 72px der | inner: 1480px
+
+   hero-left 55%  |  gap 64px  |  hero-right flex:1 (~45%)
+
+   1920px: texto=814px  galería=602px  stage=554×346px  ✓ plena
+   1440px: texto=726px  galería=530px  stage=482×301px  ✓ plena
+   1280px: texto=638px  galería=458px  stage=410×256px  ✓ correcta
+
+   Punto de quiebre: stage < 300px cuando viewport < 1036px
+   → @1060px: bajamos a 50% texto, gap 52px
+     texto=470px  galería=418px  stage=370×231px  ✓ aceptable
+   → @960px: columna única
+*/
+.hero-wrap--split {
+  align-items: center;
+  /* gap: var(--space-1); */
+  flex-direction: row;
+  max-width: 1720px;
+  padding-right: 72px;
+}
+
+/* ── Columna izquierda: texto (48%) ── */
+/*
+   Reducido de 55% → 48% para dar al slider +20% de ancho.
+   1440px: inner=1320px, texto=634px, galería=622px, stage=574×359px (+20%)
+   1920px: inner=1480px, texto=710px, galería=706px, stage=658×411px (+20%)
+*/
+.hero-left {
+  flex: 0 0 48%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+   Título +10% sobre el spec DS:
+   DS base: clamp(44px, 5.9vw, 85px) × 1.1 = clamp(48px, 6.5vw, 94px)
+   1440px: 6.5vw = 93.6px → cap 94px
+   1280px: 6.5vw = 83.2px
+   "experiencias" @94px ≈ 528px → cabe en 634px (48% de 1320px) ✓
+*/
+.hero-wrap--split .hero-title {
+  font-size: clamp(48px, 6.5vw, 94px);
+}
+
+/*
+   Subtítulo +10%: DS primitive.fontSize.lg=17px → 19px techo.
+*/
+.hero-wrap--split .hero-sub {
+  font-size: clamp(17px, 1.65vw, 19px);
+}
+
+/* ── Columna derecha: galería (flex:1 ≈ 45%) ── */
+.hero-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding-bottom: var(--space-12); /* 48px — margen para overflow del stack */
+  padding-right:  var(--space-12); /* 48px */
+}
+
+/* ── Deck Gallery container ── */
+.deck-gallery {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/*
+   Stage: 16/10 — DS component.project-card.aspect-featured.
+   A 554px (1920px): stage = 554×346px
+   A 482px (1440px): stage = 482×301px
+   A 370px (1060px): stage = 370×231px
+*/
+.deck-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  margin-top: var(--space-4);  /* 16px */
+  margin-bottom: var(--space-5); /* 20px */
+}
+
+/* ── Tarjeta individual ── */
+.deck-card {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  will-change: transform, opacity;
+  transform-origin: top left;
+  /* Shadows instead of borders — make-interfaces-feel-better */
+  box-shadow:
+    0 2px 8px  rgba(0, 0, 0, 0.08),
+    0 8px 28px rgba(0, 0, 0, 0.10),
+    0 20px 60px rgba(0, 0, 0, 0.08);
+  outline: 1px solid rgba(0, 0, 0, 0.05);
+  outline-offset: -1px;
+}
+
+/* Carta frontal: sombra más pronunciada */
+.deck-card--front {
+  box-shadow:
+    0 4px 16px  rgba(0, 0, 0, 0.10),
+    0 16px 48px rgba(0, 0, 0, 0.14),
+    0 32px 80px rgba(0, 0, 0, 0.10);
+  outline: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Imagen de la tarjeta — slow zoom (breathe) solo en la frontal */
+.deck-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  /* Sin animación por defecto (cartas traseras) */
+}
+
+/* Zoom breathe en la carta activa — igual al efecto de P4 */
+@keyframes deck-breathe {
+  0%, 100% { transform: scale(1.00); }
+  50%       { transform: scale(1.045); }
+}
+
+.deck-card--front .deck-card-img {
+  animation: deck-breathe 13s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Overlay degradado en la carta frontal */
+.deck-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.52) 0%,
+    rgba(0, 0, 0, 0.10) 40%,
+    transparent 65%
+  );
+  display: flex;
+  align-items: flex-end;
+  padding: 18px 20px;
+  pointer-events: none;
+}
+
+.deck-card-category {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.70);
+}
+
+/* ── Eyebrow: label + línea divisora + contador ── */
+.deck-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.deck-eyebrow-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--txt3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.deck-eyebrow-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.deck-eyebrow-counter {
+  font-size: 9px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.14em;
+  color: var(--txt3);
+  white-space: nowrap;
+  flex-shrink: 0;
+  will-change: opacity, transform;
+}
+
+/* ── Meta row bajo el stack ── */
+.deck-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.deck-meta-title {
+  font-family: var(--portfolio-heading-font);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--txt2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+/* ── Dots de navegación ── */
+.deck-dots {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+/* make-interfaces-feel-better: hit area ≥ 40px via ::before */
+.deck-dot {
+  position: relative;
+  width: 5px;
+  height: 5px;
+  border-radius: var(--r-full);
+  background: var(--border-h);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  /* Transiciones específicas — nunca transition: all */
+  transition-property: width, background-color;
+  transition-duration: 280ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  -webkit-tap-highlight-color: transparent;
+  will-change: width;
+}
+
+.deck-dot::before {
+  content: "";
+  position: absolute;
+  inset: -18px -12px;
+}
+
+.deck-dot--active {
+  width: 18px;
+  background: var(--accent);
+}
+
+.deck-dot:hover:not(.deck-dot--active) {
+  background: var(--txt3);
+}
+
+/* scale on press — make-interfaces-feel-better */
+.deck-dot:active {
+  transform: scale(0.96);
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .deck-card-img,
+  .deck-card--front .deck-card-img {
+    animation: none;
+  }
+  .deck-card {
+    will-change: auto;
+  }
+}
+
+/*
+   ── RESPONSIVE CASCADE ──────────────────────────────────────────────────────
+   Derivado de las proporciones base (55%/45%, max-w 1600px):
+
+   TIER 1  ≥ 1280px  → layout completo, 55%/45%, gap 64px
+   TIER 2  1060–1280px → 50%/50%, gap 52px (galería stage ≥ 230px)
+   TIER 3  960–1060px  → 46%/54%, gap 40px (galería stage ≈ 200px, al límite)
+   TIER 4  < 960px  → columna única, texto arriba, galería abajo
+   TIER 5  < 768px  → mobile, padding reducido, título libre
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/*
+   TIER 2 — desktop compacto / laptop 13"  (1060–1280px)
+   Texto 44% → galería 56% − gap
+   1280px: inner=1160px, texto=510px, gap=52px, stage=550×344px ✓
+   1060px: inner=940px,  texto=414px, gap=52px, stage=436×273px ✓
+   Clamp 6.5vw @1280px = 83px, @1060px = 68.9px → escala correctamente.
+*/
+@media (max-width: 1280px) {
+  .hero-wrap--split {
+    gap: 52px;
+  }
+
+  .hero-left {
+    flex: 0 0 44%;
+  }
+}
+
+/*
+   TIER 3 — laptop 11" / tablet landscape  (960–1060px)
+   Texto 43% → máximo uso de galería sin colapsar columna de texto.
+   1060px: inner=940px, texto=404px, gap=40px, stage=452×283px ✓
+    960px: inner=840px, texto=361px, gap=40px, stage=400×250px ✓
+   "experiencias" @6.5vw × 960 = 62.4px ≈ 390px → cabe en 361px (justa)
+   → reducimos clamp a 5.8vw para esta franja.
+*/
+@media (max-width: 1060px) {
+  .hero-wrap--split {
+    gap: var(--space-10); /* 40px */
+  }
+
+  .hero-left {
+    flex: 0 0 43%;
+  }
+
+  .hero-wrap--split .hero-title {
+    font-size: clamp(44px, 5.8vw, 80px);
+  }
+}
+
+/*
+   TIER 4 — columna única  (< 960px)
+   Textos +10% sobre el valor anterior del tier.
+*/
+@media (max-width: 960px) {
+  .hero-wrap--split {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-10); /* 40px */
+    padding-right: var(--space-12);
+  }
+
+  .hero-left {
+    flex: none;
+    width: 100%;
+  }
+
+  /* +10% vs anterior clamp(44px, 8vw, 80px) */
+  .hero-wrap--split .hero-title {
+    font-size: clamp(48px, 8.8vw, 88px);
+  }
+
+  /* +10% vs anterior clamp(15px, 2vw, 18px) */
+  .hero-wrap--split .hero-sub {
+    font-size: clamp(17px, 2.2vw, 20px);
+  }
+
+  .hero-right {
+    width: 100%;
+    padding-bottom: var(--space-10); /* 40px */
+    padding-right: var(--space-10);  /* 40px */
+  }
+}
+
+/*
+   TIER 5 — mobile portrait  (< 768px)
+   +10% vs anterior tier.
+*/
+@media (max-width: 768px) {
+  .hero-wrap--split {
+    padding: 96px var(--space-6) 56px;
+    gap: var(--space-8); /* 32px */
+  }
+
+  /* +10% vs anterior clamp(40px, 10vw, 64px) */
+  .hero-wrap--split .hero-title {
+    font-size: clamp(44px, 11vw, 70px);
+  }
+
+  /* +10% → 15px × 1.1 = 16.5 → 17px */
+  .hero-wrap--split .hero-sub {
+    font-size: 17px;
+  }
+
+  .hero-right {
+    padding-bottom: 36px;
+    padding-right: 36px;
+  }
+
+  /* 4:3 en móvil: ancho estrecho, más alto → mejor presencia visual */
+  .deck-stage {
+    aspect-ratio: 4 / 3;
+  }
+}
