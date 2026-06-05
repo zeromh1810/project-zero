@@ -5904,15 +5904,27 @@ html {
    ── RESPONSIVE CASCADE ──────────────────────────────────────────────────────
    Derivado de las proporciones base (55%/45%, max-w 1600px):
 
-   TIER 1  ≥ 1280px  → layout completo, 55%/45%, gap 64px
-   TIER 2  1060–1280px → 50%/50%, gap 52px (galería stage ≥ 230px)
-   TIER 3  960–1060px  → 46%/54%, gap 40px (galería stage ≈ 200px, al límite)
-   TIER 4  < 960px  → columna única, texto arriba, galería abajo
-   TIER 5  < 768px  → mobile, padding reducido, título libre
+   TIER 1  ≥ 1440px  → max-width 1600px, 1440–1920px y ≥1921px arriba
+   TIER 2  1281–1439px → laptop HD / MacBook Air 13" (1366×768), título 54px cap
+   TIER 3  1060–1280px → desktop compacto, gap 52px
+   TIER 4  960–1060px  → laptop 11" / tablet landscape, gap 40px
+   TIER 5  < 960px  → columna única, texto arriba, galería abajo
+   TIER 6  < 768px  → mobile, padding reducido, título libre
    ──────────────────────────────────────────────────────────────────────────── */
 
 /*
-   TIER 2 — desktop compacto / laptop 13"  (1060–1280px)
+   TIER 2 — laptop HD / MacBook Air 13"  (1281–1439px)
+   Incluye 1366×768 (resolución más común en laptops de gama media).
+   6.5vw @1366px = 88.8px → cap a 54px para evitar desbordamiento en layout split.
+*/
+@media (min-width: 1281px) and (max-width: 1439px) {
+  .hero-wrap--split .hero-title {
+    font-size: clamp(48px, 6.5vw, 54px);
+  }
+}
+
+/*
+   TIER 3 — desktop compacto / laptop 13"  (1060–1280px)
    Texto 44% → galería 56% − gap
    1280px: inner=1160px, texto=510px, gap=52px, stage=550×344px ✓
    1060px: inner=940px,  texto=414px, gap=52px, stage=436×273px ✓
