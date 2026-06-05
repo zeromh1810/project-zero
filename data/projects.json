@@ -77,7 +77,9 @@
     "lightGradient": "linear-gradient(135deg, #dcfce7 0%, #bbf7d0 40%, #86efac 100%)",
     "accentColor": "#30d158",
     "emoji": "💰",
-    "stat": "12k usuarios / mes 1"
+    "stat": "12k usuarios / mes 1",
+    "thumbnail": "/uploads/1780611314658-ryni4p.jpg",
+    "gallery": []
   },
   {
     "id": 3,
@@ -114,7 +116,9 @@
     "lightGradient": "linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 40%, #d8b4fe 100%)",
     "accentColor": "#bf5af2",
     "emoji": "🧬",
-    "stat": "Funding $2.4M seed"
+    "stat": "Funding $2.4M seed",
+    "thumbnail": "/uploads/1780611324490-4vzc4a.webp",
+    "gallery": []
   },
   {
     "id": 4,
