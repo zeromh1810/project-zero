@@ -272,7 +272,7 @@ const PALETTES: { dark: Palette; light: Palette } = {
     primary: {
       lineMinor:   hex3('#8e8e93'),   // --txt3 (dark) — secondary contours
       lineMajor:   hex3('#f5f5f7'),   // --txt (dark) — bright index contours
-      spacing:     0.140,
+      spacing:     0.200,
       lineWidth:   1.0,
       fogStart:    0.55,
       fogStrength: 0.85,
@@ -291,7 +291,7 @@ const PALETTES: { dark: Palette; light: Palette } = {
     primary: {
       lineMinor:   hex3('#5e5e64'),   // --txt3 (light) — secondary contours
       lineMajor:   hex3('#1d1d1f'),   // --txt (light) — ink on paper
-      spacing:     0.140,
+      spacing:     0.200,
       lineWidth:   1.0,
       fogStart:    0.55,
       fogStrength: 0.72,
