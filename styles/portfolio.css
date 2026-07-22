@@ -2331,18 +2331,16 @@ html {
 }
 
 /* ── BRANDS INTER-SECTION — grid estático ──
-   Banda de color real (no solo un tinte): usa --success (verde), no
-   --accent, para diferenciarse del azul de botones/links y que la
-   sección se lea claramente "del color" — combina bien contra blanco/
-   negro sin competir con el acento de marca del resto del sitio. */
+   Banda neutra tipo "hump": clara en los bordes (se funde con
+   projects-sheet y blog-preview) y más marcada justo detrás de los
+   logos — separación por tono, no por borde duro. Una sola regla sirve
+   para los dos temas porque --bg/--bg4 ya invierten su relación de
+   luminosidad en .dark (banda más clara que el negro en vez de más
+   oscura que el blanco), así que no hace falta un override aparte. */
 .brands-section {
   padding: 56px 0 64px;
   position: relative;
-  background: linear-gradient(180deg, rgba(48, 209, 88, 0.09) 0%, rgba(48, 209, 88, 0.22) 100%);
-}
-
-.dark .brands-section {
-  background: linear-gradient(180deg, rgba(48, 209, 88, 0.06) 0%, rgba(48, 209, 88, 0.16) 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg4) 50%, var(--bg) 100%);
 }
 
 /* Label editorial con líneas decorativas */
