@@ -5312,15 +5312,15 @@ html {
    ════════════════════════════════════════════════════════════════════════════ */
 @media (min-width: 1440px) and (max-width: 1920px) {
   .hero-title {
-    font-size: 85px;
+    font-size: 77px;
   }
 
   .hero-wrap--split .hero-title {
-    font-size: clamp(48px, 6.5vw, 84px);
+    font-size: clamp(43px, 5.85vw, 76px);
   }
 
   .hero-right {
-    max-width: 620px;
+    max-width: 558px;
   }
 }
 
@@ -5348,7 +5348,7 @@ html {
      aparecen MÁS ABAJO en el archivo y ganaban el empate de especificidad
      igual (0,2,0 vs 0,2,0), sin importar que este bloque sea condicional. */
   .hero-right {
-    max-width: 1040px;
+    max-width: 936px;
   }
 
   .blog-main,
@@ -5359,7 +5359,7 @@ html {
 
   /* ── Typography ─────────────────────────────────────────────────── */
   .hero-title {
-    font-size: 85px;
+    font-size: 77px;
   }
 
   .s-title {
@@ -5488,7 +5488,7 @@ html {
   align-items: center;
   /* gap: var(--space-1); */
   flex-direction: row;
-  max-width: 1600px;
+  max-width: 1440px;
   padding-right: 72px;
 }
 
@@ -5513,14 +5513,14 @@ html {
    "experiencias" @84px ≈ 528px → cabe en 634px (48% de 1320px) ✓
 */
 .hero-wrap--split .hero-title {
-  font-size: clamp(48px, 6.5vw, 84px);
+  font-size: clamp(43px, 5.85vw, 76px);
 }
 
 /*
    Subtítulo +10%: DS primitive.fontSize.lg=17px → 19px techo.
 */
 .hero-wrap--split .hero-sub {
-  font-size: clamp(17px, 1.65vw, 19px);
+  font-size: clamp(15px, 1.5vw, 17px);
 }
 
 /* ── Columna derecha: galería (flex:1 ≈ 45%) ── */
@@ -5552,15 +5552,15 @@ html {
 */
 @media (min-width: 1921px) {
   .hero-wrap--split {
-    max-width: 2160px;
+    max-width: 1944px;
   }
 
   .hero-wrap--split .hero-title {
-    font-size: clamp(48px, 6.5vw, 100px);
+    font-size: clamp(43px, 5.85vw, 90px);
   }
 
   .hero-wrap--split .hero-sub {
-    font-size: clamp(17px, 1.65vw, 21px);
+    font-size: clamp(15px, 1.5vw, 19px);
   }
 }
 
