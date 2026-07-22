@@ -2333,14 +2333,24 @@ html {
 /* ── BRANDS INTER-SECTION — grid estático ──
    Banda neutra tipo "hump": clara en los bordes (se funde con
    projects-sheet y blog-preview) y más marcada justo detrás de los
-   logos — separación por tono, no por borde duro. Una sola regla sirve
-   para los dos temas porque --bg/--bg4 ya invierten su relación de
-   luminosidad en .dark (banda más clara que el negro en vez de más
-   oscura que el blanco), así que no hace falta un override aparte. */
+   logos — separación por tono, no por borde duro.
+   El borde superior redondeado + la sombra inset dan el efecto de
+   "abertura" en la superficie blanca: como si el plano de arriba se
+   curvara hacia adentro para revelar la banda gris debajo, en vez de
+   un corte recto entre secciones. La sombra inset es oscura en claro
+   (recede contra blanco) y un glow claro en dark (recede contra
+   negro) — por eso necesita el override de .dark, a diferencia del
+   gradiente de fondo que sí comparte una sola regla entre temas. */
 .brands-section {
   padding: 56px 0 64px;
   position: relative;
   background: linear-gradient(180deg, var(--bg) 0%, var(--bg4) 50%, var(--bg) 100%);
+  border-radius: 40px 40px 0 0;
+  box-shadow: inset 0 20px 24px -16px rgba(0, 0, 0, 0.12);
+}
+
+.dark .brands-section {
+  box-shadow: inset 0 20px 24px -16px rgba(255, 255, 255, 0.06);
 }
 
 /* Label editorial con líneas decorativas */
