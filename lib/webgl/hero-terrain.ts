@@ -230,19 +230,12 @@ void main() {
 // Reusing the text hierarchy keeps the map's contrast consistent with the
 // rest of the page in both themes instead of inventing new grays.
 //
-// Each theme draws two layers of the same shader: `primary` (foreground,
-// full opacity) and `far` (background, faintest, sparsest rings) — each
-// sampling a different patch of the noise field so they read as genuinely
-// separate terrain, not a recolored copy. Both orbit the same
-// BASE_YAW/BASE_PITCH rest angle (one camera rotating a single scene, so
-// the motion stays coherent), but each layer has its OWN yawAmt/pitchAmt —
-// the foreground swings noticeably more with the mouse than the background
-// does. That, combined with planeScale (a smaller scale means the SAME
-// rotation swings it fewer screen pixels, since scale is applied after
-// rotation in the vertex shader) gives two compounding parallax cues
-// instead of one. planeShiftY pushes the far layer toward the horizon (top
-// of frame) as a static cue on top of both, so the depth reads even in a
-// still frame.
+// Each theme draws a single layer of the shader: `primary`. A second
+// (`far`) layer was tried for parallax depth, but since it sampled a
+// different patch of the same noise field, its contour lines ran at
+// unrelated angles to primary's — once both were similarly visible (after
+// switching to MAX blending, see below) it read as a crosshatched mesh
+// instead of one coherent terrain, so it was removed.
 // ─────────────────────────────────────────────────────────────────────────────
 interface LayerStyle {
   lineMinor:    [number, number, number]
@@ -264,7 +257,6 @@ interface LayerStyle {
 
 interface Palette {
   primary: LayerStyle
-  far:     LayerStyle
 }
 
 function hex3(h: string): [number, number, number] {
@@ -294,23 +286,6 @@ const PALETTES: { dark: Palette; light: Palette } = {
       planeShiftY: 0.0,
       rippleAmp:   0.14,
     },
-    far: {
-      lineMinor:   hex3('#8e8e93'),   // --txt3 (dark), barely-there
-      lineMajor:   hex3('#8e8e93'),   // no bright index contour this far back
-      spacing:     0.205,
-      lineWidth:   0.9,
-      fogStart:    0.15,
-      fogStrength: 0.95,
-      alphaMin:    0.035,
-      alphaMax:    0.085,
-      zoom:        1.25,
-      noiseOffset: [-1.1, 1.4],
-      yawAmt:      0.06,
-      pitchAmt:    0.03,
-      planeScale:  0.46,
-      planeShiftY: 0.58,
-      rippleAmp:   0.045,
-    },
   },
   light: {
     primary: {
@@ -329,23 +304,6 @@ const PALETTES: { dark: Palette; light: Palette } = {
       planeScale:  1.0,
       planeShiftY: 0.0,
       rippleAmp:   0.14,
-    },
-    far: {
-      lineMinor:   hex3('#5e5e64'),   // --txt3 (light), barely-there
-      lineMajor:   hex3('#5e5e64'),   // no dark ink contour this far back
-      spacing:     0.205,
-      lineWidth:   0.9,
-      fogStart:    0.15,
-      fogStrength: 0.85,
-      alphaMin:    0.030,
-      alphaMax:    0.075,
-      zoom:        1.25,
-      noiseOffset: [-1.1, 1.4],
-      yawAmt:      0.06,
-      pitchAmt:    0.03,
-      planeScale:  0.46,
-      planeShiftY: 0.58,
-      rippleAmp:   0.045,
     },
   },
 }
@@ -466,9 +424,12 @@ export function buildHeroTerrain(
 
   gl.bindVertexArray(null)
 
-  // Blend
+  // Blend — MAX instead of standard alpha-over: where the primary and far
+  // layers' independent contour lines cross, the result is capped to the
+  // stronger of the two instead of compounding into a darker/thicker blob.
   gl.enable(gl.BLEND)
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+  gl.blendEquation(gl.MAX)
+  gl.blendFunc(gl.ONE, gl.ONE)
   gl.disable(gl.DEPTH_TEST)
 
   // Uniform locations
@@ -539,7 +500,6 @@ export function buildHeroTerrain(
   // layer's planeScale/planeShiftY maps the same screen point differently.
   let rippleT0 = -1
   let rippleUVPrimary: [number, number] = [0, 0]
-  let rippleUVFar:     [number, number] = [0, 0]
 
   const onClick = (e: MouseEvent) => {
     const rect = container.getBoundingClientRect()
@@ -552,7 +512,6 @@ export function buildHeroTerrain(
     const ndcY = -((e.clientY - rect.top)  / rect.height - 0.5) * 2
 
     rippleUVPrimary = screenToLayerUV(ndcX, ndcY, m.x, m.y, palette.primary)
-    rippleUVFar     = screenToLayerUV(ndcX, ndcY, m.x, m.y, palette.far)
     rippleT0 = (performance.now() - t0) / 1000
   }
   window.addEventListener("click", onClick, { passive: true })
@@ -600,14 +559,7 @@ export function buildHeroTerrain(
     gl.clearColor(0, 0, 0, 0)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
-    // Painter's order back-to-front: far (smallest planeScale → dampened the
-    // most), then primary on top. Same yaw/pitch input feeds both — the
-    // differential screen-space response comes from each layer's own
-    // yawAmt/pitchAmt plus its planeScale, which together read as
-    // separated depth planes.
     gl.bindVertexArray(vao)
-    applyLayer(palette.far,     rippleUVFar,     rippleAge)
-    gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_INT, 0)
     applyLayer(palette.primary, rippleUVPrimary, rippleAge)
     gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_INT, 0)
     gl.bindVertexArray(null)
