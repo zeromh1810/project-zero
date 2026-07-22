@@ -354,6 +354,7 @@ html {
 .btn-p:hover {
   background: var(--accent-h);
   transform: scale(1.02);
+  box-shadow: var(--shadow-accent);
 }
 
 .btn-p:active {
@@ -968,7 +969,7 @@ html {
 }
 
 .p-card:active {
-  transform: scale(0.99);
+  transform: scale(0.96);
   transition-duration: 80ms;
 }
 
@@ -2270,7 +2271,8 @@ html {
   border: 1px solid var(--border);
   color: var(--txt3);
   transition: border-color 200ms ease, color 200ms ease,
-              background 200ms ease, transform 200ms ease;
+              background 200ms ease, transform 200ms ease,
+              box-shadow 200ms ease;
 }
 
 .footer-social-link:hover {
@@ -2278,6 +2280,12 @@ html {
   border-color: var(--accent);
   background: rgba(0, 98, 204, 0.06);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 98, 204, 0.18);
+}
+
+.footer-social-link:active {
+  transform: scale(0.96);
+  transition-duration: 80ms;
 }
 
 .footer-social-link svg {
@@ -2314,6 +2322,7 @@ html {
   color: #2997ff;
   border-color: rgba(41, 151, 255, 0.5);
   background: rgba(41, 151, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(41, 151, 255, 0.22);
 }
 
 .dark .footer-copy {
@@ -2322,16 +2331,18 @@ html {
 }
 
 /* ── BRANDS INTER-SECTION — grid estático ──
-   Fondo homologado al estilo terrain (neutro): el gris azulado anterior
-   ya no es el estilo del sitio, se reemplaza por tokens --bg3/--bg4. */
+   Banda de color real (no solo un tinte): usa --success (verde), no
+   --accent, para diferenciarse del azul de botones/links y que la
+   sección se lea claramente "del color" — combina bien contra blanco/
+   negro sin competir con el acento de marca del resto del sitio. */
 .brands-section {
   padding: 56px 0 64px;
   position: relative;
-  background: linear-gradient(var(--bg4) 0% 26%, var(--bg3) 100%);
+  background: linear-gradient(180deg, rgba(48, 209, 88, 0.09) 0%, rgba(48, 209, 88, 0.22) 100%);
 }
 
 .dark .brands-section {
-  background: linear-gradient(var(--bg) 0%, var(--bg3) 100%);
+  background: linear-gradient(180deg, rgba(48, 209, 88, 0.06) 0%, rgba(48, 209, 88, 0.16) 100%);
 }
 
 /* Label editorial con líneas decorativas */
@@ -2590,6 +2601,11 @@ html {
   border-color: var(--border-h);
   transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
+}
+
+.blog-card:active {
+  transform: scale(0.96);
+  transition-duration: 80ms;
 }
 
 .blog-card-img {
@@ -2888,14 +2904,15 @@ html {
   white-space: pre-wrap;
 }
 
-/* ── Blog preview (home section) ── — fondo homologado a tonos neutros
-   (--bg/--bg3), el azulado anterior ya no es el estilo del sitio. */
+/* ── Blog preview (home section) ── — vuelve a blanco/negro puro después
+   de la banda con tinte de acento en brands-section, cerrando el ritmo
+   fondo neutro → banda de color → fondo neutro. */
 .blog-preview-section {
-  background: linear-gradient(var(--bg) 0%, var(--bg3) 100%);
+  background: linear-gradient(var(--bg2) 0%, var(--bg) 100%);
 }
 
 .dark .blog-preview-section {
-  background: linear-gradient(var(--bg3) 0%, var(--bg) 100%);
+  background: linear-gradient(var(--bg) 0%, var(--bg2) 100%);
 }
 
 .blog-preview-head {
