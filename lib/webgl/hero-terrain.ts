@@ -230,19 +230,19 @@ void main() {
 // Reusing the text hierarchy keeps the map's contrast consistent with the
 // rest of the page in both themes instead of inventing new grays.
 //
-// Each theme draws three layers of the same shader: `primary` (foreground,
-// full opacity), `depth` (mid-ground, fainter) and `far` (background,
-// faintest, sparsest rings) — each sampling a different patch of the noise
-// field so they read as genuinely separate terrain, not a recolored copy.
-// All three orbit the same BASE_YAW/BASE_PITCH rest angle (one camera
-// rotating a single scene, so the motion stays coherent), but each layer
-// has its OWN yawAmt/pitchAmt — the foreground swings noticeably more with
-// the mouse than the background does. That, combined with planeScale (a
-// smaller scale means the SAME rotation swings it fewer screen pixels,
-// since scale is applied after rotation in the vertex shader) gives two
-// compounding parallax cues instead of one. planeShiftY pushes farther
-// layers toward the horizon (top of frame) as a static cue on top of both,
-// so the depth reads even in a still frame.
+// Each theme draws two layers of the same shader: `primary` (foreground,
+// full opacity) and `far` (background, faintest, sparsest rings) — each
+// sampling a different patch of the noise field so they read as genuinely
+// separate terrain, not a recolored copy. Both orbit the same
+// BASE_YAW/BASE_PITCH rest angle (one camera rotating a single scene, so
+// the motion stays coherent), but each layer has its OWN yawAmt/pitchAmt —
+// the foreground swings noticeably more with the mouse than the background
+// does. That, combined with planeScale (a smaller scale means the SAME
+// rotation swings it fewer screen pixels, since scale is applied after
+// rotation in the vertex shader) gives two compounding parallax cues
+// instead of one. planeShiftY pushes the far layer toward the horizon (top
+// of frame) as a static cue on top of both, so the depth reads even in a
+// still frame.
 // ─────────────────────────────────────────────────────────────────────────────
 interface LayerStyle {
   lineMinor:    [number, number, number]
@@ -264,7 +264,6 @@ interface LayerStyle {
 
 interface Palette {
   primary: LayerStyle
-  depth:   LayerStyle
   far:     LayerStyle
 }
 
@@ -294,23 +293,6 @@ const PALETTES: { dark: Palette; light: Palette } = {
       planeScale:  1.0,
       planeShiftY: 0.0,
       rippleAmp:   0.14,
-    },
-    depth: {
-      lineMinor:   hex3('#8e8e93'),   // --txt3 (dark), much fainter here
-      lineMajor:   hex3('#8e8e93'),   // no bright index contour on this layer
-      spacing:     0.170,
-      lineWidth:   1.0,
-      fogStart:    0.30,
-      fogStrength: 0.90,
-      alphaMin:    0.07,
-      alphaMax:    0.20,
-      zoom:        1.6,
-      noiseOffset: [0.6, 0.4],
-      yawAmt:      0.18,
-      pitchAmt:    0.10,
-      planeScale:  0.74,
-      planeShiftY: 0.36,
-      rippleAmp:   0.08,
     },
     far: {
       lineMinor:   hex3('#8e8e93'),   // --txt3 (dark), barely-there
@@ -347,23 +329,6 @@ const PALETTES: { dark: Palette; light: Palette } = {
       planeScale:  1.0,
       planeShiftY: 0.0,
       rippleAmp:   0.14,
-    },
-    depth: {
-      lineMinor:   hex3('#5e5e64'),   // --txt3 (light), much fainter here
-      lineMajor:   hex3('#5e5e64'),   // no dark ink contour on this layer
-      spacing:     0.170,
-      lineWidth:   1.0,
-      fogStart:    0.30,
-      fogStrength: 0.78,
-      alphaMin:    0.06,
-      alphaMax:    0.17,
-      zoom:        1.6,
-      noiseOffset: [0.6, 0.4],
-      yawAmt:      0.18,
-      pitchAmt:    0.10,
-      planeScale:  0.74,
-      planeShiftY: 0.36,
-      rippleAmp:   0.08,
     },
     far: {
       lineMinor:   hex3('#5e5e64'),   // --txt3 (light), barely-there
@@ -574,7 +539,6 @@ export function buildHeroTerrain(
   // layer's planeScale/planeShiftY maps the same screen point differently.
   let rippleT0 = -1
   let rippleUVPrimary: [number, number] = [0, 0]
-  let rippleUVDepth:   [number, number] = [0, 0]
   let rippleUVFar:     [number, number] = [0, 0]
 
   const onClick = (e: MouseEvent) => {
@@ -588,7 +552,6 @@ export function buildHeroTerrain(
     const ndcY = -((e.clientY - rect.top)  / rect.height - 0.5) * 2
 
     rippleUVPrimary = screenToLayerUV(ndcX, ndcY, m.x, m.y, palette.primary)
-    rippleUVDepth   = screenToLayerUV(ndcX, ndcY, m.x, m.y, palette.depth)
     rippleUVFar     = screenToLayerUV(ndcX, ndcY, m.x, m.y, palette.far)
     rippleT0 = (performance.now() - t0) / 1000
   }
@@ -638,14 +601,12 @@ export function buildHeroTerrain(
     gl.clear(gl.COLOR_BUFFER_BIT)
 
     // Painter's order back-to-front: far (smallest planeScale → dampened the
-    // most), then depth, then primary on top. Same yaw/pitch input feeds all
-    // three — the differential screen-space response comes from each
-    // layer's own yawAmt/pitchAmt plus its planeScale, which together read
-    // as separated depth planes.
+    // most), then primary on top. Same yaw/pitch input feeds both — the
+    // differential screen-space response comes from each layer's own
+    // yawAmt/pitchAmt plus its planeScale, which together read as
+    // separated depth planes.
     gl.bindVertexArray(vao)
     applyLayer(palette.far,     rippleUVFar,     rippleAge)
-    gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_INT, 0)
-    applyLayer(palette.depth,   rippleUVDepth,   rippleAge)
     gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_INT, 0)
     applyLayer(palette.primary, rippleUVPrimary, rippleAge)
     gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_INT, 0)
