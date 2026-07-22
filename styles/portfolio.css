@@ -2212,8 +2212,9 @@ html {
   );
 }
 
-/* Resplandor radial sutil bajo la línea — homologado a gris neutro
-   (--txt), el wash azulado de fondo ya no es el estilo del sitio */
+/* Resplandor radial bajo la línea — en claro usa --accent-h (misma
+   idea de iluminación que ya tenía el modo oscuro, con el acento del
+   sitio en vez de un wash neutro). */
 .footer::after {
   content: '';
   position: absolute;
@@ -2222,7 +2223,7 @@ html {
   transform: translateX(-50%);
   width: 65%;
   height: 200px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(29, 29, 31, 0.05) 0%, transparent 72%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(26, 127, 212, 0.09) 0%, transparent 72%);
   pointer-events: none;
 }
 
