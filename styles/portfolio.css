@@ -453,33 +453,6 @@ html {
   }
 }
 
-/* ── SWIPE HINT (mobile only) ── */
-.swipe-hint {
-  display: none;
-}
-
-@keyframes swipeDrop {
-  0% {
-    transform: translateY(-6px);
-    opacity: 0;
-  }
-  30% {
-    opacity: 1;
-  }
-  70% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(10px);
-    opacity: 0;
-  }
-}
-
-@keyframes swipePulse {
-  0%, 100% { opacity: 0.25; }
-  50%       { opacity: 0.55; }
-}
-
 /* ── HERO — sticky so the projects sheet can slide over it ── */
 .section-full {
   min-height: 100vh;
@@ -917,8 +890,7 @@ html {
   .badge-pulse,
   .avail-dot,
   .hero-dot,
-  .scroll-dot,
-  .swipe-hint-dot {
+  .scroll-dot {
     animation: none !important;
   }
 }
@@ -960,21 +932,6 @@ html {
   gap: 16px;
   max-width: 1100px;
   margin: 0 auto;
-}
-
-/* Legacy grid kept for backward-compat if referenced elsewhere */
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-@media (max-width: 768px) {
-  .projects-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* ── CARD BASE ── */
@@ -3337,71 +3294,6 @@ html {
     display: none;
   }
 
-  /* Mobile swipe hint — anchored to bottom of hero flex container */
-  .swipe-hint {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    position: relative;
-    bottom: auto;
-    left: auto;
-    transform: none;
-    margin-top: auto;
-    align-self: center;
-    padding-bottom: 16px;
-    animation: fadeUp 0.8s 1.6s ease both;
-  }
-
-  .swipe-hint-pill {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    padding: 10px 14px 12px;
-    border-radius: 980px;
-    background: var(--glass);
-    border: 1px solid var(--border);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    overflow: hidden;
-    position: relative;
-    width: 36px;
-    height: 56px;
-    justify-content: center;
-  }
-
-  .swipe-hint-track {
-    position: relative;
-    width: 3px;
-    height: 28px;
-    border-radius: 2px;
-    background: var(--border);
-    overflow: visible;
-    display: flex;
-    justify-content: center;
-  }
-
-  .swipe-hint-dot {
-    position: absolute;
-    top: 0;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: swipeDrop 1.8s cubic-bezier(0.4, 0, 1, 1) infinite;
-    box-shadow: 0 0 6px rgba(41, 151, 255, 0.5);
-  }
-
-  .swipe-hint-label {
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--txt3);
-    animation: swipePulse 1.8s ease infinite;
-    white-space: nowrap;
-  }
-
   .section {
     padding: 72px 20px 24px;
   }
@@ -3517,11 +3409,6 @@ html {
 
   .hero-title {
     font-size: clamp(40px, 11vw, 52px);
-  }
-
-  .projects-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
   }
 
   .projects-bento {
@@ -3818,10 +3705,6 @@ html {
   line-height: 1.6;
 }
 
-.detail-impact-metric {
-  display: inline;
-}
-
 .detail-impact-sep {
   margin: 0 8px;
   color: var(--txt3);
@@ -4026,27 +3909,6 @@ html {
 
 .light .detail-btn-secondary:hover {
   background: var(--bg3);
-}
-
-/* ── Page Animations ── */
-.anim-fade-up {
-  opacity: 0;
-  transform: translateY(16px);
-  animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.anim-fade-left {
-  opacity: 0;
-  transform: translateX(24px);
-  animation: fadeLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: 0.3s;
-}
-
-@keyframes fadeLeft {
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 /* ── Detail Page Responsive ── */
@@ -4997,20 +4859,6 @@ html {
    Principios: concentric border-radius, layered shadows, dark frame + bright screen
    ══════════════════════════════════════════════════════════════════════════════ */
 
-/* ── Scroll container for side-by-side devices ── */
-.ds-devices-strip {
-  display: flex;
-  gap: 40px;
-  overflow-x: auto;
-  padding: 32px 4px 24px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-h) transparent;
-  align-items: flex-start;
-}
-.ds-devices-strip::-webkit-scrollbar { height: 4px; }
-.ds-devices-strip::-webkit-scrollbar-track { background: transparent; }
-.ds-devices-strip::-webkit-scrollbar-thumb { background: var(--border-h); border-radius: 2px; }
-
 .ds-device-unit {
   display: flex;
   flex-direction: column;
@@ -5301,24 +5149,6 @@ html {
   background: var(--bg2);
   box-shadow: var(--shadow-md);
   margin-top: 16px;
-}
-
-.ds-annotation {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--txt3);
-  font-family: "SF Mono", "Consolas", monospace;
-  white-space: nowrap;
-}
-
-.ds-annotation-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
 }
 
 .ds-device-changes {

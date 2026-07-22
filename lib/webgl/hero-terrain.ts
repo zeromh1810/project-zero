@@ -10,6 +10,47 @@
 // 400×400 grid — dense enough for smooth nested contour rings
 const GRID = 400
 
+// Must match the vertex shader's BASE_PITCH/BASE_YAW constants below — used
+// to invert the camera transform when mapping a click from screen space to
+// plane UV. BASE_YAW gives the rest state (no mouse movement) a fixed
+// diagonal/corner view instead of a symmetric front-on tilt — that's what
+// reads as "isometric" rather than just "tilted down".
+const BASE_PITCH = 0.7853982 // 45°
+const BASE_YAW   = 0.6108652 // 35°
+
+// ─────────────────────────────────────────────────────────────────────────────
+// screenToLayerUV
+// Approximate inverse of the vertex shader's camera transform, so a click
+// in screen space can be converted to that layer's plane UV (for the click
+// ripple). Ignores the tiny height contribution to the Y projection (wy is
+// scaled by 0.09 and further reduced by the pitch rotation) — imperceptible
+// for a decorative ripple, and it keeps the inverse a plain closed-form
+// rotation instead of an iterative solve.
+// ─────────────────────────────────────────────────────────────────────────────
+function screenToLayerUV(
+  ndcX: number,
+  ndcY: number,
+  mx: number,
+  my: number,
+  s: { yawAmt: number; pitchAmt: number; planeScale: number; planeShiftY: number }
+): [number, number] {
+  const yaw = BASE_YAW + mx * s.yawAmt
+  const cosYaw = Math.cos(yaw)
+  const sinYaw = Math.sin(yaw)
+  const pitch = BASE_PITCH + my * s.pitchAmt
+  const cosPitch = Math.cos(pitch)
+  const sinPitch = Math.sin(pitch)
+  const k = cosPitch * 3.60 + sinPitch * 0.9
+
+  const x1 = ndcX / (2.28 * s.planeScale)
+  const z1 = (s.planeShiftY - ndcY) / (k * s.planeScale)
+
+  const wx = cosYaw * x1 - sinYaw * z1
+  const wz = sinYaw * x1 + cosYaw * z1
+
+  return [wx + 0.5, wz + 0.5]
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // VERTEX SHADER
 // The plane is sized to fill NDC ±1 on both axes (with a small overscan
@@ -70,16 +111,23 @@ void main() {
   // Rotating in 3D (rather than just skewing the projection) keeps genuine
   // X/Y camera movement while the extra overscan margin below absorbs the
   // small bounding-box growth from the tilt, so no edge is ever revealed.
-  float yaw  = uPX * uYawAmt;
+  // BASE_YAW gives the rest state a fixed diagonal/corner view (not a
+  // symmetric front-on tilt) — that reads as genuinely isometric even
+  // before the mouse moves.
+  const float BASE_YAW = 0.6108652; // 35°
+  float yaw  = BASE_YAW + uPX * uYawAmt;
   float cosY = cos(yaw);
   float sinY = sin(yaw);
   float x1 =  wx * cosY + wz * sinY;
   float z1 = -wx * sinY + wz * cosY;
 
   // 45° base isometric tilt (not a flat 90° top-down map), plus a modest
-  // mouse-driven swing on top of it. uYawAmt/uPitchAmt are lower for the
-  // background layer, so it swings less than the foreground when the mouse
-  // moves — that differential is what reads as depth/parallax.
+  // mouse-driven swing on top of it. uYawAmt/uPitchAmt differ per layer
+  // (set in JS, see PALETTES) — the foreground swings noticeably more than
+  // the background with the same mouse input, which on top of the
+  // planeScale-based dampening (scale applies AFTER rotation, so it also
+  // shrinks the rotation's screen-space swing) makes the depth separation
+  // read much more clearly than a single shared swing amount would.
   const float BASE_PITCH = 0.7853982; // 45°
   float pitch = BASE_PITCH + uPY * uPitchAmt;
   float cosX  = cos(pitch);
@@ -122,6 +170,16 @@ uniform float uFogStrength;
 uniform float uAlphaMin;
 uniform float uAlphaMax;
 
+// Click ripple — a radial shockwave injected into the height field so the
+// contour isolines visibly wobble/shift outward from the click point, like
+// a stone dropped on the contour map. uRippleAge < 0.0 means "no active
+// ripple" (cheap early-out). uRippleAmp lets each depth layer react with a
+// different strength (closer layers ripple more, matching the parallax
+// philosophy already used for mouse motion).
+uniform vec2  uRippleUV;
+uniform float uRippleAge;
+uniform float uRippleAmp;
+
 in  float vHeight;
 in  vec2  vUV;
 in  float vDepth;
@@ -134,8 +192,23 @@ float iso(float h, float sp) {
   return 1.0 - smoothstep(fw * 0.3, fw * 2.0, min(f, 1.0 - f));
 }
 
+// A single expanding ring (like one water-drop pulse), not a sustained
+// oscillating wave: ringRadius grows linearly with age so the disturbance
+// travels outward once, and timeFalloff kills it quickly — the lines get a
+// brief nudge and then settle back to their normal speed/order, instead of
+// visibly "keeping the wave going" for the whole ripple lifetime.
+float ripple(vec2 uv, vec2 center, float age) {
+  if (age < 0.0 || age > 0.9) return 0.0;
+  float d          = length(uv - center);
+  float ringRadius = age * 0.9;
+  float ringWidth  = 0.10;
+  float pulse      = exp(-pow((d - ringRadius) / ringWidth, 2.0));
+  float timeFalloff = exp(-age * 3.0);
+  return pulse * timeFalloff;
+}
+
 void main() {
-  float h     = vHeight;
+  float h     = vHeight + ripple(vUV, uRippleUV, uRippleAge) * uRippleAmp;
   float minor = iso(h, uSpacing);
   float major = iso(h, uSpacing * 4.0);
   float presence = clamp(max(minor * 0.65, major), 0.0, 1.0);
@@ -161,14 +234,15 @@ void main() {
 // full opacity), `depth` (mid-ground, fainter) and `far` (background,
 // faintest, sparsest rings) — each sampling a different patch of the noise
 // field so they read as genuinely separate terrain, not a recolored copy.
-// All three share the same yawAmt/pitchAmt — one camera rotating a single
-// scene — so the mouse-driven motion stays coherent across layers. The
-// parallax separation instead comes from each layer's planeScale: a smaller
-// scale means the SAME rotation swings it fewer screen pixels (the rotation
-// happens before the scale multiply in the vertex shader), which is exactly
-// how a plane genuinely further from camera would behave. planeShiftY pushes
-// farther layers toward the horizon (top of frame) as a static cue on top
-// of that differential parallax, so the depth reads even in a still frame.
+// All three orbit the same BASE_YAW/BASE_PITCH rest angle (one camera
+// rotating a single scene, so the motion stays coherent), but each layer
+// has its OWN yawAmt/pitchAmt — the foreground swings noticeably more with
+// the mouse than the background does. That, combined with planeScale (a
+// smaller scale means the SAME rotation swings it fewer screen pixels,
+// since scale is applied after rotation in the vertex shader) gives two
+// compounding parallax cues instead of one. planeShiftY pushes farther
+// layers toward the horizon (top of frame) as a static cue on top of both,
+// so the depth reads even in a still frame.
 // ─────────────────────────────────────────────────────────────────────────────
 interface LayerStyle {
   lineMinor:    [number, number, number]
@@ -185,6 +259,7 @@ interface LayerStyle {
   pitchAmt:     number
   planeScale:   number
   planeShiftY:  number
+  rippleAmp:    number
 }
 
 interface Palette {
@@ -214,10 +289,11 @@ const PALETTES: { dark: Palette; light: Palette } = {
       alphaMax:    0.58,
       zoom:        1.7,
       noiseOffset: [0, 0],
-      yawAmt:      0.30,
-      pitchAmt:    0.16,
+      yawAmt:      0.34,
+      pitchAmt:    0.18,
       planeScale:  1.0,
       planeShiftY: 0.0,
+      rippleAmp:   0.14,
     },
     depth: {
       lineMinor:   hex3('#8e8e93'),   // --txt3 (dark), much fainter here
@@ -230,10 +306,11 @@ const PALETTES: { dark: Palette; light: Palette } = {
       alphaMax:    0.20,
       zoom:        1.05,
       noiseOffset: [0.6, 0.4],
-      yawAmt:      0.30,
-      pitchAmt:    0.16,
+      yawAmt:      0.20,
+      pitchAmt:    0.11,
       planeScale:  0.80,
       planeShiftY: 0.34,
+      rippleAmp:   0.08,
     },
     far: {
       lineMinor:   hex3('#8e8e93'),   // --txt3 (dark), barely-there
@@ -246,10 +323,11 @@ const PALETTES: { dark: Palette; light: Palette } = {
       alphaMax:    0.085,
       zoom:        0.80,
       noiseOffset: [-1.1, 1.4],
-      yawAmt:      0.30,
-      pitchAmt:    0.16,
+      yawAmt:      0.10,
+      pitchAmt:    0.055,
       planeScale:  0.58,
       planeShiftY: 0.52,
+      rippleAmp:   0.045,
     },
   },
   light: {
@@ -264,10 +342,11 @@ const PALETTES: { dark: Palette; light: Palette } = {
       alphaMax:    0.38,
       zoom:        1.7,
       noiseOffset: [0, 0],
-      yawAmt:      0.30,
-      pitchAmt:    0.16,
+      yawAmt:      0.34,
+      pitchAmt:    0.18,
       planeScale:  1.0,
       planeShiftY: 0.0,
+      rippleAmp:   0.14,
     },
     depth: {
       lineMinor:   hex3('#5e5e64'),   // --txt3 (light), much fainter here
@@ -280,10 +359,11 @@ const PALETTES: { dark: Palette; light: Palette } = {
       alphaMax:    0.17,
       zoom:        1.05,
       noiseOffset: [0.6, 0.4],
-      yawAmt:      0.30,
-      pitchAmt:    0.16,
+      yawAmt:      0.20,
+      pitchAmt:    0.11,
       planeScale:  0.80,
       planeShiftY: 0.34,
+      rippleAmp:   0.08,
     },
     far: {
       lineMinor:   hex3('#5e5e64'),   // --txt3 (light), barely-there
@@ -296,10 +376,11 @@ const PALETTES: { dark: Palette; light: Palette } = {
       alphaMax:    0.075,
       zoom:        0.80,
       noiseOffset: [-1.1, 1.4],
-      yawAmt:      0.30,
-      pitchAmt:    0.16,
+      yawAmt:      0.10,
+      pitchAmt:    0.055,
       planeScale:  0.58,
       planeShiftY: 0.52,
+      rippleAmp:   0.045,
     },
   },
 }
@@ -444,9 +525,12 @@ export function buildHeroTerrain(
     uAlphaMax:    gl.getUniformLocation(prog, "uAlphaMax"),
     uPlaneScale:  gl.getUniformLocation(prog, "uPlaneScale"),
     uPlaneShiftY: gl.getUniformLocation(prog, "uPlaneShiftY"),
+    uRippleUV:    gl.getUniformLocation(prog, "uRippleUV"),
+    uRippleAge:   gl.getUniformLocation(prog, "uRippleAge"),
+    uRippleAmp:   gl.getUniformLocation(prog, "uRippleAmp"),
   }
 
-  function applyLayer(s: LayerStyle) {
+  function applyLayer(s: LayerStyle, rippleUV: [number, number], rippleAge: number) {
     gl.uniform3fv(U.uLineMinor,   s.lineMinor)
     gl.uniform3fv(U.uLineMajor,   s.lineMajor)
     gl.uniform1f (U.uSpacing,     s.spacing)
@@ -461,6 +545,9 @@ export function buildHeroTerrain(
     gl.uniform1f (U.uPitchAmt,    s.pitchAmt)
     gl.uniform1f (U.uPlaneScale,  s.planeScale)
     gl.uniform1f (U.uPlaneShiftY, s.planeShiftY)
+    gl.uniform2fv(U.uRippleUV,    rippleUV)
+    gl.uniform1f (U.uRippleAge,   rippleAge)
+    gl.uniform1f (U.uRippleAmp,   s.rippleAmp)
   }
 
   let lastIsDark = getIsDark()
@@ -479,6 +566,33 @@ export function buildHeroTerrain(
   }
   window.addEventListener("mousemove", onMouse, { passive: true })
   window.addEventListener("touchmove", onTouch, { passive: true })
+
+  // Click ripple — one active ripple at a time (a new click replaces the
+  // previous one, which has already mostly faded within its ~0.9s window).
+  // rippleT0 < 0 means no active ripple. UV is precomputed per layer at
+  // click time from the current (smoothed) mouse rotation, since each
+  // layer's planeScale/planeShiftY maps the same screen point differently.
+  let rippleT0 = -1
+  let rippleUVPrimary: [number, number] = [0, 0]
+  let rippleUVDepth:   [number, number] = [0, 0]
+  let rippleUVFar:     [number, number] = [0, 0]
+
+  const onClick = (e: MouseEvent) => {
+    const rect = container.getBoundingClientRect()
+    if (
+      e.clientX < rect.left || e.clientX > rect.right ||
+      e.clientY < rect.top  || e.clientY > rect.bottom
+    ) return
+
+    const ndcX =  ((e.clientX - rect.left) / rect.width  - 0.5) * 2
+    const ndcY = -((e.clientY - rect.top)  / rect.height - 0.5) * 2
+
+    rippleUVPrimary = screenToLayerUV(ndcX, ndcY, m.x, m.y, palette.primary)
+    rippleUVDepth   = screenToLayerUV(ndcX, ndcY, m.x, m.y, palette.depth)
+    rippleUVFar     = screenToLayerUV(ndcX, ndcY, m.x, m.y, palette.far)
+    rippleT0 = (performance.now() - t0) / 1000
+  }
+  window.addEventListener("click", onClick, { passive: true })
 
   // Resize
   function resize() {
@@ -514,19 +628,26 @@ export function buildHeroTerrain(
     gl.uniform1f(U.uPX,   m.x)
     gl.uniform1f(U.uPY,   m.y)
 
+    // Ripple age since last click, in real seconds — independent of the
+    // slow *0.10 terrain time scale so the ripple always plays at the same
+    // speed. -1 (sentinel) once it's fully faded, so the shader can early-out.
+    const rippleAge = rippleT0 < 0 ? -1 : elapsed - rippleT0
+    if (rippleAge > 0.9) rippleT0 = -1
+
     gl.clearColor(0, 0, 0, 0)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
     // Painter's order back-to-front: far (smallest planeScale → dampened the
     // most), then depth, then primary on top. Same yaw/pitch input feeds all
-    // three — the differential screen-space response comes purely from each
-    // layer's planeScale, which is what reads as separated depth planes.
+    // three — the differential screen-space response comes from each
+    // layer's own yawAmt/pitchAmt plus its planeScale, which together read
+    // as separated depth planes.
     gl.bindVertexArray(vao)
-    applyLayer(palette.far)
+    applyLayer(palette.far,     rippleUVFar,     rippleAge)
     gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_INT, 0)
-    applyLayer(palette.depth)
+    applyLayer(palette.depth,   rippleUVDepth,   rippleAge)
     gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_INT, 0)
-    applyLayer(palette.primary)
+    applyLayer(palette.primary, rippleUVPrimary, rippleAge)
     gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_INT, 0)
     gl.bindVertexArray(null)
   }
@@ -537,6 +658,7 @@ export function buildHeroTerrain(
     cancelAnimationFrame(raf)
     window.removeEventListener("mousemove", onMouse)
     window.removeEventListener("touchmove", onTouch)
+    window.removeEventListener("click", onClick)
     ro.disconnect()
     gl.deleteVertexArray(vao)
     gl.deleteBuffer(vbo)

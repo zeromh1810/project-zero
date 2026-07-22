@@ -1930,7 +1930,7 @@ function PageDarkMode() {
       <SectionHeading title="Theme Toggle — componente" />
       <p className="ds-pattern-desc">
         Pill dual con dos botones (sol / luna). El botón activo recibe fondo <code>--bg2</code> + sombra sutil.
-        El botón inactivo desaparece visualmente pero es clicable. Usado en <code>AppNavbar</code>, <code>Navbar</code> y <code>BlogNavbar</code>.
+        El botón inactivo desaparece visualmente pero es clicable. Usado en <code>AppNavbar</code>.
       </p>
       <PreviewBox label="Vista actual">
         <div className="theme-toggle" role="group" aria-label="Modo de color (preview)">
@@ -2624,18 +2624,6 @@ function MonitorDevice() {
   )
 }
 
-/** Legacy small diagram — kept for compact tables */
-function BPDiagram({ bp }: { bp: "mobile" | "tablet" | "desktop" | "qhd" | "ultrawide" }) {
-  const map = {
-    mobile: <MobileDevice />,
-    tablet: <TabletDevice />,
-    desktop: <LaptopDevice />,
-    qhd: <LaptopDevice showQHDBadge />,
-    ultrawide: <MonitorDevice />,
-  }
-  return <>{map[bp]}</>
-}
-
 /** Blog post layout diagram */
 function BlogPostDiagram({ variant }: { variant: "default" | "ultrawide" }) {
   const col = { display: "flex", flexDirection: "column" as const, gap: 3 }
@@ -2906,7 +2894,6 @@ useEffect(() => {
           { name: "blink",              desc: "Pulso del hero-dot (available indicator). Loop 2s." },
           { name: "badgePulse",         desc: "box-shadow expanding pulse. about-badge, avail-dot. Loop 2s." },
           { name: "titleWordRise",      desc: "translateY(105%)→0. Projects title scroll-driven (Chrome 115+, Safari 18+)." },
-          { name: "swipeDrop",          desc: "Hint de swipe mobile — dot baja desde arriba. Loop 1.8s." },
           { name: "ds-fade-in",         desc: "Fade-in del DS viewer al cambiar de página (150ms)." },
           { name: "toastSlideUp",       desc: "Entrada del AdminToast. 300ms spring." },
           { name: "toastSlideDown",     desc: "Salida del AdminToast (clase .leaving). 200ms ease-in." },
@@ -3274,7 +3261,6 @@ function PageBreakpoints() {
   ]
 
   const SECONDARY = [
-    { bp: "≤ 768px",  affects: "projects-grid (legacy)",   change: "1 columna" },
     { bp: "≤ 820px",  affects: ".contact-split",           change: "stack vertical (1 col)" },
     { bp: "≤ 860px",  affects: ".about-grid",              change: "stack vertical (1 col)" },
     { bp: "≤ 860px",  affects: ".related-posts-grid",      change: "2 columnas → 1 columna" },
@@ -3586,7 +3572,6 @@ function PageBreakpoints() {
 @media (min-width: 641px) and (max-width: 860px) { ... }
 
 /* SECONDARY — componente-específicos */
-@media (max-width: 768px) { /* projects-grid legacy 1col */ }
 @media (max-width: 820px) { /* contact-split 1col */ }
 @media (max-width: 860px) { /* about-grid + related-posts */ }
 @media (max-width: 900px) { /* blog-grid + blog-preview-grid 2col */ }

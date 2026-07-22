@@ -1,7 +1,0 @@
-export { Portfolio } from "./portfolio"
-export { Navbar } from "./navbar"
-export { BottomNav } from "./bottom-nav"
-export { ProjectCard } from "./project-card"
-export { ProjectPanel } from "./project-panel"
-export { ProfileModal } from "./profile-modal"
-export { WebGLCanvas } from "./webgl-canvas"

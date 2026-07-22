@@ -1,4 +1,4 @@
-export interface ProjectKPI {
+interface ProjectKPI {
   val: string
   lbl: string
 }
