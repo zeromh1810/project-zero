@@ -157,14 +157,18 @@ void main() {
 // Reusing the text hierarchy keeps the map's contrast consistent with the
 // rest of the page in both themes instead of inventing new grays.
 //
-// Each theme draws two layers of the same shader: `primary` (foreground,
-// current opacity) and `depth` (background, lighter/fainter, a different
-// patch of the noise field). Both use the same yawAmt/pitchAmt — one
-// camera rotating a single scene — so the mouse-driven motion is coherent
-// between them. The depth cue instead comes from `depth` being drawn at a
-// smaller planeScale and shifted toward the horizon (planeShiftY), which
-// also means it naturally moves fewer screen pixels than the foreground for
-// the same rotation, like a plane genuinely sitting further away.
+// Each theme draws three layers of the same shader: `primary` (foreground,
+// full opacity), `depth` (mid-ground, fainter) and `far` (background,
+// faintest, sparsest rings) — each sampling a different patch of the noise
+// field so they read as genuinely separate terrain, not a recolored copy.
+// All three share the same yawAmt/pitchAmt — one camera rotating a single
+// scene — so the mouse-driven motion stays coherent across layers. The
+// parallax separation instead comes from each layer's planeScale: a smaller
+// scale means the SAME rotation swings it fewer screen pixels (the rotation
+// happens before the scale multiply in the vertex shader), which is exactly
+// how a plane genuinely further from camera would behave. planeShiftY pushes
+// farther layers toward the horizon (top of frame) as a static cue on top
+// of that differential parallax, so the depth reads even in a still frame.
 // ─────────────────────────────────────────────────────────────────────────────
 interface LayerStyle {
   lineMinor:    [number, number, number]
@@ -186,6 +190,7 @@ interface LayerStyle {
 interface Palette {
   primary: LayerStyle
   depth:   LayerStyle
+  far:     LayerStyle
 }
 
 function hex3(h: string): [number, number, number] {
@@ -230,6 +235,22 @@ const PALETTES: { dark: Palette; light: Palette } = {
       planeScale:  0.80,
       planeShiftY: 0.34,
     },
+    far: {
+      lineMinor:   hex3('#8e8e93'),   // --txt3 (dark), barely-there
+      lineMajor:   hex3('#8e8e93'),   // no bright index contour this far back
+      spacing:     0.205,
+      lineWidth:   0.9,
+      fogStart:    0.15,
+      fogStrength: 0.95,
+      alphaMin:    0.035,
+      alphaMax:    0.085,
+      zoom:        0.80,
+      noiseOffset: [-1.1, 1.4],
+      yawAmt:      0.30,
+      pitchAmt:    0.16,
+      planeScale:  0.58,
+      planeShiftY: 0.52,
+    },
   },
   light: {
     primary: {
@@ -263,6 +284,22 @@ const PALETTES: { dark: Palette; light: Palette } = {
       pitchAmt:    0.16,
       planeScale:  0.80,
       planeShiftY: 0.34,
+    },
+    far: {
+      lineMinor:   hex3('#5e5e64'),   // --txt3 (light), barely-there
+      lineMajor:   hex3('#5e5e64'),   // no dark ink contour this far back
+      spacing:     0.205,
+      lineWidth:   0.9,
+      fogStart:    0.15,
+      fogStrength: 0.85,
+      alphaMin:    0.030,
+      alphaMax:    0.075,
+      zoom:        0.80,
+      noiseOffset: [-1.1, 1.4],
+      yawAmt:      0.30,
+      pitchAmt:    0.16,
+      planeScale:  0.58,
+      planeShiftY: 0.52,
     },
   },
 }
@@ -480,9 +517,13 @@ export function buildHeroTerrain(
     gl.clearColor(0, 0, 0, 0)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
-    // Depth layer first (fainter, dampened parallax), primary on top —
-    // the differential response to uPX/uPY is what reads as depth.
+    // Painter's order back-to-front: far (smallest planeScale → dampened the
+    // most), then depth, then primary on top. Same yaw/pitch input feeds all
+    // three — the differential screen-space response comes purely from each
+    // layer's planeScale, which is what reads as separated depth planes.
     gl.bindVertexArray(vao)
+    applyLayer(palette.far)
+    gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_INT, 0)
     applyLayer(palette.depth)
     gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_INT, 0)
     applyLayer(palette.primary)

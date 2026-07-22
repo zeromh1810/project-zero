@@ -1499,13 +1499,15 @@ html {
     0 24px 48px rgba(0, 0, 0, 0.5);
 }
 
-/* Photo area — rich mesh instead of flat gradient */
+/* Photo area — rich mesh instead of flat gradient.
+   Homologado al estilo hero-terrain: grises de --txt/--txt3 en vez del
+   mesh azul/violeta/verde anterior — el azulado ya no es el estilo del sitio. */
 .about-photo-fallback {
   width: 100%;
   aspect-ratio: 3/4;
-  background: radial-gradient(ellipse at 30% 20%, rgba(41, 151, 255, 0.22) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 80%, rgba(167, 139, 250, 0.18) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 50%, rgba(110, 231, 183, 0.16) 0%, transparent 60%), #eef4ff;
+  background: radial-gradient(ellipse at 30% 20%, rgba(94, 94, 100, 0.16) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(29, 29, 31, 0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 50%, rgba(94, 94, 100, 0.12) 0%, transparent 60%), var(--bg3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1513,9 +1515,9 @@ html {
 }
 
 .dark .about-photo-fallback {
-  background: radial-gradient(ellipse at 30% 20%, rgba(41, 151, 255, 0.28) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 80%, rgba(91, 33, 200, 0.22) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 50%, rgba(14, 138, 106, 0.15) 0%, transparent 60%), #080c14;
+  background: radial-gradient(ellipse at 30% 20%, rgba(142, 142, 147, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(245, 245, 247, 0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 50%, rgba(142, 142, 147, 0.14) 0%, transparent 60%), #0a0a0c;
 }
 
 /* Foto de perfil real — object-fit:cover para llenar el 3/4 container */
@@ -2252,7 +2254,8 @@ html {
   );
 }
 
-/* Resplandor radial sutil bajo la línea */
+/* Resplandor radial sutil bajo la línea — homologado a gris neutro
+   (--txt), el wash azulado de fondo ya no es el estilo del sitio */
 .footer::after {
   content: '';
   position: absolute;
@@ -2261,12 +2264,12 @@ html {
   transform: translateX(-50%);
   width: 65%;
   height: 200px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(0, 98, 204, 0.05) 0%, transparent 72%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(29, 29, 31, 0.05) 0%, transparent 72%);
   pointer-events: none;
 }
 
 .dark .footer::after {
-  background: radial-gradient(ellipse at 50% 0%, rgba(41, 151, 255, 0.07) 0%, transparent 72%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(245, 245, 247, 0.06) 0%, transparent 72%);
 }
 
 /* ── Textos light mode — tonos oscuros sobre fondo blanco ── */
@@ -2361,15 +2364,17 @@ html {
   opacity: 1;
 }
 
-/* ── BRANDS INTER-SECTION — grid estático ── */
+/* ── BRANDS INTER-SECTION — grid estático ──
+   Fondo homologado al estilo terrain (neutro): el gris azulado anterior
+   ya no es el estilo del sitio, se reemplaza por tokens --bg3/--bg4. */
 .brands-section {
   padding: 56px 0 64px;
   position: relative;
-  background: linear-gradient(#d8deec 0% 26%, #e6ebf3 100%);
+  background: linear-gradient(var(--bg4) 0% 26%, var(--bg3) 100%);
 }
 
 .dark .brands-section {
-  background: linear-gradient(#03070e 0%, #060b16 100%);
+  background: linear-gradient(var(--bg) 0%, var(--bg3) 100%);
 }
 
 /* Label editorial con líneas decorativas */
@@ -2926,13 +2931,14 @@ html {
   white-space: pre-wrap;
 }
 
-/* ── Blog preview (home section) ── */
+/* ── Blog preview (home section) ── — fondo homologado a tonos neutros
+   (--bg/--bg3), el azulado anterior ya no es el estilo del sitio. */
 .blog-preview-section {
-  background: linear-gradient(rgb(240, 244, 251) 0%, #f0f4fb 100%);
+  background: linear-gradient(var(--bg) 0%, var(--bg3) 100%);
 }
 
 .dark .blog-preview-section {
-  background: linear-gradient(#0c1325 0%, #07090e 100%);
+  background: linear-gradient(var(--bg3) 0%, var(--bg) 100%);
 }
 
 .blog-preview-head {
@@ -5481,12 +5487,13 @@ html {
     padding-top: 112px;
   }
 
-  .hero-wrap--split {
-    max-width: 1620px;
-  }
-
+  /* La corrección real de hero-wrap--split/.hero-title/.hero-sub vive más
+     abajo, junto a las reglas base de HERO V2 (después de línea ~5690) —
+     puestas aquí quedaban sin efecto: esas reglas base, sin media query,
+     aparecen MÁS ABAJO en el archivo y ganaban el empate de especificidad
+     igual (0,2,0 vs 0,2,0), sin importar que este bloque sea condicional. */
   .hero-right {
-    max-width: 800px;
+    max-width: 1040px;
   }
 
   .blog-main,
@@ -5498,10 +5505,6 @@ html {
   /* ── Typography ─────────────────────────────────────────────────── */
   .hero-title {
     font-size: 85px;
-  }
-
-  .hero-wrap--split .hero-title {
-    font-size: clamp(48px, 6.5vw, 84px);
   }
 
   .s-title {
@@ -5673,6 +5676,37 @@ html {
   align-items: center;
   padding-bottom: var(--space-12); /* 48px — margen para overflow del stack */
   padding-right:  var(--space-12); /* 48px */
+}
+
+/*
+   ULTRA-WIDE (≥1921px) — override de las 3 reglas base de arriba.
+   Bug real corregido: el bloque "ULTRA-WIDE" de más arriba (línea ~5478)
+   dejaba hero-wrap--split en 1620px (+1.25% sobre 1600px) y el título
+   topado en 84px (idéntico al tier 1440–1920px) — el hero no escalaba en
+   absoluto entre 1920px y 2560px de viewport, mientras el resto de
+   secciones (.section, .projects-bento, .contact-split) sí crecen ~20-38%
+   en ese mismo tier. Además, puesto ahí arriba nunca llegaba a aplicarse:
+   estas reglas base (sin media query) están MÁS ABAJO en el archivo y
+   ganaban el empate de especificidad (0,2,0 vs 0,2,0) pese a la condición.
+   Este bloque va DESPUÉS de las reglas base por esa misma razón.
+   Ajuste posterior (feedback en vivo): 1900px dejaba aún bastante margen
+   vacío en 2560px — se amplía a 2160px (~84% del viewport en 2560px,
+   similar a la proporción 1600/1920≈83% del tier anterior) para
+   aprovechar mejor el espacio y darle más ancho real al slider
+   (.hero-right sube a 1040px, ver bloque ULTRA-WIDE de más arriba).
+*/
+@media (min-width: 1921px) {
+  .hero-wrap--split {
+    max-width: 2160px;
+  }
+
+  .hero-wrap--split .hero-title {
+    font-size: clamp(48px, 6.5vw, 100px);
+  }
+
+  .hero-wrap--split .hero-sub {
+    font-size: clamp(17px, 1.65vw, 21px);
+  }
 }
 
 /* ── Deck Gallery container ── */
