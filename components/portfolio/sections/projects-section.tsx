@@ -47,9 +47,10 @@ export function ProjectsSection({ onNavigateContact, onNavigateAbout, onSelectPr
         (window.innerHeight - rect.top) / (window.innerHeight - navH)
       ))
       const alpha = (0.82 + 0.18 * progress).toFixed(3)
+      // rgb triplets match --content-sheet (== --bg3): 20,20,20 dark / 240,240,240 light
       el.style.background = isDark
-        ? `rgba(6, 12, 26, ${alpha})`
-        : `rgba(240, 244, 251, ${alpha})`
+        ? `rgba(20, 20, 20, ${alpha})`
+        : `rgba(240, 240, 240, ${alpha})`
     }
 
     window.addEventListener("scroll", update, { passive: true })

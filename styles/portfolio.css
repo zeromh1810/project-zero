@@ -26,8 +26,8 @@
   --accent: #0062cc;
   --accent-h: #1a7fd4;
   --highlight: #3b82f6;
-  --content-sheet: #f0f4fb;
-  --content-sheet-rgb: 240, 244, 251;
+  --content-sheet: var(--bg3);
+  --content-sheet-rgb: 240, 240, 240;
   --highlight-bg: #3b82f6;
   --success: #30d158;
   --warning: #f59e0b;
@@ -108,8 +108,8 @@
   --accent: #2997ff;
   --accent-h: #5ac8fa;
   --highlight: #5ac8fa;
-  --content-sheet: #060c1a;
-  --content-sheet-rgb: 6, 12, 26;
+  --content-sheet: var(--bg3);
+  --content-sheet-rgb: 20, 20, 20;
   --navbar-bg: rgba(0, 0, 0, 0.75);
   --shadow: rgba(0, 0, 0, 0.6);
 
@@ -156,17 +156,6 @@ body {
 
 html {
   scrollbar-width: none;
-}
-
-/* ── WEBGL CANVAS (gradient background) ── */
-#gl-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  transition: background 0.4s ease;
 }
 
 .hero-terrain-container {
@@ -2225,12 +2214,12 @@ html {
   align-items: center;
   padding: 64px 40px 52px;
   gap: 0;
-  background: #ffffff;
+  background: var(--bg2);
   overflow: hidden;
 }
 
 .dark .footer {
-  background: #000000;
+  background: var(--bg);
 }
 
 /* Línea superior con degradado de acento — la separación real */
@@ -2508,11 +2497,11 @@ html {
 /* ── Blog page layout ── */
 .blog-page {
   min-height: 100vh;
-  background: #f0f4fb;
+  background: var(--content-sheet);
 }
 
 .dark .blog-page {
-  background: #060c1a;
+  background: var(--content-sheet);
 }
 
 .blog-main {
@@ -4117,11 +4106,11 @@ html {
   grid-template-columns: 260px 1fr;
   min-height: calc(100vh - 64px);
   position: relative;
-  background: #ffffff;
+  background: var(--bg2);
   padding-top: 64px;
 }
 .dark .ds-layout {
-  background: #0a0a0a;
+  background: var(--bg2);
 }
 .dark .ds-sidebar {
   background: #111111;
@@ -5641,7 +5630,7 @@ html {
   align-items: center;
   /* gap: var(--space-1); */
   flex-direction: row;
-  max-width: 1720px;
+  max-width: 1600px;
   padding-right: 72px;
 }
 
