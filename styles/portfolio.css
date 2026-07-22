@@ -2331,25 +2331,24 @@ html {
 }
 
 /* ── BRANDS INTER-SECTION — grid estático ──
-   Banda neutra tipo "hump": clara en los bordes (se funde con
-   projects-sheet y blog-preview) y más marcada justo detrás de los
-   logos — separación por tono, no por borde duro.
-   El borde superior redondeado + la sombra inset dan el efecto de
-   "abertura" en la superficie blanca: como si el plano de arriba se
-   curvara hacia adentro para revelar la banda gris debajo, en vez de
-   un corte recto entre secciones. La sombra inset es oscura en claro
-   (recede contra blanco) y un glow claro en dark (recede contra
-   negro) — por eso necesita el override de .dark, a diferencia del
-   gradiente de fondo que sí comparte una sola regla entre temas. */
+   Gradiente simple de arriba hacia abajo (clara → --bg4), sin "hump"
+   ni esquinas redondeadas. La sombra inset en el borde superior es la
+   que da el efecto de "abertura" en la superficie blanca/negra — es
+   oscura en claro (recede contra blanco) y un glow claro en dark
+   (recede contra negro), por eso necesita el override de .dark.
+   En dark el fondo también usa --bg3 en vez de --bg4 (más oscuro que
+   en claro) porque --bg4 (#1e1e1e) se veía demasiado claro/brillante
+   contra el negro — --bg3 (#141414) da el mismo efecto sin ese salto
+   de brillo. */
 .brands-section {
   padding: 56px 0 64px;
   position: relative;
-  background: linear-gradient(180deg, var(--bg) 0%, var(--bg4) 50%, var(--bg) 100%);
-  border-radius: 40px 40px 0 0;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg4) 100%);
   box-shadow: inset 0 20px 24px -16px rgba(0, 0, 0, 0.12);
 }
 
 .dark .brands-section {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg3) 100%);
   box-shadow: inset 0 20px 24px -16px rgba(255, 255, 255, 0.06);
 }
 
