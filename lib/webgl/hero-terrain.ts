@@ -209,7 +209,7 @@ float ripple(vec2 uv, vec2 center, float age) {
 
 void main() {
   float h     = vHeight + ripple(vUV, uRippleUV, uRippleAge) * uRippleAmp;
-  float minor = iso(h, uSpacing);
+  float minor = iso(h, uSpacing * 2.0);
   float major = iso(h, uSpacing * 4.0);
   float presence = clamp(max(minor * 0.65, major), 0.0, 1.0);
   if (presence < 0.006) discard;
