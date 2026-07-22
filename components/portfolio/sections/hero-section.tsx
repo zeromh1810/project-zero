@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from "react"
 import { useTheme } from "@/lib/context/theme-context"
-import { buildDustField } from "@/lib/webgl/dust-field"
+import { buildHeroTerrain } from "@/lib/webgl/hero-terrain"
 import { useScrollParallax } from "@/hooks/use-scroll-parallax"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -51,9 +51,9 @@ interface HeroSectionProps {
 
 export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionProps) {
   const { darkRef } = useTheme()
-  const dustCanvasRef  = useRef<HTMLCanvasElement>(null)
-  const dustCleanupRef = useRef<(() => void) | null>(null)
-  const wrapRef        = useRef<HTMLDivElement>(null)
+  const terrainContainerRef = useRef<HTMLDivElement>(null)
+  const terrainCleanupRef   = useRef<(() => void) | null>(null)
+  const wrapRef             = useRef<HTMLDivElement>(null)
   const scrollHintRef  = useRef<HTMLDivElement>(null)
 
   const [hero,   setHero]   = useState<HeroData>(DEFAULT)
@@ -139,16 +139,19 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
     return () => { ignore = true }
   }, [])
 
-  // ── WebGL dust field ─────────────────────────────────────────────────────────
+  // ── WebGL hero terrain (isotipo hexagon) ─────────────────────────────────────
   useEffect(() => {
     const id = setTimeout(() => {
-      if (!dustCanvasRef.current) return
-      if (dustCleanupRef.current) dustCleanupRef.current()
-      dustCleanupRef.current = buildDustField(dustCanvasRef.current, () => darkRef.current)
-    }, 50)
+      if (!terrainContainerRef.current) return
+      if (terrainCleanupRef.current) terrainCleanupRef.current()
+      terrainCleanupRef.current = buildHeroTerrain(
+        terrainContainerRef.current,
+        () => darkRef.current
+      )
+    }, 80)
     return () => {
       clearTimeout(id)
-      if (dustCleanupRef.current) { dustCleanupRef.current(); dustCleanupRef.current = null }
+      if (terrainCleanupRef.current) { terrainCleanupRef.current(); terrainCleanupRef.current = null }
     }
   }, [darkRef])
 
@@ -156,7 +159,7 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
 
   return (
     <div className="section-full">
-      <canvas ref={dustCanvasRef} id="dust-canvas" aria-hidden="true" />
+      <div ref={terrainContainerRef} className="hero-terrain-container" aria-hidden="true" />
 
       <div className="hero-wrap hero-wrap--split" ref={wrapRef}>
 

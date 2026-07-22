@@ -3,7 +3,6 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useIntersection } from "@/hooks/use-intersection"
-import { WebGLCanvas } from "./webgl-canvas"
 import { AppNavbar, NAV_SESSION_KEY } from "./app-navbar"
 import { BottomNav } from "./bottom-nav"
 import { ProfileModal } from "./profile-modal"
@@ -93,8 +92,6 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
 
   return (
     <>
-      <WebGLCanvas />
-
       {/* Overlay entre WebGL y page — inmune al opacity del page div */}
       <div
         className={`section-bg-overlay${needsSolidOverlay ? " section-bg-overlay--on" : ""}`}
