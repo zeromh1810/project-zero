@@ -73,7 +73,7 @@ function UploadZone({
       />
       {url ? (
         <div style={{ ...bg, borderRadius: 12, padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, minHeight: 72 }}>
-          <img src={url} alt="" style={{ height: 32, width: "auto", maxWidth: 130, objectFit: "contain" }} />
+          <img src={url} alt="" loading="lazy" style={{ height: 32, width: "auto", maxWidth: 130, objectFit: "contain" }} />
           <div style={{ display: "flex", gap: 6 }}>
             <button onClick={() => ref.current?.click()}
               style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: "#2997ff", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
@@ -299,12 +299,12 @@ export default function BrandsTab({ onToast }: Props) {
               }}>
                 <div style={{ background: "#f5f5f5", borderRadius: 8, padding: "8px 10px", display: "flex", alignItems: "center", justifyContent: "center", height: 48 }}>
                   {b.lightLogo
-                    ? <img src={b.lightLogo} alt="" style={{ maxHeight: 30, maxWidth: 80, objectFit: "contain" }} />
+                    ? <img src={b.lightLogo} alt="" loading="lazy" style={{ maxHeight: 30, maxWidth: 80, objectFit: "contain" }} />
                     : <span style={{ fontSize: 10, color: "#aaa" }}>—</span>}
                 </div>
                 <div style={{ background: "#0a0a0a", borderRadius: 8, padding: "8px 10px", display: "flex", alignItems: "center", justifyContent: "center", height: 48 }}>
                   {b.darkLogo
-                    ? <img src={b.darkLogo} alt="" style={{ maxHeight: 30, maxWidth: 80, objectFit: "contain" }} />
+                    ? <img src={b.darkLogo} alt="" loading="lazy" style={{ maxHeight: 30, maxWidth: 80, objectFit: "contain" }} />
                     : <span style={{ fontSize: 10, color: "#555" }}>—</span>}
                 </div>
                 <div style={{ fontSize: 12, color: "var(--txt3)" }}>Logo #{idx + 1}</div>

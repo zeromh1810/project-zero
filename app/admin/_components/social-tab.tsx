@@ -51,7 +51,6 @@ export default function SocialTab({ onToast }: Props) {
   const hasFooterChanges = JSON.stringify(footer) !== JSON.stringify(savedFooter)
 
   useEffect(() => {
-    setLoadingSocial(true)
     fetch("/api/admin/social", { cache: "no-store" })
       .then(r => r.json())
       .then(d => {
@@ -64,7 +63,6 @@ export default function SocialTab({ onToast }: Props) {
   }, [])
 
   useEffect(() => {
-    setLoadingFooter(true)
     fetch("/api/admin/footer", { cache: "no-store" })
       .then(r => r.json())
       .then(d => {

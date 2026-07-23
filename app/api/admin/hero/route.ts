@@ -1,21 +1,15 @@
 import { NextResponse } from "next/server"
-import fs from "fs"
 import path from "path"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
-import { commitToGitHub } from "@/lib/github-data"
+import { readJsonFile, writeJsonAndCommit } from "@/lib/admin-json"
 
 export const dynamic = "force-dynamic"
 
 const FILE      = path.join(process.cwd(), "data", "hero.json")
 const DATA_PATH = "data/hero.json"
 
-function read() {
-  try { return JSON.parse(fs.readFileSync(FILE, "utf-8")) }
-  catch { return null }
-}
-
 export async function GET() {
-  const data = read()
+  const data = readJsonFile(FILE, null)
   if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 })
   return NextResponse.json(data)
 }
@@ -26,14 +20,7 @@ export async function PUT(request: Request) {
   }
   try {
     const body = await request.json()
-    fs.writeFileSync(FILE, JSON.stringify(body, null, 2), "utf-8")
-
-    try {
-      await commitToGitHub(DATA_PATH, body, "chore(data): update hero via admin panel [skip ci]")
-    } catch (err) {
-      console.warn("[hero] GitHub commit failed:", err)
-    }
-
+    await writeJsonAndCommit(FILE, DATA_PATH, body, "chore(data): update hero via admin panel [skip ci]", "hero")
     return NextResponse.json(body)
   } catch {
     return NextResponse.json({ error: "Error al guardar" }, { status: 500 })

@@ -94,6 +94,7 @@ function UploadZone({
           <img
             src={url}
             alt={`Logo ${label}`}
+            loading="lazy"
             style={{ height: 32, width: "auto", maxWidth: 140, objectFit: "contain", display: "block" }}
           />
           <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
@@ -185,7 +186,6 @@ export default function LogoTab({ onToast }: Props) {
   const hasChanges = JSON.stringify(form) !== JSON.stringify(saved)
 
   useEffect(() => {
-    setLoading(true)
     fetch("/api/admin/logo", { cache: "no-store" })
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
@@ -367,6 +367,7 @@ export default function LogoTab({ onToast }: Props) {
                     <img
                       src={form.lightUrl || form.darkUrl}
                       alt="logo"
+                      loading="lazy"
                       style={{ height: 24, width: "auto", objectFit: "contain" }}
                     />
                   ) : (
@@ -402,6 +403,7 @@ export default function LogoTab({ onToast }: Props) {
                     <img
                       src={form.darkUrl || form.lightUrl}
                       alt="logo"
+                      loading="lazy"
                       style={{ height: 24, width: "auto", objectFit: "contain" }}
                     />
                   ) : (
@@ -430,7 +432,7 @@ export default function LogoTab({ onToast }: Props) {
             Sin logo SVG subido
           </div>
           <div style={{ fontSize: 13, color: "var(--txt3)" }}>
-            La navbar mostrará el texto "{form.fallbackText || "Project Zero"}" como identidad visual.
+            La navbar mostrará el texto &quot;{form.fallbackText || "Project Zero"}&quot; como identidad visual.
           </div>
         </div>
       )}

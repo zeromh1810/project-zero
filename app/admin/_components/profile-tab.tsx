@@ -137,7 +137,7 @@ export default function ProfileTab({ onToast }: Props) {
 
         {avatarUrl && (
           <div className="about-admin-photo-preview" style={{ marginBottom: 0 }}>
-            <img src={avatarUrl} alt="Foto de perfil" />
+            <img src={avatarUrl} alt="Foto de perfil" loading="lazy" />
           </div>
         )}
 
@@ -259,7 +259,7 @@ export default function ProfileTab({ onToast }: Props) {
             overflow: "hidden",
           }}>
             {avatarUrl ? (
-              <img src={avatarUrl} alt={data.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              <img src={avatarUrl} alt={data.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
             ) : (
               initials
             )}

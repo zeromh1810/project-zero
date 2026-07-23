@@ -78,6 +78,10 @@ function usePill(activeKey: string) {
 
     if (!pillReady) {
       pill.style.transition = "none"
+      // Depende de la medición de DOM (getBoundingClientRect) de arriba, que
+      // solo puede ocurrir en un effect — marca que ya se hizo el primer
+      // posicionamiento sin transición, antes de reactivarla un frame después.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPillReady(true)
       requestAnimationFrame(() => requestAnimationFrame(() => {
         if (pillRef.current)
@@ -101,7 +105,11 @@ function PortfolioNavbar({ currentSection, onNavigate, onProfileClick }: Omit<Po
     currentSection === "trabajos" ? "home" : currentSection
   )
 
+  // Sincroniza activeKey con la sección activa (salvo "trabajos", que usa su
+  // propio estado inicial "home") para que la píldora de usePill seleccione
+  // el nav-item correcto tras una navegación por código, no solo por click.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (currentSection !== "trabajos") setActiveKey(currentSection)
   }, [currentSection])
 

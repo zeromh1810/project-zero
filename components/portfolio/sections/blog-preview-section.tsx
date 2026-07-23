@@ -48,7 +48,7 @@ export function BlogPreviewSection() {
             >
               <div className="blog-preview-img">
                 {post.image
-                  ? <img src={post.image} alt={post.title} />
+                  ? <img src={post.image} alt={post.title} loading="lazy" />
                   : <div className="blog-card-img-placeholder" />}
               </div>
               <div className="blog-preview-body">

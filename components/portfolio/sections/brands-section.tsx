@@ -59,7 +59,7 @@ export function BrandsSection() {
               className="brand-item"
               style={{ transitionDelay: `${idx * 60}ms` }}
             >
-              <img src={logo} alt="" draggable={false} />
+              <img src={logo} alt="" draggable={false} loading="lazy" />
             </div>
           )
         })}

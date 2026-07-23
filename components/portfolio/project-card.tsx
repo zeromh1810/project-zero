@@ -181,6 +181,7 @@ export function ProjectCard({ project, onClick, variant = "featured", index }: P
             src={project.thumbnail}
             alt={project.title}
             className="p-card-thumb"
+            loading="lazy"
           />
           <div className="p-card-thumb-overlay" />
         </>

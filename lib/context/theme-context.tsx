@@ -27,9 +27,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false)
   const darkRef = useRef(isDark)
 
-  // Initialize theme from localStorage on mount
+  // Initialize theme from localStorage on mount — localStorage/matchMedia
+  // don't exist during SSR, so the real theme can only be read client-side
+  // after mount (state starts at the SSR-safe "light" default above).
   useEffect(() => {
     const initialTheme = getInitialTheme()
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsDark(initialTheme)
     setMounted(true)
   }, [])

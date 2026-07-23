@@ -56,7 +56,7 @@ function BlogCard({ post, onTagClick }: { post: BlogPost; onTagClick: (tag: stri
       <Link href={`/blog/${post.slug}`} style={{ textDecoration: "none", display: "contents" }}>
         <div className="blog-card-img">
           {post.image
-            ? <img src={post.image} alt={post.title} />
+            ? <img src={post.image} alt={post.title} loading="lazy" />
             : <div className="blog-card-img-placeholder" />}
         </div>
         <div className="blog-card-body">
@@ -106,7 +106,11 @@ function BlogPageInner() {
     return () => { ignore = true }
   }, [])
 
-  // Resetear página al cambiar filtros
+  // Resetear página al cambiar filtros. Podría moverse a cada handler que
+  // cambia category/search/selectedTag, pero eso son 4 call sites separados
+  // (línea de búsqueda, botón de categoría, click de tag, limpiar tag) — un
+  // solo effect centralizado es menos propenso a que alguno quede desincronizado.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setPage(1) }, [category, search, selectedTag])
 
   function handleTagClick(tag: string) {

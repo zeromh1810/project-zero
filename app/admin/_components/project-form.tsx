@@ -198,7 +198,7 @@ export default function ProjectForm({ initial, onSave, onClose, saving }: Props)
 
             {form.thumbnail ? (
               <div style={{ position: "relative", borderRadius: 12, overflow: "hidden", aspectRatio: "16/10", border: "1.5px solid var(--border)" }}>
-                <img src={form.thumbnail} alt="Thumbnail"
+                <img src={form.thumbnail} alt="Thumbnail" loading="lazy"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0, transition: "opacity 0.2s" }}
                   onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
@@ -261,7 +261,7 @@ export default function ProjectForm({ initial, onSave, onClose, saving }: Props)
                 />
                 {url ? (
                   <div style={{ position: "relative", aspectRatio: "4/3", borderRadius: 10, overflow: "hidden", border: "1.5px solid var(--border)" }}>
-                    <img src={url} alt={`Galería ${slot + 1}`}
+                    <img src={url} alt={`Galería ${slot + 1}`} loading="lazy"
                       style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     <div style={{
                       position: "absolute", top: 6, right: 6,

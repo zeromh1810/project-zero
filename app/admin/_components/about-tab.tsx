@@ -141,7 +141,7 @@ export default function AboutTab({ onToast }: Props) {
 
         {(localPreview || data.photoUrl) && (
           <div className="about-admin-photo-preview">
-            <img src={localPreview || data.photoUrl} alt="Foto de perfil" />
+            <img src={localPreview || data.photoUrl} alt="Foto de perfil" loading="lazy" />
           </div>
         )}
 
@@ -257,7 +257,7 @@ export default function AboutTab({ onToast }: Props) {
             type="url"
           />
           <div className="admin-input-hint">
-            El botón "Ver CV" en la sección Sobre mí abrirá este link en una nueva pestaña.
+            El botón &quot;Ver CV&quot; en la sección Sobre mí abrirá este link en una nueva pestaña.
           </div>
         </div>
         {data.cvUrl && (

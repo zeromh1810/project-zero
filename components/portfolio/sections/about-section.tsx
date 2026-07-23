@@ -68,6 +68,7 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
                   src={data.photoUrl}
                   alt="Foto de perfil"
                   className="about-photo-img"
+                  loading="lazy"
                   onError={() => setPhotoError(true)}
                 />
               ) : (

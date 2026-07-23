@@ -768,7 +768,7 @@ function PageForms() {
           </div>
           <div style={{ padding: "8px 10px", background: "rgba(239,68,68,0.05)", borderRadius: 8, border: "1px solid rgba(239,68,68,0.25)" }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: "var(--error)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>4. Error</div>
-            <div style={{ fontSize: 9, color: "var(--txt3)", lineHeight: 1.5, fontFamily: "monospace" }}>border: var(--error)<br/>label: color: var(--error)<br/>mensaje: role="alert"<br/>aria-live="assertive"</div>
+            <div style={{ fontSize: 9, color: "var(--txt3)", lineHeight: 1.5, fontFamily: "monospace" }}>border: var(--error)<br/>label: color: var(--error)<br/>mensaje: role=&quot;alert&quot;<br/>aria-live=&quot;assertive&quot;</div>
           </div>
         </div>
       </div>
@@ -1601,7 +1601,7 @@ function PageBrands() {
       <div className="ds-page-header">
         <h2 className="ds-page-title">Brands Section</h2>
         <p className="ds-page-desc">
-          Inter-sección "Han confiado en mí" entre proyectos y blog. Grid auto-fill que escala de 6 a 12 logos sin tocar código. Entrada con IntersectionObserver + stagger. Admin: <code>/admin → Marcas</code>.
+          Inter-sección &quot;Han confiado en mí&quot; entre proyectos y blog. Grid auto-fill que escala de 6 a 12 logos sin tocar código. Entrada con IntersectionObserver + stagger. Admin: <code>/admin → Marcas</code>.
         </p>
       </div>
 
@@ -2745,7 +2745,7 @@ function PageAnimaciones() {
               &nbsp;&nbsp;opacity: 1;<br/>
               &nbsp;&nbsp;transform: translateY(0);<br/>
               &#125;<br/>
-              /* 650ms cubic-bezier(0.16,1,0.3,1) */
+              {"/* 650ms cubic-bezier(0.16,1,0.3,1) */"}
             </div>
           </div>
         </div>
@@ -3130,7 +3130,7 @@ function PageBlog() {
       {/* ── BlogPreviewCard ── */}
       <SectionHeading title="BlogPreviewCard — Sección home" />
       <p className="ds-pattern-desc">
-        Versión compacta de BlogCard para la sección "Últimas entradas" del home. Sin categoría pill, sin tags, sin meta row. Grid de 3 columnas siempre (no cambia a 4 en ultra-wide — intencional para dar espacio a la sección sin saturarla).
+        Versión compacta de BlogCard para la sección &quot;Últimas entradas&quot; del home. Sin categoría pill, sin tags, sin meta row. Grid de 3 columnas siempre (no cambia a 4 en ultra-wide — intencional para dar espacio a la sección sin saturarla).
       </p>
       <div className="ds-spec-table">
         {[
@@ -3535,7 +3535,7 @@ function PageBreakpoints() {
       {/* ── Secondary breakpoints ── */}
       <SectionHeading title="Breakpoints secundarios — componentes específicos" />
       <p className="ds-pattern-desc">
-        Breakpoints de ajuste fino para componentes que necesitan colapsar antes o después del tier general. No definen un "tier" de diseño — solo ajustan el comportamiento de un componente concreto.
+        Breakpoints de ajuste fino para componentes que necesitan colapsar antes o después del tier general. No definen un &quot;tier&quot; de diseño — solo ajustan el comportamiento de un componente concreto.
       </p>
       <div className="ds-spec-table">
         <div className="ds-spec-row">

@@ -27,6 +27,10 @@ export default function ProjectsTab({ onToast }: Props) {
     }
   }
 
+  // load() sets state after an await (inside .finally/try-catch), not
+  // synchronously — it's also reused after save/delete below, so it stays a
+  // shared named function instead of being inlined into the effect.
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   useEffect(() => { load() }, [])
 
   async function handleSave(data: ProjectData) {

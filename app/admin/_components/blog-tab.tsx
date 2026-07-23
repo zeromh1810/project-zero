@@ -209,7 +209,7 @@ export default function BlogTab({ onToast }: Props) {
             onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.target.value = "" }} />
           {form.image ? (
             <div style={{ position: "relative", borderRadius: 12, overflow: "hidden", marginBottom: 8 }}>
-              <img src={form.image} alt="" style={{ width: "100%", aspectRatio: "16/7", objectFit: "cover", display: "block" }} />
+              <img src={form.image} alt="" loading="lazy" style={{ width: "100%", aspectRatio: "16/7", objectFit: "cover", display: "block" }} />
               <button onClick={() => setForm(p => ({ ...p, image: "" }))}
                 style={{ position: "absolute", top: 10, right: 10, padding: "4px 10px", borderRadius: 6, border: "none", background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: 11, cursor: "pointer" }}>
                 Quitar
@@ -278,7 +278,7 @@ export default function BlogTab({ onToast }: Props) {
                 {/* Thumb */}
                 <div style={{ width: 64, height: 44, borderRadius: 8, overflow: "hidden", background: "var(--bg)", flexShrink: 0 }}>
                   {post.image
-                    ? <img src={post.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ? <img src={post.image} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     : <div style={{ width: "100%", height: "100%", background: "var(--glass)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--txt3)" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                       </div>}

@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
-import fs from "fs"
 import path from "path"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
-import { commitToGitHub } from "@/lib/github-data"
+import { readJsonFile, writeJsonAndCommit } from "@/lib/admin-json"
 
 export const dynamic = "force-dynamic"
 
@@ -10,13 +9,8 @@ const FILE      = path.join(process.cwd(), "data", "profile.json")
 const DATA_PATH = "data/profile.json"
 const EMPTY     = { name: "", role: "", photoUrl: "", github: "", linkedin: "", instagram: "" }
 
-function read() {
-  try { return JSON.parse(fs.readFileSync(FILE, "utf-8")) }
-  catch { return { ...EMPTY } }
-}
-
 export async function GET() {
-  return NextResponse.json({ ...EMPTY, ...read() })
+  return NextResponse.json({ ...EMPTY, ...readJsonFile(FILE, { ...EMPTY }) })
 }
 
 export async function PUT(request: Request) {
@@ -34,14 +28,7 @@ export async function PUT(request: Request) {
       linkedin:  String(body.linkedin  ?? ""),
       instagram: String(body.instagram ?? ""),
     }
-    fs.writeFileSync(FILE, JSON.stringify(updated, null, 2), "utf-8")
-
-    try {
-      await commitToGitHub(DATA_PATH, updated, "chore(data): update profile via admin panel [skip ci]")
-    } catch (err) {
-      console.warn("[profile] GitHub commit failed:", err)
-    }
-
+    await writeJsonAndCommit(FILE, DATA_PATH, updated, "chore(data): update profile via admin panel [skip ci]", "profile")
     return NextResponse.json(updated)
   } catch {
     return NextResponse.json({ error: "Error al guardar" }, { status: 500 })

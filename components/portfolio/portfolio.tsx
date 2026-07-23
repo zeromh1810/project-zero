@@ -46,6 +46,7 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
       const valid: Section[] = ["trabajos", "sobre", "contacto"]
       if (!valid.includes(target)) return
       pendingScrollRef.current = scroll ?? null
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- lee sessionStorage (externo), ver comentario arriba
       setSection(target)
       setDisplaySection(target)
     } catch {}
@@ -69,6 +70,7 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
   useEffect(() => {
     if (section === displaySection) return
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- máquina de estados del crossfade, ver comentario arriba
     setTransitioning(true)
     const exitTimer = setTimeout(() => {
       setDisplaySection(section)
