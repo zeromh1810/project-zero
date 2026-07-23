@@ -15,8 +15,8 @@ const GRID = 400
 // plane UV. BASE_YAW gives the rest state (no mouse movement) a fixed
 // diagonal/corner view instead of a symmetric front-on tilt — that's what
 // reads as "isometric" rather than just "tilted down".
-const BASE_PITCH = 0.5235988 // 30°
-const BASE_YAW   = 0.6108652 // 35°
+const BASE_PITCH = 0.7635988 // ~43.75°
+const BASE_YAW   = 0.1708652 // ~9.79°
 
 // ─────────────────────────────────────────────────────────────────────────────
 // screenToLayerUV
@@ -113,24 +113,25 @@ void main() {
   // small bounding-box growth from the tilt, so no edge is ever revealed.
   // BASE_YAW gives the rest state a fixed diagonal/corner view (not a
   // symmetric front-on tilt) — that reads as genuinely isometric even
-  // before the mouse moves.
-  const float BASE_YAW = 0.6108652; // 35°
+  // before the mouse moves. Tuned to match the look at the mouse parked in
+  // the top-left corner (the reference the user picked), baked in so the
+  // rest state now looks like that without needing the mouse there.
+  const float BASE_YAW = 0.1708652; // ~9.79°
   float yaw  = BASE_YAW + uPX * uYawAmt;
   float cosY = cos(yaw);
   float sinY = sin(yaw);
   float x1 =  wx * cosY + wz * sinY;
   float z1 = -wx * sinY + wz * cosY;
 
-  // 30° base isometric tilt (shallower than the previous 45°, so the plane
-  // reads less like a straight-down map and more like a diagonal horizon
-  // view), plus a modest mouse-driven swing on top of it. uYawAmt/uPitchAmt
-  // differ per layer (set in JS, see PALETTES) — the foreground swings
-  // noticeably more than the background with the same mouse input, which
-  // on top of the planeScale-based dampening (scale applies AFTER
-  // rotation, so it also shrinks the rotation's screen-space swing) makes
-  // the depth separation read much more clearly than a single shared swing
-  // amount would.
-  const float BASE_PITCH = 0.5235988; // 30°
+  // Base isometric tilt, same reference as BASE_YAW above (mouse parked in
+  // the top-left corner), plus a modest mouse-driven swing on top of it.
+  // uYawAmt/uPitchAmt differ per layer (set in JS, see PALETTES) — the
+  // foreground swings noticeably more than the background with the same
+  // mouse input, which on top of the planeScale-based dampening (scale
+  // applies AFTER rotation, so it also shrinks the rotation's screen-space
+  // swing) makes the depth separation read much more clearly than a single
+  // shared swing amount would.
+  const float BASE_PITCH = 0.7635988; // ~43.75°
   float pitch = BASE_PITCH + uPY * uPitchAmt;
   float cosX  = cos(pitch);
   float sinX  = sin(pitch);
