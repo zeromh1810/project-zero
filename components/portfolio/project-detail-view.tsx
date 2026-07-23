@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import type { Project } from "@/lib/data/projects"
 import { GalleryModal, PlaceholderThumb, type GalleryItem } from "./gallery-modal"
 import { useLogo } from "@/lib/hooks/use-logo"
@@ -9,8 +9,13 @@ interface ProjectDetailViewProps {
   project: Project
   isDark: boolean
   onToggleTheme: () => void
-  onBack: () => void
+  onBack: (scrollTarget?: "projects") => void
 }
+
+// Exit animation duration — matches the .exiting CSS transition below.
+// Kept shorter than the ~500-600ms entrance stagger (exits read better
+// faster than they enter).
+const EXIT_DURATION = 300
 
 const PLACEHOLDER_TYPES: GalleryItem["placeholderType"][] = [
   "desktop", "mobile", "components", "flow", "research", "final",
@@ -39,6 +44,7 @@ export function ProjectDetailView({
   onBack,
 }: ProjectDetailViewProps) {
   const [mounted, setMounted] = useState(false)
+  const [exiting, setExiting] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalIndex, setModalIndex] = useState(0)
   const logo = useLogo()
@@ -52,14 +58,60 @@ export function ProjectDetailView({
     return () => clearTimeout(t)
   }, [])
 
+  // Hands off from the grown thumbnail clone + backdrop (see project-card.tsx)
+  // to the real content: both live on <body>, outside this component's tree,
+  // so they survive the route change and need manual cleanup here.
+  //
+  // Tried twice to snap the clone onto .detail-hero-image's real measured
+  // rect before fading (once in a plain useEffect, once in a
+  // useLayoutEffect that also forced scroll to 0 itself first) — both times
+  // something inside Next's navigation re-scrolled the page AFTER our
+  // measurement, so the read rect didn't match what actually got painted,
+  // producing wildly wrong (large negative) coordinates. Not a race we can
+  // reliably win from here. A plain fade over the already-matching backdrop
+  // is simpler and has no race to lose.
+  //
+  // The backdrop must fade too, not just get removed at the end: it's fully
+  // opaque and sits above the real content (z-index 9998 vs the page's own
+  // stacking), so while it stayed solid the content's own entrance
+  // animation (mounted, below) was running the whole time invisibly behind
+  // it — clone and content never actually appeared to cross-fade, the
+  // content just "popped in" already-finished the instant the backdrop was
+  // removed. Fading both together lets the real content show through as it
+  // happens.
+  useEffect(() => {
+    const clone = document.getElementById("project-morph-clone")
+    const backdrop = document.getElementById("project-morph-backdrop")
+    if (!clone && !backdrop) return
+    if (clone) {
+      clone.style.transition = "opacity 400ms cubic-bezier(0.16, 1, 0.3, 1)"
+      clone.style.opacity = "0"
+    }
+    if (backdrop) {
+      backdrop.style.transition = "opacity 400ms cubic-bezier(0.16, 1, 0.3, 1)"
+      backdrop.style.opacity = "0"
+    }
+    const t = setTimeout(() => {
+      clone?.remove()
+      backdrop?.remove()
+    }, 400)
+    return () => clearTimeout(t)
+  }, [])
+
+  const handleBack = useCallback((scrollTarget?: "projects") => {
+    if (exiting) return
+    setExiting(true)
+    setTimeout(() => onBack(scrollTarget), EXIT_DURATION)
+  }, [exiting, onBack])
+
   const galleryItems = buildGalleryItems(project)
 
   return (
-    <div className={`detail-wrapper ${mounted ? "mounted" : ""}`}>
+    <div className={`detail-wrapper ${mounted ? "mounted" : ""}${exiting ? " exiting" : ""}`}>
       {/* NAVBAR */}
       <header className="detail-navbar">
         <div className="detail-navbar-left">
-          <button className="detail-breadcrumb-link" onClick={onBack}>
+          <button className="detail-breadcrumb-link" onClick={() => handleBack()}>
             {logoUrl ? (
               <img src={logoUrl} alt={logoText} className="nav-logo-img" style={{ verticalAlign: "middle" }} />
             ) : (
@@ -67,7 +119,7 @@ export function ProjectDetailView({
             )}
           </button>
           <span className="detail-breadcrumb-sep">/</span>
-          <button className="detail-breadcrumb-link" onClick={onBack}>Trabajos</button>
+          <button className="detail-breadcrumb-link" onClick={() => handleBack("projects")}>Trabajos</button>
           <span className="detail-breadcrumb-sep">/</span>
           <span className="detail-breadcrumb-current">{project.title}</span>
         </div>
@@ -83,7 +135,7 @@ export function ProjectDetailView({
       <main className="detail-main">
         {/* LEFT — Content */}
         <div className="detail-content">
-          <button className="detail-back-link" onClick={onBack}>
+          <button className="detail-back-link" onClick={() => handleBack("projects")}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -102,6 +154,12 @@ export function ProjectDetailView({
           </h1>
 
           <p className="detail-description">{project.desc}</p>
+
+          {project.thumbnail && (
+            <div className="detail-hero-image">
+              <img src={project.thumbnail} alt={project.title} />
+            </div>
+          )}
 
           <section className="detail-section">
             <h3 className="detail-section-label">EL DESAFÍO</h3>
@@ -212,7 +270,7 @@ export function ProjectDetailView({
                 <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </a>
-            <button className="detail-btn-secondary" onClick={onBack}>
+            <button className="detail-btn-secondary" onClick={() => handleBack("projects")}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>

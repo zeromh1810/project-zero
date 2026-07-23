@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useTheme } from "@/lib/context/theme-context"
 import { ProjectDetailView } from "@/components/portfolio/project-detail-view"
+import { NAV_SESSION_KEY } from "@/components/portfolio/app-navbar"
 import type { Project } from "@/lib/data/projects"
 
 interface Props {
@@ -27,7 +28,17 @@ export function ProjectDetailClient({ project }: Props) {
       project={project}
       isDark={isDark}
       onToggleTheme={toggleTheme}
-      onBack={() => router.push("/")}
+      onBack={(scrollTarget) => {
+        if (scrollTarget) {
+          sessionStorage.setItem(NAV_SESSION_KEY, JSON.stringify({ section: "trabajos", scroll: scrollTarget }))
+          // Next's own scroll-to-top-on-navigation would otherwise fight
+          // the instant scrollIntoView done in portfolio.tsx's layout
+          // effect — disable it so only our targeted scroll applies.
+          router.push("/", { scroll: false })
+        } else {
+          router.push("/")
+        }
+      }}
     />
   )
 }

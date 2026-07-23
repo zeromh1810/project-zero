@@ -25,6 +25,7 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
   const [transitioning, setTransitioning] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const pageRef   = useRef<HTMLDivElement>(null)
+  const pendingScrollRef = useRef<string | null>(null)
 
   // Scroll animations
   useIntersection(
@@ -44,17 +45,25 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
       const { section: target, scroll } = JSON.parse(raw) as { section: Section; scroll?: string }
       const valid: Section[] = ["trabajos", "sobre", "contacto"]
       if (!valid.includes(target)) return
+      pendingScrollRef.current = scroll ?? null
       setSection(target)
       setDisplaySection(target)
-      if (scroll === "projects") {
-        // 350ms: margen suficiente para hidratación Next.js + render inicial
-        setTimeout(() => {
-          const sheet = document.querySelector(".projects-sheet") as HTMLElement
-          if (sheet) sheet.scrollIntoView({ behavior: "smooth", block: "start" })
-        }, 350)
-      }
     } catch {}
   }, [])
+
+  // Aplica el scroll pendiente (si lo hay) en la MISMA pasada de layout effects
+  // que monta displaySection="trabajos" — antes del primer paint, así al volver
+  // desde el detalle de un proyecto no se ve el hero ni un scroll animado,
+  // se llega directo a la grilla.
+  useLayoutEffect(() => {
+    const target = pendingScrollRef.current
+    if (!target) return
+    pendingScrollRef.current = null
+    if (target === "projects") {
+      const sheet = document.querySelector(".projects-sheet") as HTMLElement | null
+      sheet?.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" })
+    }
+  }, [displaySection])
 
   // Crossfade transition between sections
   useEffect(() => {
