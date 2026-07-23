@@ -1,7 +1,12 @@
 "use client"
 
+import { useRef } from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { cn } from "@/lib/utils"
+
+// Swipe threshold in px — below this, a touch is treated as a tap/scroll,
+// not a navigation gesture.
+const SWIPE_THRESHOLD = 50
 
 export interface GalleryItem {
   id: number
@@ -28,6 +33,7 @@ export function GalleryModal({
   onNavigate,
 }: GalleryModalProps) {
   const currentItem = items[currentIndex]
+  const touchStartX = useRef<number | null>(null)
 
   const handlePrev = () =>
     onNavigate(currentIndex === 0 ? items.length - 1 : currentIndex - 1)
@@ -37,6 +43,18 @@ export function GalleryModal({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") { e.preventDefault(); handlePrev() }
     if (e.key === "ArrowRight") { e.preventDefault(); handleNext() }
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    touchStartX.current = null
+    if (Math.abs(dx) < SWIPE_THRESHOLD) return
+    if (dx > 0) handlePrev()
+    else handleNext()
   }
 
   return (
@@ -51,6 +69,8 @@ export function GalleryModal({
         />
         <DialogPrimitive.Content
           onKeyDown={handleKeyDown}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
           aria-describedby={undefined}
           className={cn(
             "fixed inset-0 z-[10000] flex items-center justify-center",
@@ -66,7 +86,7 @@ export function GalleryModal({
 
           {/* Close */}
           <DialogPrimitive.Close className={cn(
-            "absolute top-6 right-6 z-10 flex items-center justify-center w-12 h-12",
+            "absolute top-4 right-4 sm:top-6 sm:right-6 z-10 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12",
             "rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200",
             "hover:scale-110 focus:outline-none"
           )}>
@@ -75,9 +95,9 @@ export function GalleryModal({
             </svg>
           </DialogPrimitive.Close>
 
-          {/* Prev */}
+          {/* Prev — hidden on touch/mobile widths, swipe covers navigation there */}
           <button onClick={handlePrev} aria-label="Anterior" className={cn(
-            "absolute left-6 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-12 h-12",
+            "hidden sm:flex absolute left-6 top-1/2 -translate-y-1/2 z-10 items-center justify-center w-12 h-12",
             "rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-110"
           )}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -85,9 +105,9 @@ export function GalleryModal({
             </svg>
           </button>
 
-          {/* Next */}
+          {/* Next — hidden on touch/mobile widths, swipe covers navigation there */}
           <button onClick={handleNext} aria-label="Siguiente" className={cn(
-            "absolute right-6 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-12 h-12",
+            "hidden sm:flex absolute right-6 top-1/2 -translate-y-1/2 z-10 items-center justify-center w-12 h-12",
             "rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 hover:scale-110"
           )}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -96,7 +116,7 @@ export function GalleryModal({
           </button>
 
           {/* Main image area */}
-          <div className="w-full max-w-5xl mx-auto px-20">
+          <div className="w-full max-w-5xl mx-auto px-4 sm:px-12 md:px-20">
             <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl" style={{ background: "var(--bg2)" }}>
               {currentItem?.src ? (
                 <img

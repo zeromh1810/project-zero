@@ -482,6 +482,17 @@ export function buildHeroTerrain(
   let lastIsDark = getIsDark()
   let palette = lastIsDark ? PALETTES.dark : PALETTES.light
 
+  // On narrow screens the same contour density reads as visually busier
+  // (lines crossing each other more within a narrower, taller frame), which
+  // fights the elegant/minimal feel the shader is going for. Widening the
+  // spacing (fewer isolines) and lowering the zoom (gentler, lower-frequency
+  // terrain) simplifies the pattern without touching desktop at all.
+  let isMobile = false
+  function mobileLayer(s: LayerStyle): LayerStyle {
+    if (!isMobile) return s
+    return { ...s, spacing: s.spacing * 1.4, zoom: s.zoom * 0.85 }
+  }
+
   // Mouse / touch parallax
   const m = { x: 0, y: 0, tx: 0, ty: 0 }
   const onMouse = (e: MouseEvent) => {
@@ -523,6 +534,7 @@ export function buildHeroTerrain(
   function resize() {
     const w = container.clientWidth  || window.innerWidth
     const h = container.clientHeight || window.innerHeight
+    isMobile = w <= 640
     if (canvas.width === w && canvas.height === h) return
     canvas.width  = w
     canvas.height = h
@@ -563,7 +575,7 @@ export function buildHeroTerrain(
     gl.clear(gl.COLOR_BUFFER_BIT)
 
     gl.bindVertexArray(vao)
-    applyLayer(palette.primary, rippleUVPrimary, rippleAge)
+    applyLayer(mobileLayer(palette.primary), rippleUVPrimary, rippleAge)
     gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_INT, 0)
     gl.bindVertexArray(null)
   }

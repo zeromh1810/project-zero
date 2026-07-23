@@ -3281,25 +3281,28 @@ html {
   }
 
   /* El espacio para el bottom-nav va dentro del footer (cubierto por su glass),
-     no como padding del body (que dejaba un hueco sin estilar entre ellos). */
+     no como padding del body (que dejaba un hueco sin estilar entre ellos).
+     Se suma el safe-area-inset-bottom porque el bottom-nav ahora crece esa
+     misma cantidad (ver .bottom-nav) para no invadir el home indicator. */
   .footer {
-    padding: 40px 24px 80px;
+    padding: 40px 24px calc(80px + env(safe-area-inset-bottom, 0px));
   }
 
   body {
     padding-bottom: 0;
   }
 
-  /* Hero: top-aligned + compressed to reveal projects section below */
+  /* Hero: pantalla completa y centrado, sin necesidad de scroll para ver
+     todo el contenido — al hacer scroll se pasa directo a proyectos. */
   .section-full {
-    min-height: calc(70vh - 64px);
-    min-height: calc(70svh - 64px);
+    min-height: calc(100vh - 64px);
+    min-height: calc(100svh - 64px);
   }
   .hero-wrap {
-    justify-content: flex-start;
-    min-height: calc(80vh - 64px);
-    min-height: calc(80svh - 64px);
-    padding: 120px 20px 32px;
+    justify-content: center;
+    min-height: calc(100vh - 64px);
+    min-height: calc(100svh - 64px);
+    padding: 88px 20px 32px;
   }
   .hero-tag {
     margin-bottom: 18px;
@@ -3330,10 +3333,12 @@ html {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 64px;
+    /* border-box: el padding-bottom añade el safe-area DEBAJO de la fila de
+       64px sin comprimirla, así el home indicator de iPhone no tapa los tabs. */
+    height: calc(64px + env(safe-area-inset-bottom, 0px));
     z-index: var(--z-navigation);
     align-items: center;
-    padding: 0 8px;
+    padding: 0 8px env(safe-area-inset-bottom, 0px);
     gap: 4px;
     backdrop-filter: blur(28px) saturate(200%);
     -webkit-backdrop-filter: blur(28px) saturate(200%);
