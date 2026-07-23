@@ -482,15 +482,19 @@ export function buildHeroTerrain(
   let lastIsDark = getIsDark()
   let palette = lastIsDark ? PALETTES.dark : PALETTES.light
 
-  // On narrow screens the same contour density reads as visually busier
-  // (lines crossing each other more within a narrower, taller frame), which
-  // fights the elegant/minimal feel the shader is going for. Widening the
-  // spacing (fewer isolines) and lowering the zoom (gentler, lower-frequency
-  // terrain) simplifies the pattern without touching desktop at all.
+  // The noise field is sampled in UV space (independent of canvas pixel
+  // size), so the same pattern gets squeezed into a much narrower canvas on
+  // mobile — isolines end up visually closer together than on desktop, even
+  // though it's the same content. Widening the spacing (fewer isolines) and
+  // lowering the zoom (gentler, lower-frequency terrain) brings the
+  // perceived density back in line with the desktop feel, without touching
+  // desktop's own values. Tuned by eye against the desktop reference at
+  // several mobile widths (iPhone SE/13/Pro Max) — not a formula, so revisit
+  // by screenshot if BASE_PITCH/zoom/spacing above ever change again.
   let isMobile = false
   function mobileLayer(s: LayerStyle): LayerStyle {
     if (!isMobile) return s
-    return { ...s, spacing: s.spacing * 1.4, zoom: s.zoom * 0.85 }
+    return { ...s, spacing: s.spacing * 2.2, zoom: s.zoom * 0.6 }
   }
 
   // Mouse / touch parallax
