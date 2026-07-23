@@ -15,7 +15,7 @@ const GRID = 400
 // plane UV. BASE_YAW gives the rest state (no mouse movement) a fixed
 // diagonal/corner view instead of a symmetric front-on tilt — that's what
 // reads as "isometric" rather than just "tilted down".
-const BASE_PITCH = 0.7853982 // 45°
+const BASE_PITCH = 0.5235988 // 30°
 const BASE_YAW   = 0.6108652 // 35°
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -121,14 +121,16 @@ void main() {
   float x1 =  wx * cosY + wz * sinY;
   float z1 = -wx * sinY + wz * cosY;
 
-  // 45° base isometric tilt (not a flat 90° top-down map), plus a modest
-  // mouse-driven swing on top of it. uYawAmt/uPitchAmt differ per layer
-  // (set in JS, see PALETTES) — the foreground swings noticeably more than
-  // the background with the same mouse input, which on top of the
-  // planeScale-based dampening (scale applies AFTER rotation, so it also
-  // shrinks the rotation's screen-space swing) makes the depth separation
-  // read much more clearly than a single shared swing amount would.
-  const float BASE_PITCH = 0.7853982; // 45°
+  // 30° base isometric tilt (shallower than the previous 45°, so the plane
+  // reads less like a straight-down map and more like a diagonal horizon
+  // view), plus a modest mouse-driven swing on top of it. uYawAmt/uPitchAmt
+  // differ per layer (set in JS, see PALETTES) — the foreground swings
+  // noticeably more than the background with the same mouse input, which
+  // on top of the planeScale-based dampening (scale applies AFTER
+  // rotation, so it also shrinks the rotation's screen-space swing) makes
+  // the depth separation read much more clearly than a single shared swing
+  // amount would.
+  const float BASE_PITCH = 0.5235988; // 30°
   float pitch = BASE_PITCH + uPY * uPitchAmt;
   float cosX  = cos(pitch);
   float sinX  = sin(pitch);
@@ -136,8 +138,8 @@ void main() {
   float z2 = wy * sinX + z1 * cosX;
 
   // Full-bleed rectangle. The Y scale is larger than X to compensate for
-  // the 45° tilt foreshortening the depth axis (cos 45° ≈ 0.71), so the
-  // mesh still covers the full height with no exposed edge.
+  // the tilt foreshortening the depth axis, so the mesh still covers the
+  // full height with no exposed edge.
   float ndcX =  x1 * 2.28;
   float ndcY = -z2 * 3.60 + y2 * 0.9;
 
