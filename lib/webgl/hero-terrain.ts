@@ -270,10 +270,10 @@ function hex3(h: string): [number, number, number] {
 const PALETTES: { dark: Palette; light: Palette } = {
   dark: {
     primary: {
-      lineMinor:   hex3('#8e8e93'),   // --txt3 (dark) — secondary contours
-      lineMajor:   hex3('#f5f5f7'),   // --txt (dark) — bright index contours
+      lineMinor:   hex3('#727276'),   // --txt3 (dark) −20% tono
+      lineMajor:   hex3('#c4c4c6'),   // --txt (dark) −20% tono
       spacing:     0.200,
-      lineWidth:   0.8,
+      lineWidth:   0.6,
       fogStart:    0.55,
       fogStrength: 0.85,
       alphaMin:    0.13,
@@ -289,10 +289,10 @@ const PALETTES: { dark: Palette; light: Palette } = {
   },
   light: {
     primary: {
-      lineMinor:   hex3('#5e5e64'),   // --txt3 (light) — secondary contours
-      lineMajor:   hex3('#1d1d1f'),   // --txt (light) — ink on paper
+      lineMinor:   hex3('#4b4b50'),   // --txt3 (light) −20% tono
+      lineMajor:   hex3('#171719'),   // --txt (light) −20% tono
       spacing:     0.200,
-      lineWidth:   0.8,
+      lineWidth:   0.6,
       fogStart:    0.55,
       fogStrength: 0.72,
       alphaMin:    0.07,
