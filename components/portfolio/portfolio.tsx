@@ -89,8 +89,22 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
 
-  const navigateTo = (s: Section) => {
-    if (s === section) return
+  // scrollTarget reuses the same pendingScrollRef the sessionStorage flow
+  // uses (see the two effects above) — set before setSection so the
+  // layout effect keyed on displaySection applies it instantly, before
+  // paint, instead of a delayed/animated scroll after the crossfade.
+  const navigateTo = (s: Section, scrollTarget?: string) => {
+    if (s === section) {
+      // Already on this section — this is an in-page anchor jump (hero →
+      // grid), not a cross-section switch, so a smooth scroll reads fine
+      // here (nothing to hide, unlike the crossfade case below).
+      if (scrollTarget === "projects") {
+        const sheet = document.querySelector(".projects-sheet") as HTMLElement | null
+        sheet?.scrollIntoView({ behavior: "smooth", block: "start" })
+      }
+      return
+    }
+    pendingScrollRef.current = scrollTarget ?? null
     setSection(s)
   }
 

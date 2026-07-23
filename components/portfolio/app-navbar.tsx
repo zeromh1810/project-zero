@@ -15,7 +15,7 @@ type Section = "trabajos" | "sobre" | "contacto"
 interface PortfolioProps {
   mode: "portfolio"
   currentSection: Section
-  onNavigate: (section: Section) => void
+  onNavigate: (section: Section, scrollTarget?: string) => void
   onProfileClick: () => void
 }
 
@@ -114,15 +114,11 @@ function PortfolioNavbar({ currentSection, onNavigate, onProfileClick }: Omit<Po
   }
 
   function goTrabajos() {
-    onNavigate("trabajos")
+    // scrollTarget "projects" is applied instantly by portfolio.tsx's own
+    // layout effect (same mechanism as the project-detail "Volver" flow) —
+    // no more hero flash + delayed smooth scroll down to the grid.
+    onNavigate("trabajos", "projects")
     setActiveKey("trabajos")
-    // La transición de sección tarda 160ms (portfolio.tsx exitTimer).
-    // Esperamos 280ms para que displaySection haya cambiado y .projects-sheet
-    // esté en el DOM antes de intentar el scroll.
-    setTimeout(() => {
-      const sheet = document.querySelector(".projects-sheet") as HTMLElement
-      if (sheet) sheet.scrollIntoView({ behavior: "smooth", block: "start" })
-    }, 280)
   }
 
   function goSection(key: Section) {
