@@ -32,12 +32,16 @@ function screenToLayerUV(
   ndcY: number,
   mx: number,
   my: number,
-  s: { yawAmt: number; pitchAmt: number; planeScale: number; planeShiftY: number }
+  s: { yawAmt: number; pitchAmt: number; pitchAmtDown: number; planeScale: number; planeShiftY: number }
 ): [number, number] {
   const yaw = BASE_YAW + mx * s.yawAmt
   const cosYaw = Math.cos(yaw)
   const sinYaw = Math.sin(yaw)
-  const pitch = BASE_PITCH + my * s.pitchAmt
+  // Mismo swing asimétrico que el vertex shader (ver comentario ahí) — si no
+  // se replica aquí, el ripple del click cae desplazado cuando el mouse está
+  // en la mitad inferior de la pantalla (pitch más rasante).
+  const pitchAmt = my >= 0 ? s.pitchAmt : s.pitchAmtDown
+  const pitch = BASE_PITCH + my * pitchAmt
   const cosPitch = Math.cos(pitch)
   const sinPitch = Math.sin(pitch)
   const k = cosPitch * 3.60 + sinPitch * 0.9
@@ -75,6 +79,7 @@ uniform float uZoom;
 uniform vec2  uNoiseOffset;
 uniform float uYawAmt;
 uniform float uPitchAmt;
+uniform float uPitchAmtDown;
 uniform float uPlaneScale;
 uniform float uPlaneShiftY;
 
@@ -132,7 +137,15 @@ void main() {
   // swing) makes the depth separation read much more clearly than a single
   // shared swing amount would.
   const float BASE_PITCH = 0.7635988; // ~43.75°
-  float pitch = BASE_PITCH + uPY * uPitchAmt;
+  // Swing asimétrico: hacia arriba (uPY > 0, cámara más cenital) usa el
+  // swing completo — ahí las líneas ya se leen limpias. Hacia abajo
+  // (uPY < 0, ángulo más rasante) el foreshortening comprime el eje de
+  // profundidad y los anillos de contorno se ven apretados/entrecruzados,
+  // así que ese lado usa un swing menor (uPitchAmtDown) — menos rasante en
+  // el extremo, sin perder el parallax-por-altura que da la sensación de
+  // profundidad (ver comentario de y2/z2 abajo).
+  float pitchAmt = uPY >= 0.0 ? uPitchAmt : uPitchAmtDown;
+  float pitch = BASE_PITCH + uPY * pitchAmt;
   float cosX  = cos(pitch);
   float sinX  = sin(pitch);
   float y2 = wy * cosX - z1 * sinX;
@@ -151,7 +164,14 @@ void main() {
   ndcX *= uPlaneScale;
   ndcY  = ndcY * uPlaneScale + uPlaneShiftY;
 
-  gl_Position = vec4(ndcX, ndcY, 0.5, 1.0);
+  // Real depth so nearer terrain occludes farther contour lines instead of
+  // blending through them. z2 is already the camera-space "into the screen"
+  // axis (bigger = farther, see ndcY above) — reusing it directly as clip Z
+  // gives correct near/far ordering for free. Bounded well inside [-1, 1]
+  // (see derivation in the PR/commit notes) so it's never near-/far-clipped.
+  float depthZ = clamp(z2 * 0.9, -0.98, 0.98);
+
+  gl_Position = vec4(ndcX, ndcY, depthZ, 1.0);
 }
 `
 
@@ -172,6 +192,7 @@ uniform float uFogStart;
 uniform float uFogStrength;
 uniform float uAlphaMin;
 uniform float uAlphaMax;
+uniform vec3  uBgColor;
 
 // Click ripple — a radial shockwave injected into the height field so the
 // contour isolines visibly wobble/shift outward from the click point, like
@@ -215,14 +236,22 @@ void main() {
   float minor = iso(h, uSpacing * 2.0);
   float major = iso(h, uSpacing * 4.0);
   float presence = clamp(max(minor * 0.65, major), 0.0, 1.0);
-  if (presence < 0.006) discard;
 
   float fog = 1.0 - smoothstep(uFogStart, 1.0, vDepth) * uFogStrength;
 
   vec3  col   = mix(uLineMinor, uLineMajor, major);
   float alpha = mix(uAlphaMin, uAlphaMax, major) * fog;
 
-  fragColor = vec4(col, clamp(alpha * presence, 0.0, 1.0));
+  // Superficie opaca (no discard): cada pixel del plano —tenga línea o no—
+  // escribe su propio color Y su propia profundidad real (ver depthZ en el
+  // vertex shader). Antes los huecos entre líneas se descartaban del todo,
+  // así que nunca ocluían nada detrás; con esto el "relleno" entre contornos
+  // pinta el mismo color de fondo de la página (uBgColor, invisible a simple
+  // vista) pero sigue compitiendo por el depth test — un pliegue del terreno
+  // más cercano ahora sí tapa por completo una línea de un pliegue más lejano
+  // en vez de mezclarse con ella.
+  vec3 finalColor = mix(uBgColor, col, clamp(alpha * presence, 0.0, 1.0));
+  fragColor = vec4(finalColor, 1.0);
 }
 `
 
@@ -243,6 +272,7 @@ void main() {
 interface LayerStyle {
   lineMinor:    [number, number, number]
   lineMajor:    [number, number, number]
+  bgColor:      [number, number, number]  // = body's --bg, para la superficie opaca (ver FRAG)
   spacing:      number
   lineWidth:    number
   fogStart:     number
@@ -252,7 +282,8 @@ interface LayerStyle {
   zoom:         number
   noiseOffset:  [number, number]
   yawAmt:       number
-  pitchAmt:     number
+  pitchAmt:     number      // swing hacia arriba (mouse en mitad superior, cámara más cenital)
+  pitchAmtDown: number      // swing hacia abajo (mouse en mitad inferior, ángulo más rasante) — menor, evita que los contornos se apiñen
   planeScale:   number
   planeShiftY:  number
   rippleAmp:    number
@@ -275,16 +306,18 @@ const PALETTES: { dark: Palette; light: Palette } = {
     primary: {
       lineMinor:   hex3('#727276'),   // --txt3 (dark) −20% tono
       lineMajor:   hex3('#c4c4c6'),   // --txt (dark) −20% tono
-      spacing:     0.200,
+      bgColor:     hex3('#000000'),   // --bg (dark)
+      spacing:     0.230,
       lineWidth:   0.6,
       fogStart:    0.55,
       fogStrength: 0.85,
       alphaMin:    0.13,
       alphaMax:    0.27,
-      zoom:        2.6,
+      zoom:        2.35,
       noiseOffset: [0, 0],
       yawAmt:      0.44,
       pitchAmt:    0.24,
+      pitchAmtDown: 0.04,
       planeScale:  1.0,
       planeShiftY: 0.0,
       rippleAmp:   0.14,
@@ -294,16 +327,18 @@ const PALETTES: { dark: Palette; light: Palette } = {
     primary: {
       lineMinor:   hex3('#4b4b50'),   // --txt3 (light) −20% tono
       lineMajor:   hex3('#171719'),   // --txt (light) −20% tono
-      spacing:     0.200,
+      bgColor:     hex3('#f8f8f8'),   // --bg (light)
+      spacing:     0.230,
       lineWidth:   0.6,
       fogStart:    0.55,
       fogStrength: 0.72,
       alphaMin:    0.07,
       alphaMax:    0.16,
-      zoom:        2.6,
+      zoom:        2.35,
       noiseOffset: [0, 0],
       yawAmt:      0.44,
       pitchAmt:    0.24,
+      pitchAmtDown: 0.04,
       planeScale:  1.0,
       planeShiftY: 0.0,
       rippleAmp:   0.14,
@@ -427,13 +462,15 @@ export function buildHeroTerrain(
 
   gl.bindVertexArray(null)
 
-  // Blend — MAX instead of standard alpha-over: where the primary and far
-  // layers' independent contour lines cross, the result is capped to the
-  // stronger of the two instead of compounding into a darker/thicker blob.
-  gl.enable(gl.BLEND)
-  gl.blendEquation(gl.MAX)
-  gl.blendFunc(gl.ONE, gl.ONE)
-  gl.disable(gl.DEPTH_TEST)
+  // Depth test real: el plano ahora escribe una Z por vértice (ver depthZ en
+  // el vertex shader) y cada pixel es opaco (ver FRAG), así que un pliegue
+  // del terreno más cercano a cámara oculta por completo lo que quede detrás
+  // en vez de mezclarse con ello — antes con DEPTH_TEST apagado y blend MAX
+  // (pensado para fundir varias capas de parallax, ya no existen) todas las
+  // líneas del mesh se combinaban sin importar cuál estaba "adelante".
+  gl.enable(gl.DEPTH_TEST)
+  gl.depthFunc(gl.LESS)
+  gl.disable(gl.BLEND)
 
   // Uniform locations
   const U = {
@@ -443,11 +480,13 @@ export function buildHeroTerrain(
     uZoom:        gl.getUniformLocation(prog, "uZoom"),
     uNoiseOffset: gl.getUniformLocation(prog, "uNoiseOffset"),
     uYawAmt:      gl.getUniformLocation(prog, "uYawAmt"),
-    uPitchAmt:    gl.getUniformLocation(prog, "uPitchAmt"),
+    uPitchAmt:     gl.getUniformLocation(prog, "uPitchAmt"),
+    uPitchAmtDown: gl.getUniformLocation(prog, "uPitchAmtDown"),
     uSpacing:     gl.getUniformLocation(prog, "uSpacing"),
     uLineWidth:   gl.getUniformLocation(prog, "uLineWidth"),
     uLineMinor:   gl.getUniformLocation(prog, "uLineMinor"),
     uLineMajor:   gl.getUniformLocation(prog, "uLineMajor"),
+    uBgColor:     gl.getUniformLocation(prog, "uBgColor"),
     uFogStart:    gl.getUniformLocation(prog, "uFogStart"),
     uFogStrength: gl.getUniformLocation(prog, "uFogStrength"),
     uAlphaMin:    gl.getUniformLocation(prog, "uAlphaMin"),
@@ -462,6 +501,7 @@ export function buildHeroTerrain(
   function applyLayer(s: LayerStyle, rippleUV: [number, number], rippleAge: number) {
     gl.uniform3fv(U.uLineMinor,   s.lineMinor)
     gl.uniform3fv(U.uLineMajor,   s.lineMajor)
+    gl.uniform3fv(U.uBgColor,     s.bgColor)
     gl.uniform1f (U.uSpacing,     s.spacing)
     gl.uniform1f (U.uLineWidth,   s.lineWidth)
     gl.uniform1f (U.uFogStart,    s.fogStart)
@@ -471,7 +511,8 @@ export function buildHeroTerrain(
     gl.uniform1f (U.uZoom,        s.zoom)
     gl.uniform2fv(U.uNoiseOffset, s.noiseOffset)
     gl.uniform1f (U.uYawAmt,      s.yawAmt)
-    gl.uniform1f (U.uPitchAmt,    s.pitchAmt)
+    gl.uniform1f (U.uPitchAmt,     s.pitchAmt)
+    gl.uniform1f (U.uPitchAmtDown, s.pitchAmtDown)
     gl.uniform1f (U.uPlaneScale,  s.planeScale)
     gl.uniform1f (U.uPlaneShiftY, s.planeShiftY)
     gl.uniform2fv(U.uRippleUV,    rippleUV)
@@ -576,7 +617,7 @@ export function buildHeroTerrain(
     if (rippleAge > 0.9) rippleT0 = -1
 
     gl.clearColor(0, 0, 0, 0)
-    gl.clear(gl.COLOR_BUFFER_BIT)
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     gl.bindVertexArray(vao)
     applyLayer(mobileLayer(palette.primary), rippleUVPrimary, rippleAge)
