@@ -61,15 +61,24 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
 
   useScrollParallax(wrapRef, 0.35)
 
-  // ── Blur progresivo ──────────────────────────────────────────────────────────
+  // ── Blur progresivo (texto + terreno WebGL, misma curva) ────────────────────
   useEffect(() => {
-    const el = wrapRef.current
+    const el      = wrapRef.current
+    const terrain = terrainContainerRef.current
     if (!el) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
     const onScroll = () => {
-      const vh = window.innerHeight
-      const p  = Math.max(0, Math.min(1, (window.scrollY - vh * 0.3) / (vh * 0.6)))
-      el.style.filter = p > 0 ? `blur(${(p * 18).toFixed(1)}px)` : ""
+      const vh   = window.innerHeight
+      const p    = Math.max(0, Math.min(1, (window.scrollY - vh * 0.3) / (vh * 0.6)))
+      const blur = p > 0 ? `blur(${(p * 18).toFixed(1)}px)` : ""
+      el.style.filter = blur
+      if (terrain) {
+        // El terreno además funde a 0 (no solo desenfoca) para que desaparezca
+        // limpio antes de que el projects-sheet lo tape del todo, en vez de
+        // quedar como un resplandor difuso detrás del sheet semitransparente.
+        terrain.style.filter  = blur
+        terrain.style.opacity = p > 0 ? `${(1 - p).toFixed(3)}` : ""
+      }
     }
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
