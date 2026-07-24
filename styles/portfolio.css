@@ -5371,32 +5371,6 @@ html {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   MACBOOK PRO 14"/AIR 13" — resolución escalada por omisión (1440px–1599px)
-   Cubre 1512×982 (MBP 14" default) y 1470×956 (Air 13" default).
-   El tier genérico de arriba (1440–1920) fija el título en 76px asumiendo
-   monitores anchos ≥1600px; en un viewport de 1512px ese tamaño resulta
-   desproporcionado frente al slider y con la altura corta (982px) del
-   portátil el bloque de texto se ve pesado.
-   Ajuste: título −21% (76→60px) y slider +13% (558→630px) para equilibrar
-   el peso visual de ambas columnas.
-   1512px: inner=1320px, texto=634px (48%), slider=630px (capped),
-   espacio libre repartido=56px (28px por lado) — antes eran 128px (64px/lado).
-   ════════════════════════════════════════════════════════════════════════════ */
-@media (min-width: 1440px) and (max-width: 1599px) {
-  .hero-wrap--split .hero-title {
-    font-size: clamp(43px, 5.85vw, 60px);
-  }
-
-  .hero-wrap--split .hero-sub {
-    font-size: clamp(15px, 1.5vw, 16px);
-  }
-
-  .hero-right {
-    max-width: 630px;
-  }
-}
-
-/* ════════════════════════════════════════════════════════════════════════════
    ULTRA-WIDE — ≥1440p / 2560×1440 (≥1921px)
    Solo activo por encima de Full HD (1920×1080).
    Estrategia: expandir containers de 1160px→1400px, blog 4 cols,
@@ -5633,6 +5607,35 @@ html {
 
   .hero-wrap--split .hero-sub {
     font-size: clamp(15px, 1.5vw, 19px);
+  }
+}
+
+/*
+   MACBOOK PRO 14"/AIR 13" — resolución escalada por omisión (1440px–1599px)
+   Cubre 1512×982 (MBP 14" default) y 1470×956 (Air 13" default).
+   El tier "1440-1920" (línea ~5359) fija el título en 76px asumiendo
+   monitores anchos ≥1600px; en un viewport de 1512px ese tamaño resulta
+   desproporcionado frente al slider y, con la altura corta (982px) del
+   portátil, el bloque de texto se ve pesado.
+   Ajuste: título −21% (76→60px) y slider +13% (558→630px) para equilibrar
+   el peso visual de ambas columnas.
+   1512px: inner=1320px, texto=634px (48%), slider=630px (capped),
+   espacio libre repartido=56px (28px por lado) — antes eran 128px (64px/lado).
+   Este bloque va DESPUÉS de las reglas base (línea ~5561) por la misma
+   razón documentada arriba en ULTRA-WIDE: empate de especificidad (0,2,0)
+   resuelto por orden de aparición en el archivo, no por la media query.
+*/
+@media (min-width: 1440px) and (max-width: 1599px) {
+  .hero-wrap--split .hero-title {
+    font-size: clamp(43px, 5.85vw, 60px);
+  }
+
+  .hero-wrap--split .hero-sub {
+    font-size: clamp(15px, 1.5vw, 16px);
+  }
+
+  .hero-right {
+    max-width: 630px;
   }
 }
 
