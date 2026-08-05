@@ -3,9 +3,9 @@
   "$meta": {
     "project": "Project Zero Portafolio de trabajos Carlos Felipe Rojas Hickmann",
     "author": "Carlos Felipe Rojas Hickmann",
-    "version": "1.8.0",
+    "version": "1.9.0",
     "source": "Extracted from portfolio.css — do not edit CSS directly",
-    "changelog": "v1.8.0: Audit completo post code-review. CSS vars completas: --space-1..24 (14 steps), --r-sm..full (6 radios), --glass-blur-xs..xl (5 niveles glassmorphism). Fix accesibilidad: .theme-toggle-btn::before extiende hit area a 44×44px (WCAG 2.5.5) sin modificar visual 32px. Fix auto-fill (revertido de auto-fit) en brands-gallery. Fix prefers-color-scheme: getInitialTheme() ahora detecta OS preference cuando no hay localStorage. DS viewer v1.8.0: 15 páginas (añadidas Animaciones y Blog), isColor fix (solo hex → swatches), stale spec fix (32px/4px), PagePrimitivos expandida con spacing/radius/glassmorphism como tokens CSS reales, PageBrands CodeBlock actualizado a auto-fill. v1.7.0: CSS custom properties completas — --shadow-* (9 niveles) y --z-* (9 capas) ahora definidos en :root y .dark de portfolio.css. Dark mode override shadows (×3–4 opacidad). Hero-title fijado a 85px en breakpoint 1440-1920px. Theme toggle proporcionado: btn-size 32px, pill-padding 4px, icon 15px. DS viewer: darkmode conectado al PAGE_MAP (bug fix), nueva página Tokens Primitivos (shadow/z-index/radius/blur/duration/easing), ds-dm-* clases CSS para tabla comparativa light/dark. DS v1.7.0. v1.6.0: DS Audit completo — escala z-index semántica (9 capas), escala shadows (9 niveles), focus-ring tokens, section-heading patrón universal, bottom-nav componente, modal/overlay, related-posts-slider, about-photo-card, btn-ghost + btn-magnetic, floating-label form, blog-filter-pill + blog-tag + blog-post-layout. Consolidación fadeInUp→fadeUp. Docs: docs/ds-audit-2026.md. v1.5.0: BrandsSection rediseño completo — grid auto-fill (6→12 logos sin cambios), eyebrow label editorial con líneas decorativas, stagger entrance via IntersectionObserver, hover scale(1.06)+grayscale lift. Nuevos tokens: section-eyebrow-label, stagger-entrance, blog-preview-section. brand-item y brands-section actualizados. Primitivos brands-dark (#03070e, #060b16) y blog-dark (#0c1325, #07090e) añadidos. Dark mode blog-preview-section homologado. DS viewer: página Brands añadida al grupo Patrones. Docs: docs/brands-section.md. v1.4.0: Blog system completo (BlogCard, BlogPreviewSection, BlogNavbar, AppNavbar unificado), BrandsSection inter-sección, ThemeToggle dual-icon sun/moon, tokens bg4 + content-sheet + inter-section (superficies blue-tinted), scroll-driven alpha en projects-sheet y footer, auto-ripple idle 2s en WebGL, modo light como default, partículas dust deshabilitadas en light mode, sección .page--solid-bg para About y Contact, CV link en About admin. Docs: docs/components.md, docs/blog.md. v1.3.0: AdminToast tokens completados — border/shadow-dark tokenizados, title-size corregido a 14px, close-radius 6px, anim-enter/anim-exit como tokens CSS, admin.css refactorizado a 100% token-first, documentación docs/toast.md. v1.2.0: AdminToast component (4 estados: success/error/warning/info), token --warning #f59e0b amber, glassmorphism toast con progress bar y animación exit. v1.1.0: hero-title line-height 1.05, anim-enter-translate 16px, scroll-indicator opacity 0.65, card hover shadow + thumb scale, nav-item hover glass bg, theme-toggle 44px touch target, DS layout navbar offset, hardcoded colors → tokens"
+    "changelog": "v1.9.0: Dark mode — escala de negros neutral.950-700 (--bg/bg2/bg3/bg4) reemplazada por escala navy-tinted (~hue 225-230°, inspirada en betterstack.com), alineada con el matiz que content-sheet/brands-section/blog-preview-section ya usaban. navbar-bg dark deriva del nuevo --bg. Fix: JSON inválido (faltaba la clave \"dark\" envolviendo los overrides de semantic/component en dark — bug preexistente que rompía generate-tokens.cjs). Fix seam: hero-terrain.ts (WebGL shader) tenía uBgColor hardcodeado en #000000 para el relleno opaco de oclusión — desalineado del nuevo --bg, se veía como un parche negro en los bordes del plano 3D; actualizado a #0a0b12. Fix: projects-section.tsx tenía rgba(0,0,0,alpha) hardcodeado en el scroll-driven-alpha del projects-sheet (bypaseaba la CSS var) — actualizado a rgba(10,11,18,alpha). DS viewer sincronizado: PageColors y PageDarkMode (design-system-section.tsx) tenían las tablas de --bg/bg2/bg3/bg4 dark hardcodeadas con los hex viejos; actualizadas. Comparativa visual (contact-form-card) usaba #060c1a para el lado oscuro — no coincidía con el valor real que renderiza --content-sheet (var(--bg3)); corregido a #171926. Limpieza: eliminada la familia primitiva \"blue-tinted\" (950/900/50/100/brands-start/brands-end/blog-dark-start/blog-dark-end) — documentaba una paleta navy propia para content-sheet/brands-section/blog-preview-section que nunca estuvo conectada al CSS real (esas reglas siempre usaron var(--bg)/var(--bg2)/var(--bg3), alias de la escala neutral). content-sheet ahora referencia {primitive.color.neutral.100}/{primitive.color.neutral.800} directamente. Eliminado el token semántico inter-section (light y dark) — no correspondía a ninguna CSS var real (--inter-section no existe en portfolio.css). Sincronizados component.brands-section.bg-light/bg-dark y component.blog-preview-section.bg-light/bg-dark con los gradientes reales. DS viewer: PageBrands (gradientes de fondo) y comparativa visual del lado claro también corregidos. v1.8.0: Audit completo post code-review. CSS vars completas: --space-1..24 (14 steps), --r-sm..full (6 radios), --glass-blur-xs..xl (5 niveles glassmorphism). Fix accesibilidad: .theme-toggle-btn::before extiende hit area a 44×44px (WCAG 2.5.5) sin modificar visual 32px. Fix auto-fill (revertido de auto-fit) en brands-gallery. Fix prefers-color-scheme: getInitialTheme() ahora detecta OS preference cuando no hay localStorage. DS viewer v1.8.0: 15 páginas (añadidas Animaciones y Blog), isColor fix (solo hex → swatches), stale spec fix (32px/4px), PagePrimitivos expandida con spacing/radius/glassmorphism como tokens CSS reales, PageBrands CodeBlock actualizado a auto-fill. v1.7.0: CSS custom properties completas — --shadow-* (9 niveles) y --z-* (9 capas) ahora definidos en :root y .dark de portfolio.css. Dark mode override shadows (×3–4 opacidad). Hero-title fijado a 85px en breakpoint 1440-1920px. Theme toggle proporcionado: btn-size 32px, pill-padding 4px, icon 15px. DS viewer: darkmode conectado al PAGE_MAP (bug fix), nueva página Tokens Primitivos (shadow/z-index/radius/blur/duration/easing), ds-dm-* clases CSS para tabla comparativa light/dark. DS v1.7.0. v1.6.0: DS Audit completo — escala z-index semántica (9 capas), escala shadows (9 niveles), focus-ring tokens, section-heading patrón universal, bottom-nav componente, modal/overlay, related-posts-slider, about-photo-card, btn-ghost + btn-magnetic, floating-label form, blog-filter-pill + blog-tag + blog-post-layout. Consolidación fadeInUp→fadeUp. Docs: docs/ds-audit-2026.md. v1.5.0: BrandsSection rediseño completo — grid auto-fill (6→12 logos sin cambios), eyebrow label editorial con líneas decorativas, stagger entrance via IntersectionObserver, hover scale(1.06)+grayscale lift. Nuevos tokens: section-eyebrow-label, stagger-entrance, blog-preview-section. brand-item y brands-section actualizados. Primitivos brands-dark (#03070e, #060b16) y blog-dark (#0c1325, #07090e) añadidos. Dark mode blog-preview-section homologado. DS viewer: página Brands añadida al grupo Patrones. Docs: docs/brands-section.md. v1.4.0: Blog system completo (BlogCard, BlogPreviewSection, BlogNavbar, AppNavbar unificado), BrandsSection inter-sección, ThemeToggle dual-icon sun/moon, tokens bg4 + content-sheet + inter-section (superficies blue-tinted), scroll-driven alpha en projects-sheet y footer, auto-ripple idle 2s en WebGL, modo light como default, partículas dust deshabilitadas en light mode, sección .page--solid-bg para About y Contact, CV link en About admin. Docs: docs/components.md, docs/blog.md. v1.3.0: AdminToast tokens completados — border/shadow-dark tokenizados, title-size corregido a 14px, close-radius 6px, anim-enter/anim-exit como tokens CSS, admin.css refactorizado a 100% token-first, documentación docs/toast.md. v1.2.0: AdminToast component (4 estados: success/error/warning/info), token --warning #f59e0b amber, glassmorphism toast con progress bar y animación exit. v1.1.0: hero-title line-height 1.05, anim-enter-translate 16px, scroll-indicator opacity 0.65, card hover shadow + thumb scale, nav-item hover glass bg, theme-toggle 44px touch target, DS layout navbar offset, hardcoded colors → tokens"
   },
 
   "primitive": {
@@ -29,24 +29,14 @@
         "500": { "$value": "#ef4444", "$type": "color", "$description": "Error state" }
       },
       "neutral": {
-        "950": { "$value": "#000000", "$type": "color", "$description": "Dark mode bg" },
-        "900": { "$value": "#0a0a0a", "$type": "color", "$description": "Dark mode bg elevated" },
-        "800": { "$value": "#141414", "$type": "color", "$description": "Dark mode bg surface (bg3)" },
-        "700": { "$value": "#1e1e1e", "$type": "color", "$description": "Dark mode bg depth-4 (bg4) — superficie más profunda" },
+        "950": { "$value": "#0a0b12", "$type": "color", "$description": "Dark mode bg — navy-tinted (~hue 225-230°), no negro puro" },
+        "900": { "$value": "#0f1018", "$type": "color", "$description": "Dark mode bg elevated" },
+        "800": { "$value": "#171926", "$type": "color", "$description": "Dark mode bg surface (bg3)" },
+        "700": { "$value": "#212430", "$type": "color", "$description": "Dark mode bg depth-4 (bg4) — superficie más profunda" },
         "50":  { "$value": "#f8f8f8", "$type": "color", "$description": "Light mode bg" },
         "0":   { "$value": "#ffffff", "$type": "color", "$description": "Light mode bg elevated" },
         "100": { "$value": "#f0f0f0", "$type": "color", "$description": "Light mode bg surface (bg3)" },
         "200": { "$value": "#e4e4e4", "$type": "color", "$description": "Light mode bg depth-4 (bg4) — superficie más oscura" }
-      },
-      "blue-tinted": {
-        "50":  { "$value": "#f0f4fb", "$type": "color", "$description": "Content-sheet light — fondo sólido secciones con azul tintado (proyectos, blog, sobre mí, contacto, footer)" },
-        "100": { "$value": "#e8edf7", "$type": "color", "$description": "Inter-section light — base sección brands" },
-        "900": { "$value": "#0b1526", "$type": "color", "$description": "Inter-section dark legacy — referencia" },
-        "950": { "$value": "#060c1a", "$type": "color", "$description": "Content-sheet dark — fondo sólido secciones modo oscuro (deep navy)" },
-        "brands-start": { "$value": "#03070e", "$type": "color", "$description": "Brands section dark — inicio gradiente (casi negro con tinte azul)" },
-        "brands-end":   { "$value": "#060b16", "$type": "color", "$description": "Brands section dark — fin gradiente (navy oscuro)" },
-        "blog-dark-start": { "$value": "#0c1325", "$type": "color", "$description": "Blog preview section dark — inicio gradiente, conecta visualmente con brands-end" },
-        "blog-dark-end":   { "$value": "#07090e", "$type": "color", "$description": "Blog preview section dark — fin gradiente (casi negro)" }
       },
       "text": {
         "dark-900": { "$value": "#1d1d1f", "$type": "color", "$description": "Primary text light mode" },
@@ -171,8 +161,7 @@
       "bg2":            { "$value": "{primitive.color.neutral.0}",          "$type": "color", "$description": "Elevated surface" },
       "bg3":            { "$value": "{primitive.color.neutral.100}",        "$type": "color", "$description": "Depressed surface" },
       "bg4":            { "$value": "{primitive.color.neutral.200}",        "$type": "color", "$description": "Depth-4 surface — más oscuro que bg3. Usar para fondos que necesitan distinción adicional sin llegar a bg3" },
-      "content-sheet":  { "$value": "{primitive.color.blue-tinted.50}",    "$type": "color", "$description": "Superficie sólida de secciones de contenido (projects-sheet, blog, footer). Blue-tinted white que aporta coherencia con el acento azul" },
-      "inter-section":  { "$value": "{primitive.color.blue-tinted.100}",   "$type": "color", "$description": "Fondo de la inter-sección 'He trabajado con'. Gradiente: linear-gradient(#d8deec 0% 26%, #e6ebf3 100%)" },
+      "content-sheet":  { "$value": "{primitive.color.neutral.100}",       "$type": "color", "$description": "Superficie sólida de secciones de contenido (projects-sheet, blog, footer) — alias de bg3, misma escala neutra que el resto de la app" },
       "txt":          { "$value": "{primitive.color.text.dark-900}", "$type": "color", "$description": "Primary text" },
       "txt2":         { "$value": "{primitive.color.text.dark-700}", "$type": "color", "$description": "Secondary text" },
       "txt3":         { "$value": "{primitive.color.text.dark-500}", "$type": "color", "$description": "Muted text" },
@@ -328,15 +317,15 @@
       "gallery-max-width":  { "$value": "1000px","$type": "dimension" },
       "gallery-columns":    { "$value": "repeat(auto-fill, minmax(130px, 1fr))", "$type": "string", "$description": "6 cols a ≥780px, escala sola al crecer" },
       "gallery-gap":        { "$value": "24px 16px", "$type": "dimension", "$description": "row 24px / column 16px" },
-      "bg-light":           { "$value": "linear-gradient(#d8deec 0% 26%, #e6ebf3 100%)", "$type": "color" },
-      "bg-dark":            { "$value": "linear-gradient(#03070e 0%, #060b16 100%)", "$type": "color" },
+      "bg-light":           { "$value": "linear-gradient(180deg, {primitive.color.neutral.50} 0%, {primitive.color.neutral.200} 100%)", "$type": "color", "$description": "var(--bg) → var(--bg4) en CSS" },
+      "bg-dark":            { "$value": "linear-gradient(180deg, {primitive.color.neutral.950} 0%, {primitive.color.neutral.800} 100%)", "$type": "color", "$description": "var(--bg) → var(--bg3) en CSS — bg3 en vez de bg4 para evitar el salto de brillo contra --bg" },
       "entrance-threshold": { "$value": "0.12",  "$type": "number", "$description": "IntersectionObserver threshold — 12% visible dispara la animación" },
       "entrance-class":     { "$value": "brands-section--visible", "$type": "string", "$description": "Clase que se añade al <section> al entrar en viewport; activa transiciones en hijos" }
     },
     "blog-preview-section": {
-      "$description": "Sección preview del blog en el home (últimas entradas). Aparece bajo brands-section. Los gradientes dark conectan visualmente: brands termina en #060b16 y blog empieza en #0c1325. CSS: .blog-preview-section, .dark .blog-preview-section",
-      "bg-light": { "$value": "linear-gradient(#f0f4fb 0%, #f0f4fb 100%)", "$type": "color" },
-      "bg-dark":  { "$value": "linear-gradient(#0c1325 0%, #07090e 100%)", "$type": "color", "$description": "Conecta con brands-end para transición suave entre secciones dark" }
+      "$description": "Sección preview del blog en el home (últimas entradas). Aparece bajo brands-section. Ambas secciones comparten la misma escala neutra bg/bg2/bg3/bg4 — no hay paleta propia. CSS: .blog-preview-section, .dark .blog-preview-section",
+      "bg-light": { "$value": "linear-gradient({primitive.color.neutral.0} 0%, {primitive.color.neutral.50} 100%)", "$type": "color", "$description": "var(--bg2) → var(--bg) en CSS" },
+      "bg-dark":  { "$value": "linear-gradient({primitive.color.neutral.950} 0%, {primitive.color.neutral.900} 100%)", "$type": "color", "$description": "var(--bg) → var(--bg2) en CSS" }
     },
     "section-eyebrow-label": {
       "$description": "Patrón editorial de etiqueta de sección con líneas decorativas horizontales a los lados. Actual uso: BrandsSection. Patrón reutilizable para cualquier sección que necesite un encabezado discreto centrado. HTML: <div class='brands-label-wrap'><div class='brands-label-line'/><p class='brands-label'>TEXTO</p><div class='brands-label-line'/></div>. Regla de uso: solo para secciones de soporte (inter-secciones, social proof). Para secciones primarias usar heading jerárquico.",
@@ -594,14 +583,15 @@
       "back-link-size":   { "$value": "{primitive.fontSize.sm}", "$description": "14px · txt3 → txt en hover" }
     }
   },
+
+  "dark": {
     "semantic": {
       "color": {
         "bg":          { "$value": "{primitive.color.neutral.950}",  "$type": "color" },
         "bg2":         { "$value": "{primitive.color.neutral.900}",  "$type": "color" },
         "bg3":            { "$value": "{primitive.color.neutral.800}",          "$type": "color" },
-        "bg4":            { "$value": "{primitive.color.neutral.700}",          "$type": "color", "$description": "Depth-4 dark — #1e1e1e" },
-        "content-sheet":  { "$value": "{primitive.color.blue-tinted.950}",     "$type": "color", "$description": "Superficie sólida dark — deep navy #060c1a" },
-        "inter-section":  { "$value": "{primitive.color.blue-tinted.900}",     "$type": "color", "$description": "Inter-sección dark — #0b1526" },
+        "bg4":            { "$value": "{primitive.color.neutral.700}",          "$type": "color", "$description": "Depth-4 dark — #212430" },
+        "content-sheet":  { "$value": "{primitive.color.neutral.800}",         "$type": "color", "$description": "Superficie sólida dark — alias de bg3, misma escala neutra que el resto de la app" },
         "txt":         { "$value": "{primitive.color.text.light-50}",  "$type": "color" },
         "txt2":        { "$value": "{primitive.color.text.light-300}", "$type": "color" },
         "txt3":        { "$value": "{primitive.color.text.light-500}", "$type": "color" },
@@ -613,7 +603,7 @@
         "glass-hover": { "$value": "rgba(255, 255, 255, 0.07)",      "$type": "color" },
         "card":        { "$value": "rgba(255, 255, 255, 0.04)",      "$type": "color" },
         "card-hover":  { "$value": "rgba(255, 255, 255, 0.08)",      "$type": "color" },
-        "navbar-bg":   { "$value": "rgba(0, 0, 0, 0.75)",           "$type": "color" },
+        "navbar-bg":   { "$value": "rgba(10, 11, 18, 0.75)",        "$type": "color" },
         "shadow":      { "$value": "rgba(0, 0, 0, 0.60)",           "$type": "color" }
       }
     },

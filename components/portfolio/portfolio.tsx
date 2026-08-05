@@ -27,6 +27,24 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
   const pageRef   = useRef<HTMLDivElement>(null)
   const pendingScrollRef = useRef<string | null>(null)
 
+  // El navegador restaura automáticamente la posición de scroll al recargar
+  // la página (history.scrollRestoration por defecto es "auto") — si el
+  // usuario había scrolleado antes de recargar, vuelve a esa misma posición
+  // sin que haya scrolleado en la sesión nueva. El hero usa esa posición
+  // para decidir cuándo activar el blur/disolución de la transición al
+  // scroll (ver hero-section.tsx), así que una recarga scrolleada activaba
+  // el blur de golpe apenas se cumplía el timer de entrada, sin que el
+  // usuario hubiera hecho scroll — se sentía como un bug del blur. Se
+  // desactiva acá, una sola vez: no pisa la restauración propia de la app
+  // (sessionStorage + scrollIntoView al volver del detalle de un proyecto,
+  // ver los efectos de pendingScrollRef más abajo), que es un mecanismo
+  // completamente aparte del nativo del navegador.
+  useEffect(() => {
+    if (typeof history !== "undefined" && "scrollRestoration" in history) {
+      history.scrollRestoration = "manual"
+    }
+  }, [])
+
   // Scroll animations
   useIntersection(
     pageRef,

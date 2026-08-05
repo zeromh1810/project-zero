@@ -47,11 +47,12 @@ export function ProjectsSection({ onNavigateContact, onNavigateAbout, onSelectPr
         (window.innerHeight - rect.top) / (window.innerHeight - navH)
       ))
       const alpha = (0.82 + 0.18 * progress).toFixed(3)
-      // rgb triplets match --bg2/--bg (blanco/negro puro): más contraste con el
-      // terreno del hero que el --bg3 gris usado antes, y coherente con que
-      // brands/blog-preview también vuelven a blanco/negro puro más abajo.
+      // rgb triplets match --bg2/--bg (blanco / navy-tinted oscuro): más
+      // contraste con el terreno del hero que el --bg3 gris usado antes, y
+      // coherente con que brands/blog-preview también vuelven a esos
+      // extremos de la escala más abajo.
       el.style.background = isDark
-        ? `rgba(0, 0, 0, ${alpha})`
+        ? `rgba(10, 11, 18, ${alpha})`
         : `rgba(255, 255, 255, ${alpha})`
     }
 

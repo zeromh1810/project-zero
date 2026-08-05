@@ -27,11 +27,16 @@ const BASE_YAW   = 0.1708652 // ~9.79°
 // for a decorative ripple, and it keeps the inverse a plain closed-form
 // rotation instead of an iterative solve.
 // ─────────────────────────────────────────────────────────────────────────────
+// REF_ASPECT debe coincidir con la constante homónima del vertex shader —
+// es el mismo ancla de aspect ratio, invertida acá para el cálculo inverso.
+const REF_ASPECT = 1.6
+
 function screenToLayerUV(
   ndcX: number,
   ndcY: number,
   mx: number,
   my: number,
+  aspect: number,
   s: { yawAmt: number; pitchAmt: number; pitchAmtDown: number; planeScale: number; planeShiftY: number }
 ): [number, number] {
   const yaw = BASE_YAW + mx * s.yawAmt
@@ -46,7 +51,11 @@ function screenToLayerUV(
   const sinPitch = Math.sin(pitch)
   const k = cosPitch * 3.60 + sinPitch * 0.9
 
-  const x1 = ndcX / (2.28 * s.planeScale)
+  // Inversa de la corrección de aspect ratio del vertex shader — mismo
+  // clamp a mínimo 1.0 que allá (ver comentario junto a ndcXAspect en el
+  // vertex shader), o el ripple cae desplazado en pantallas más anchas
+  // que REF_ASPECT.
+  const x1 = ndcX / (2.28 * Math.max(1.0, REF_ASPECT / aspect) * s.planeScale)
   const z1 = (s.planeShiftY - ndcY) / (k * s.planeScale)
 
   const wx = cosYaw * x1 - sinYaw * z1
@@ -82,6 +91,22 @@ uniform float uPitchAmt;
 uniform float uPitchAmtDown;
 uniform float uPlaneScale;
 uniform float uPlaneShiftY;
+uniform float uAspect;
+
+// El terreno se tuneó a ojo contra un viewport de escritorio ~1440×900
+// (aspect 1.6) — REF_ASPECT ancla esa calibración. Sin corrección, ndcX
+// y ndcY se escriben con multiplicadores fijos (ver abajo) que asumen
+// ESE aspect ratio; WebGL mapea NDC ±1 en X al ancho del canvas y NDC ±1
+// en Y a su alto de forma independiente, así que en un viewport angosto
+// y alto (mobile portrait) el mismo terreno queda comprimido en X y
+// estirado en Y — las colinas isométricas se aplanan en líneas casi
+// verticales. La corrección seguida acá es la convención estándar de
+// cámara con FOV vertical fijo: el eje Y (profundidad) no se toca, y el
+// eje X se reescala proporcional a cuánto se aleja el aspect actual del
+// de referencia — angosto → X se comprime (efecto "zoom out"
+// horizontal) para que la proporción de las formas se mantenga igual
+// que en desktop, en vez de estirarse.
+const float REF_ASPECT = 1.6;
 
 float terrain(float u, float v, float t) {
   float h = 0.0;
@@ -154,7 +179,26 @@ void main() {
   // Full-bleed rectangle. The Y scale is larger than X to compensate for
   // the tilt foreshortening the depth axis, so the mesh still covers the
   // full height with no exposed edge.
-  float ndcX =  x1 * 2.28;
+  // Aspect correction (ver comentario de REF_ASPECT arriba): FOV vertical
+  // fijo — ndcY no cambia con el aspect. ndcX se reescala por
+  // REF_ASPECT/uAspect: en un viewport más angosto que la referencia ese
+  // factor crece (>1), así que ndcX llega a ±1 con un rango de x1 más
+  // chico — se ve MENOS mundo en X, en la misma proporción en que se ve
+  // menos mundo en Y por el alto real del canvas. Es lo que mantiene
+  // pixelsPerWorldX/pixelsPerWorldZ constante (sin esto, ese ratio es
+  // proporcional al aspect del canvas — por eso se estiraba en mobile).
+  // clamp a mínimo 1.0: el overscan original (el "small overscan margin"
+  // del comentario de arriba, ver VERT header) ya se tuneó a ojo para
+  // cubrir de sobra el rango de aspects de escritorio típico (~1.4–2.0).
+  // Sin este clamp, en un monitor MÁS ancho que REF_ASPECT (ej. 2560px+,
+  // aspect >1.6) el factor cae por debajo de 1 y ENCOGE ese overscan en
+  // vez de solo expandirlo en mobile — el plano deja de cubrir el ancho
+  // real y se ve el borde de la malla (líneas cortadas en seco) antes
+  // del borde del navegador. Con el clamp, pantallas angostas siguen
+  // expandiendo (factor >1) y pantallas anchas se quedan en el mismo
+  // overscan de siempre (factor 1, nunca reducido).
+  float ndcXAspect = max(1.0, REF_ASPECT / uAspect);
+  float ndcX =  x1 * 2.28 * ndcXAspect;
   float ndcY = -z2 * 3.60 + y2 * 0.9;
 
   // uPlaneScale/uPlaneShiftY push the background layer's plane smaller and
@@ -306,7 +350,7 @@ const PALETTES: { dark: Palette; light: Palette } = {
     primary: {
       lineMinor:   hex3('#727276'),   // --txt3 (dark) −20% tono
       lineMajor:   hex3('#c4c4c6'),   // --txt (dark) −20% tono
-      bgColor:     hex3('#000000'),   // --bg (dark)
+      bgColor:     hex3('#0a0b12'),   // --bg (dark)
       spacing:     0.230,
       lineWidth:   0.6,
       fogStart:    0.55,
@@ -477,6 +521,7 @@ export function buildHeroTerrain(
     uTime:        gl.getUniformLocation(prog, "uTime"),
     uPX:          gl.getUniformLocation(prog, "uPX"),
     uPY:          gl.getUniformLocation(prog, "uPY"),
+    uAspect:      gl.getUniformLocation(prog, "uAspect"),
     uZoom:        gl.getUniformLocation(prog, "uZoom"),
     uNoiseOffset: gl.getUniformLocation(prog, "uNoiseOffset"),
     uYawAmt:      gl.getUniformLocation(prog, "uYawAmt"),
@@ -523,21 +568,6 @@ export function buildHeroTerrain(
   let lastIsDark = getIsDark()
   let palette = lastIsDark ? PALETTES.dark : PALETTES.light
 
-  // The noise field is sampled in UV space (independent of canvas pixel
-  // size), so the same pattern gets squeezed into a much narrower canvas on
-  // mobile — isolines end up visually closer together than on desktop, even
-  // though it's the same content. Widening the spacing (fewer isolines) and
-  // lowering the zoom (gentler, lower-frequency terrain) brings the
-  // perceived density back in line with the desktop feel, without touching
-  // desktop's own values. Tuned by eye against the desktop reference at
-  // several mobile widths (iPhone SE/13/Pro Max) — not a formula, so revisit
-  // by screenshot if BASE_PITCH/zoom/spacing above ever change again.
-  let isMobile = false
-  function mobileLayer(s: LayerStyle): LayerStyle {
-    if (!isMobile) return s
-    return { ...s, spacing: s.spacing * 2.2, zoom: s.zoom * 0.6 }
-  }
-
   // Mouse / touch parallax
   const m = { x: 0, y: 0, tx: 0, ty: 0 }
   const onMouse = (e: MouseEvent) => {
@@ -570,16 +600,18 @@ export function buildHeroTerrain(
     const ndcX =  ((e.clientX - rect.left) / rect.width  - 0.5) * 2
     const ndcY = -((e.clientY - rect.top)  / rect.height - 0.5) * 2
 
-    rippleUVPrimary = screenToLayerUV(ndcX, ndcY, m.x, m.y, palette.primary)
+    rippleUVPrimary = screenToLayerUV(ndcX, ndcY, m.x, m.y, currentAspect, palette.primary)
     rippleT0 = (performance.now() - t0) / 1000
   }
   window.addEventListener("click", onClick, { passive: true })
 
   // Resize
+  let currentAspect = 16 / 9
   function resize() {
     const w = container.clientWidth  || window.innerWidth
     const h = container.clientHeight || window.innerHeight
-    isMobile = w <= 640
+    currentAspect = w / h
+    gl.uniform1f(U.uAspect, currentAspect)
     if (canvas.width === w && canvas.height === h) return
     canvas.width  = w
     canvas.height = h
@@ -620,7 +652,7 @@ export function buildHeroTerrain(
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     gl.bindVertexArray(vao)
-    applyLayer(mobileLayer(palette.primary), rippleUVPrimary, rippleAge)
+    applyLayer(palette.primary, rippleUVPrimary, rippleAge)
     gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_INT, 0)
     gl.bindVertexArray(null)
   }

@@ -1,9 +1,9 @@
 "use client"
 
-import { useRef, useEffect, useState, useCallback } from "react"
+import { useRef, useEffect, useState } from "react"
 import { useTheme } from "@/lib/context/theme-context"
 import { buildHeroTerrain } from "@/lib/webgl/hero-terrain"
-import { useScrollParallax } from "@/hooks/use-scroll-parallax"
+import SplitText from "../split-text"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -14,13 +14,6 @@ interface HeroData {
   subtitle: string
 }
 
-interface SlideProject {
-  id: number
-  title: string
-  category: string
-  thumbnail: string
-}
-
 const DEFAULT: HeroData = {
   titleLine1: "Diseño",
   titleLine2: "experiencias",
@@ -29,106 +22,174 @@ const DEFAULT: HeroData = {
     "Product Designer & Frontend Developer. Cinco años creando productos que equilibran estética refinada con funcionalidad real.",
 }
 
-/**
- * Stack positions — index 0 = frente, 2 = fondo
- * Offsets más grandes (20/38px) para que la profundidad sea claramente legible.
- * Opacidades más agresivas para crear separación real entre planos.
- */
-const DEPTH = [
-  { x:  0, y:  0, s: 1.000, o: 1.00, z: 4 },
-  { x: 20, y: 20, s: 0.940, o: 0.60, z: 3 },
-  { x: 38, y: 38, s: 0.882, o: 0.32, z: 2 },
-]
-
 interface HeroSectionProps {
   onNavigateContact: () => void
   onNavigateAbout: () => void
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// HeroSection
-// ═══════════════════════════════════════════════════════════════════════════════
+// Las animaciones de entrada (.hero-sub, .hero-cta, .hero-portrait) usan
+// animation-fill-mode:forwards para no "saltar" al estado final apenas
+// termina de jugar la animación — pero ese mismo forwards le sigue ganando
+// la cascada a cualquier estilo inline que el scroll escriba después
+// (opacity/transform quedan pegados al valor final de la animación para
+// siempre, aunque el JS de scroll escriba otra cosa: el elemento nunca se
+// desvanece ni se mueve visualmente). Por eso hay que liberar la animación
+// apenas termina de jugar.
+//
+// El bug real estaba en CÓMO se liberaba: poner solo `animation:none` saca
+// la animación de la cascada, pero esa misma regla declara `opacity:0`
+// como valor BASE (fuera del keyframe) — sin la animación pisándolo, el
+// elemento vuelve exactamente a ese opacity:0 de golpe, y como el scroll
+// todavía no escribió nada (usuario recién recargó y no hizo scroll), se
+// queda invisible para siempre. Por eso "cargan y después desaparecen".
+// Fix: al liberar, fijar explícitamente el estado final visible (mismo
+// valor al que ya había llegado el keyframe) ANTES de sacar la animación,
+// para que la cascada tenga algo visible de dónde partir hasta que el
+// scroll tome el control.
+function releaseEntranceAnimation(e: React.AnimationEvent<HTMLElement>) {
+  const el = e.currentTarget
+  el.style.opacity   = "1"
+  el.style.transform = "none"
+  el.style.filter    = "none"
+  el.style.animation = "none"
+}
 
 export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionProps) {
   const { darkRef } = useTheme()
   const terrainContainerRef = useRef<HTMLDivElement>(null)
   const terrainCleanupRef   = useRef<(() => void) | null>(null)
   const wrapRef             = useRef<HTMLDivElement>(null)
+  const portraitRef         = useRef<HTMLDivElement>(null)
   const scrollHintRef  = useRef<HTMLDivElement>(null)
 
-  const [hero,   setHero]   = useState<HeroData>(DEFAULT)
-  const [slides, setSlides] = useState<SlideProject[]>([])
+  const [hero, setHero] = useState<HeroData>(DEFAULT)
+  // SplitText no debe montarse dos veces con textos distintos (ver comentario
+  // en split-text.tsx): si ya terminó de animar una vez, un cambio de texto
+  // posterior no la vuelve a disparar. Como este título es editable desde
+  // /admin y llega vía fetch después del mount, esperamos a que ese fetch
+  // resuelva (éxito o error) para recién ahí montar el SplitText con el
+  // texto definitivo — así anima una sola vez, con el texto correcto.
+  const [heroLoaded, setHeroLoaded] = useState(false)
 
-  useScrollParallax(wrapRef, 0.35)
-
-  // ── Blur progresivo (texto + terreno WebGL, misma curva) ────────────────────
+  // ── Scroll: parallax + disolución, todo en un solo listener con rAF ────────
+  // Antes eran 4 listeners de scroll independientes (parallax de texto,
+  // parallax+disolución del retrato, blur de texto/terreno, disolución
+  // escalonada de título/sub/cta), cada uno leyendo/escribiendo el DOM por su
+  // cuenta en cada evento — encolados acá en un solo rAF para que la
+  // transición no se sienta a los tirones (menos layout thrashing).
+  // El parallax base del texto corre siempre, igual que antes; el resto de
+  // la disolución espera ~1.65s (cubre el delay+duración más largo entre
+  // .hero-sub/.hero-cta/.hero-portrait) para no pelear visualmente con sus
+  // animaciones de entrada — ver releaseEntranceAnimation arriba, que las
+  // libera de animation-fill-mode:forwards apenas terminan de jugar.
   useEffect(() => {
-    const el      = wrapRef.current
-    const terrain = terrainContainerRef.current
-    if (!el) return
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-    const onScroll = () => {
-      const vh   = window.innerHeight
-      const p    = Math.max(0, Math.min(1, (window.scrollY - vh * 0.3) / (vh * 0.6)))
-      const blur = p > 0 ? `blur(${(p * 18).toFixed(1)}px)` : ""
-      el.style.filter = blur
-      if (terrain) {
-        // El terreno además funde a 0 (no solo desenfoca) para que desaparezca
-        // limpio antes de que el projects-sheet lo tape del todo, en vez de
-        // quedar como un resplandor difuso detrás del sheet semitransparente.
-        terrain.style.filter  = blur
-        terrain.style.opacity = p > 0 ? `${(1 - p).toFixed(3)}` : ""
-      }
-    }
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [])
-
-  // ── Disolución escalonada al scroll ─────────────────────────────────────────
-  useEffect(() => {
-    const wrap = wrapRef.current
+    const wrap     = wrapRef.current
+    const portrait = portraitRef.current
+    const terrain  = terrainContainerRef.current
+    const hint     = scrollHintRef.current
     if (!wrap) return
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     let active = false
-    const t = setTimeout(() => { active = true }, 1500)
-    const onScroll = () => {
+    // Al activar, vuelve a evaluar la posición de scroll actual: si el
+    // usuario ya scrolleó durante los primeros 1.65s (antes de que esto
+    // corriera), el estado de disolución quedaría "colgado" en el valor de
+    // la entrada hasta el próximo evento de scroll si no se fuerza acá.
+    const activateTimer = reduced ? null : setTimeout(() => { active = true; apply() }, 1650)
+
+    let rafId = 0
+    const apply = () => {
+      rafId = 0
+      const y  = window.scrollY
+      const vh = window.innerHeight
+
+      if (hint) hint.classList.toggle("scroll-hint--hidden", y > 48)
+      if (reduced) return
+
+      // Parallax base del bloque de texto
+      wrap.style.transform = `translateY(${(y * 0.35).toFixed(1)}px)`
+
       if (!active) return
-      const vh     = window.innerHeight
-      const titleEl = wrap.querySelector<HTMLElement>(".hero-title")
+
+      // Blur progresivo — texto + terreno, misma curva. El terreno además
+      // funde a 0 (no solo desenfoca) para que desaparezca limpio antes de
+      // que el projects-sheet lo tape del todo, en vez de quedar como un
+      // resplandor difuso detrás del sheet semitransparente.
+      // IMPORTANTE: esto va en .hero-left, NO en .hero-wrap — .hero-portrait
+      // vive dentro de .hero-wrap (para compartir su contenedor centrado con
+      // el texto), y filter en CSS blurea visualmente a TODOS los
+      // descendientes del elemento que lo tiene. Ponerlo en .hero-wrap
+      // hacía que el retrato recibiera este blur MÁS el suyo propio (más
+      // abajo) sumados — hasta ~32px en vez de los 14px diseñados.
+      // blur(0px), no "" — un string vacío LIMPIA el inline y deja que la
+      // cascada decida, y si el elemento tiene un filter/opacity BASE
+      // declarado en su regla CSS (como .hero-portrait, más abajo: su
+      // filter:blur(10px) es el estado "antes de la animación de entrada"),
+      // la cascada cae ahí en vez de en "sin blur". Mismo bug que ya
+      // habíamos visto con opacity — acá aplica a filter, y por eso el
+      // blur "se activaba solo": bastaba con volver a pp/pBlur=0 para que
+      // el "" revelara el blur(10px) base del retrato.
+      const heroLeft = wrap.querySelector<HTMLElement>(".hero-left")
+      const pBlur = Math.max(0, Math.min(1, (y - vh * 0.3) / (vh * 0.6)))
+      const blur  = `blur(${(pBlur * 18).toFixed(1)}px)`
+      if (heroLeft) heroLeft.style.filter = blur
+      if (terrain) {
+        terrain.style.filter  = blur
+        terrain.style.opacity = `${(1 - pBlur).toFixed(3)}`
+      }
+
+      // Disolución escalonada del texto — cta primero, luego sub. El título
+      // ya no participa: su animación de entrada ahora es el SplitText
+      // (ver JSX más abajo), y no queremos que el scroll le pise ese efecto
+      // con otra transición encima.
       const subEl   = wrap.querySelector<HTMLElement>(".hero-sub")
       const ctaEl   = wrap.querySelector<HTMLElement>(".hero-cta")
       if (ctaEl) {
-        const p = Math.max(0, Math.min(1, (window.scrollY - vh * 0.10) / (vh * 0.35)))
+        const p = Math.max(0, Math.min(1, (y - vh * 0.10) / (vh * 0.35)))
         ctaEl.style.transform = `translateY(${8 * p}px) scale(${(1 - p * 0.06).toFixed(3)})`
         ctaEl.style.opacity   = `${Math.max(0, 1 - p * 1.5).toFixed(3)}`
       }
       if (subEl) {
-        const p = Math.max(0, Math.min(1, (window.scrollY - vh * 0.20) / (vh * 0.35)))
+        const p = Math.max(0, Math.min(1, (y - vh * 0.20) / (vh * 0.35)))
         subEl.style.transform = `translateY(${14 * p}px)`
         subEl.style.opacity   = `${Math.max(0, 1 - p * 1.3).toFixed(3)}`
       }
-      if (titleEl) {
-        const p = Math.max(0, Math.min(1, (window.scrollY - vh * 0.15) / (vh * 0.45)))
-        titleEl.style.transform = `translateY(${-36 * p}px)`
-        titleEl.style.opacity   = `${Math.max(0, 1 - p * 0.8).toFixed(3)}`
-      }
-      if (window.scrollY < vh * 0.08) {
-        if (titleEl) { titleEl.style.transform = ""; titleEl.style.opacity = "" }
-        if (subEl)   { subEl.style.transform   = ""; subEl.style.opacity   = "" }
-        if (ctaEl)   { ctaEl.style.transform   = ""; ctaEl.style.opacity   = "" }
-      }
-    }
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => { clearTimeout(t); window.removeEventListener("scroll", onScroll) }
-  }, [])
 
-  // ── Scroll hint ──────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const hint = scrollHintRef.current
-    if (!hint) return
-    const onScroll = () => hint.classList.toggle("scroll-hint--hidden", window.scrollY > 48)
+      // Retrato — su propia curva (más rápida que el 0.35 del texto, para que
+      // la figura "cruce" el texto en vez de moverse pegada a él) + disolución
+      // sincronizada con la misma ventana que el resto.
+      if (portrait) {
+        const py = Math.min(y * 0.5, 220)
+        const pp = Math.max(0, Math.min(1, (y - vh * 0.15) / (vh * 0.5)))
+        portrait.style.transform = `translateY(${(-py).toFixed(1)}px) scale(${(1 - pp * 0.05).toFixed(3)})`
+        portrait.style.opacity   = `${Math.max(0, 1 - pp * 1.1).toFixed(3)}`
+        portrait.style.filter    = `blur(${(pp * 14).toFixed(1)}px)`
+      }
+      // Nota: no hace falta un "reset cerca del tope" — los clamps de arriba
+      // (Math.max(0, ...)) ya devuelven exactamente p=0 en y=0, así que las
+      // fórmulas SIEMPRE escriben el valor de reposo correcto (opacity:1,
+      // transform:none) de forma explícita. Un reset a "" (como había antes)
+      // no es más prolijo, es PEOR: borra el valor ya calculado y deja que
+      // la cascada decida — y para .hero-sub/.hero-cta/.hero-portrait esa
+      // cascada cae en el opacity:0 base de su regla CSS una vez que
+      // releaseEntranceAnimation ya fijó animation:none, dejándolos
+      // invisibles para siempre. Ese era justamente el bug: al volver cerca
+      // del tope, ese reset "apagaba" todo salvo el título (que nunca tuvo
+      // opacity:0 propio ni animación en sí mismo).
+    }
+
+    const onScroll = () => {
+      if (rafId) return
+      rafId = requestAnimationFrame(apply)
+    }
+
     window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
+    apply()
+    return () => {
+      if (activateTimer) clearTimeout(activateTimer)
+      if (rafId) cancelAnimationFrame(rafId)
+      window.removeEventListener("scroll", onScroll)
+    }
   }, [])
 
   // ── Data ─────────────────────────────────────────────────────────────────────
@@ -136,15 +197,7 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
     let ignore = false
     fetch("/api/admin/hero", { cache: "no-store" })
       .then(r => r.json()).then(d => { if (!ignore) setHero({ ...DEFAULT, ...d }) }).catch(() => {})
-    return () => { ignore = true }
-  }, [])
-
-  useEffect(() => {
-    let ignore = false
-    fetch("/api/admin/projects", { cache: "no-store" })
-      .then(r => r.json())
-      .then((d: SlideProject[]) => { if (!ignore) setSlides(d.filter(p => p.thumbnail).slice(0, 5)) })
-      .catch(() => {})
+      .finally(() => { if (!ignore) setHeroLoaded(true) })
     return () => { ignore = true }
   }, [])
 
@@ -170,33 +223,36 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
     <div className="section-full">
       <div ref={terrainContainerRef} className="hero-terrain-container" aria-hidden="true" />
 
-      <div className="hero-wrap hero-wrap--split" ref={wrapRef}>
+      <div className="hero-wrap hero-wrap--portrait" ref={wrapRef}>
 
         {/* ── LEFT: texto hero ─────────────────────────────────────────────── */}
         <div className="hero-left">
           <h1 className="hero-title">
-            <span className="hero-line-wrap">
-              <span className="hero-line-inner" style={{ animationDelay: "0.05s" }}>
-                {hero.titleLine1}
-              </span>
-            </span>
-            <br />
-            <span className="hero-line-wrap">
-              <span className="hero-line-inner" style={{ animationDelay: "0.18s" }}>
-                <em>{hero.titleLine2}</em>
-              </span>
-            </span>
-            <br />
-            <span className="hero-line-wrap">
-              <span className="hero-line-inner" style={{ animationDelay: "0.30s" }}>
-                {hero.titleLine3}
-              </span>
-            </span>
+            {heroLoaded ? (
+              <>
+                <SplitText tag="span" text={hero.titleLine1} className="hero-title-line" />
+                <br />
+                <SplitText tag="span" text={hero.titleLine2} className="hero-title-line hero-title-line--accent" />
+                <br />
+                <SplitText tag="span" text={hero.titleLine3} className="hero-title-line" />
+              </>
+            ) : (
+              // Placeholder estático (sin animar) mientras /api/admin/hero
+              // resuelve — ver comentario de heroLoaded arriba. Misma
+              // estructura que el resultado final para no saltar de layout.
+              <>
+                <span className="hero-title-line">{hero.titleLine1}</span>
+                <br />
+                <span className="hero-title-line hero-title-line--accent">{hero.titleLine2}</span>
+                <br />
+                <span className="hero-title-line">{hero.titleLine3}</span>
+              </>
+            )}
           </h1>
 
-          <p className="hero-sub">{hero.subtitle}</p>
+          <p className="hero-sub" onAnimationEnd={releaseEntranceAnimation}>{hero.subtitle}</p>
 
-          <div className="hero-cta">
+          <div className="hero-cta" onAnimationEnd={releaseEntranceAnimation}>
             <button className="btn-p btn-magnetic" onClick={onNavigateContact}>
               Trabajemos juntos <span>→</span>
             </button>
@@ -204,225 +260,35 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
               Sobre mí
             </button>
           </div>
+        </div>
 
-          <div className="scroll-hint" ref={scrollHintRef} aria-hidden="true">
-            <div className="scroll-mouse"><div className="scroll-dot" /></div>
-            <span className="scroll-label">Scroll</span>
+        {/* ── Retrato — dentro de .hero-wrap para compartir su mismo
+            contenedor centrado con el texto (ver comentario en el CSS).
+            .hero-portrait: entrada + parallax de scroll (ref, vía JS).
+            .hero-portrait-float: loop idle independiente (puro CSS) para
+            que el personaje se sienta "vivo" sin pelear con las
+            transformaciones de scroll del div padre ──────────────────── */}
+        <div className="hero-portrait" ref={portraitRef} onAnimationEnd={releaseEntranceAnimation}>
+          <div className="hero-portrait-float">
+            <img
+              src="/hero-carlos.png"
+              alt="Carlos Felipe Rojas Hickmann"
+              className="hero-portrait-img"
+              draggable={false}
+              loading="lazy"
+            />
           </div>
         </div>
 
-        {/* ── RIGHT: galería stacked deck ──────────────────────────────────── */}
-        <div className="hero-right">
-          {slides.length > 0 && <DeckGallery slides={slides} />}
-        </div>
-
-      </div>
-    </div>
-  )
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// DeckGallery — Stacked Depth Deck
-// ═══════════════════════════════════════════════════════════════════════════════
-
-function DeckGallery({ slides }: { slides: SlideProject[] }) {
-  const [order,  setOrder]  = useState(() => slides.map((_, i) => i))
-  const cardRefs    = useRef<(HTMLDivElement | null)[]>([])
-  const counterRef  = useRef<HTMLSpanElement>(null)
-  const titleRef    = useRef<HTMLSpanElement>(null)
-  const busy        = useRef(false)
-  const timerRef    = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const galleryRef  = useRef<HTMLDivElement>(null)
-  const tiltFrameRef = useRef<number>(0)
-
-  const handleTiltMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    cancelAnimationFrame(tiltFrameRef.current)
-    tiltFrameRef.current = requestAnimationFrame(() => {
-      const el = galleryRef.current
-      if (!el) return
-      const rect = el.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width - 0.5
-      const y = (e.clientY - rect.top) / rect.height - 0.5
-      el.style.transform = `perspective(1000px) rotateX(${-y * 5}deg) rotateY(${x * 5}deg)`
-      el.style.transition = "transform 80ms linear"
-    })
-  }, [])
-
-  const handleTiltLeave = useCallback(() => {
-    cancelAnimationFrame(tiltFrameRef.current)
-    const el = galleryRef.current
-    if (!el) return
-    el.style.transition = "transform 600ms cubic-bezier(0.16, 1, 0.3, 1)"
-    el.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg)"
-  }, [])
-
-  // ── Deal ─────────────────────────────────────────────────────────────────────
-  const deal = useCallback(() => {
-    if (busy.current || slides.length < 2) return
-    busy.current = true
-
-    import("animejs/lib/anime.es.js").then(m => {
-      const anime = (m.default ?? m) as any
-      const frontIdx = order[0]
-      const frontEl  = cardRefs.current[frontIdx]
-      if (!frontEl) { busy.current = false; return }
-
-      const tl = anime.timeline({})
-
-      // Eyebrow counter sale
-      tl.add({
-        targets: [counterRef.current, titleRef.current].filter(Boolean),
-        opacity: [1, 0],
-        translateY: [0, -6],
-        duration: 220,
-        easing: "easeInCubic",
-      })
-
-      // Carta frontal sube y sale con leve rotación
-      tl.add({
-        targets: frontEl,
-        translateY: [0, "-128%"],
-        rotate:     [0, -5],
-        opacity:    [1, 0],
-        scale:      [1, 0.96],
-        duration: 480,
-        easing: "easeInExpo",
-      }, 0)
-
-      // Cartas traseras avanzan a sus nuevas posiciones
-      order.slice(1).forEach((cardIdx, posIdx) => {
-        const el   = cardRefs.current[cardIdx]
-        const from = DEPTH[Math.min(posIdx + 1, DEPTH.length - 1)]
-        const to   = DEPTH[Math.min(posIdx, DEPTH.length - 1)]
-        if (!el) return
-        tl.add({
-          targets: el,
-          translateX: [from.x, to.x],
-          translateY: [from.y, to.y],
-          scale:      [from.s, to.s],
-          opacity:    [from.o, to.o],
-          duration: 520,
-          easing: "easeOutExpo",
-        }, 120 + posIdx * 40)
-      })
-
-      // Eyebrow counter entra con nuevos valores
-      tl.add({
-        targets: [counterRef.current, titleRef.current].filter(Boolean),
-        opacity: [0, 1],
-        translateY: [6, 0],
-        duration: 320,
-        easing: "easeOutExpo",
-        begin: () => setOrder(prev => [...prev.slice(1), prev[0]]),
-      }, 540)
-
-      setTimeout(() => {
-        const pos = DEPTH[DEPTH.length - 1]
-        if (frontEl) {
-          frontEl.style.transform = `translateX(${pos.x}px) translateY(${pos.y}px) scale(${pos.s})`
-          frontEl.style.opacity   = String(pos.o)
-          frontEl.style.zIndex    = String(pos.z)
-          frontEl.style.rotate    = "0deg"
-        }
-        busy.current = false
-      }, 900)
-    })
-  }, [order, slides.length])
-
-  // ── Auto-avance ───────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (slides.length < 2) return
-    timerRef.current = setTimeout(deal, 4500)
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  }, [deal, slides.length])
-
-  // ── Entrada escalonada ────────────────────────────────────────────────────────
-  useEffect(() => {
-    import("animejs/lib/anime.es.js").then(m => {
-      const a = (m.default ?? m) as any
-      order.slice(0, DEPTH.length).forEach((cardIdx, posIdx) => {
-        const el  = cardRefs.current[cardIdx]
-        const pos = DEPTH[posIdx]
-        if (!el) return
-        a({
-          targets: el,
-          opacity:    [0, pos.o],
-          translateX: [pos.x + 28, pos.x],
-          translateY: [pos.y + 18, pos.y],
-          scale:      [pos.s * 0.90, pos.s],
-          duration: 900,
-          delay: 600 + posIdx * 130,
-          easing: "easeOutExpo",
-        })
-      })
-    })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const frontIdx    = order[0]
-  const frontProject = slides[frontIdx]
-
-  return (
-    <div className="deck-gallery" ref={galleryRef} onMouseMove={handleTiltMove} onMouseLeave={handleTiltLeave}>
-
-      {/* ── Eyebrow: label + línea + contador ── */}
-      <div className="deck-eyebrow">
-        <span className="deck-eyebrow-label">Proyectos</span>
-        <span className="deck-eyebrow-line" />
-        <span ref={counterRef} className="deck-eyebrow-counter">
-          {String(frontIdx + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
-        </span>
-      </div>
-
-      {/* ── Stack de cartas ── */}
-      <div className="deck-stage">
-        {order.slice(0, DEPTH.length).map((cardIdx, posIdx) => {
-          const p   = slides[cardIdx]
-          const pos = DEPTH[posIdx]
-          const isFront = posIdx === 0
-          return (
-            <div
-              key={cardIdx}
-              ref={el => { cardRefs.current[cardIdx] = el }}
-              className={`deck-card${isFront ? " deck-card--front" : ""}`}
-              style={{
-                zIndex:    pos.z,
-                opacity:   0,
-                transform: `translateX(${pos.x}px) translateY(${pos.y}px) scale(${pos.s})`,
-                cursor:    isFront ? "pointer" : "default",
-              }}
-              onClick={isFront ? deal : undefined}
-              aria-label={isFront ? `Ver siguiente proyecto: ${slides[order[1]]?.title}` : undefined}
-            >
-              <img src={p.thumbnail} alt={p.title} className="deck-card-img" />
-
-              {isFront && (
-                <div className="deck-card-overlay">
-                  <span className="deck-card-category">{p.category}</span>
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
-
-      {/* ── Meta: título activo + dots ── */}
-      <div className="deck-meta">
-        <span ref={titleRef} className="deck-meta-title">
-          {frontProject?.title ?? ""}
-        </span>
-        <div className="deck-dots">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              className={`deck-dot${order[0] === i ? " deck-dot--active" : ""}`}
-              onClick={() => !busy.current && order[0] !== i && deal()}
-              aria-label={`Proyecto ${i + 1}`}
-            />
-          ))}
+        {/* ── scroll-hint: hermano directo de .hero-wrap (no de .hero-left)
+            a propósito — ver comentario de z-index en .hero-left en el CSS,
+            si viviera dentro de .hero-left heredaría su containing block y
+            "bottom:40px" dejaría de anclarse al fondo real del viewport. ── */}
+        <div className="scroll-hint" ref={scrollHintRef} aria-hidden="true">
+          <div className="scroll-mouse"><div className="scroll-dot" /></div>
+          <span className="scroll-label">Scroll</span>
         </div>
       </div>
-
     </div>
   )
 }

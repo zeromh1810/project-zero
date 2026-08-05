@@ -35,6 +35,10 @@
   --navbar-bg: rgba(248, 248, 248, 0.82);
   --shadow: rgba(0, 0, 0, 0.12);
   --portfolio-font: "DM Sans", "Helvetica Neue", sans-serif;
+  /* Manrope vía next/font/google — a diferencia de Geist (fuente local),
+     Google Fonts sí registra un @font-face bajo su nombre "bonito", así
+     que referenciarla por el string literal funciona igual que ya
+     funcionaba con Plus Jakarta Sans. */
   --portfolio-heading-font: "Plus Jakarta Sans", sans-serif;
 
   /* ── Spacing scale ── */
@@ -92,10 +96,16 @@
 }
 
 .dark {
-  --bg: #000000;
-  --bg2: #0a0a0a;
-  --bg3: #141414;
-  --bg4: #1e1e1e;
+  /* Escala de negros con tinte navy (~hue 225-230°), no gris neutro puro —
+     evita el "agujero" de negro puro contra el que las superficies
+     elevadas competían por brillo. content-sheet/brands-section/
+     blog-preview-section son alias de esta misma escala (bg/bg2/bg3),
+     no tienen paleta propia — así que todo el sitio queda en un único
+     sistema de tonos. Inspirado en la escala real de betterstack.com. */
+  --bg: #0a0b12;
+  --bg2: #0f1018;
+  --bg3: #171926;
+  --bg4: #212430;
   --glass: rgba(255, 255, 255, 0.04);
   --glass-hover: rgba(255, 255, 255, 0.07);
   --card: rgba(255, 255, 255, 0.04);
@@ -109,8 +119,8 @@
   --accent-h: #5ac8fa;
   --highlight: #5ac8fa;
   --content-sheet: var(--bg3);
-  --content-sheet-rgb: 20, 20, 20;
-  --navbar-bg: rgba(0, 0, 0, 0.75);
+  --content-sheet-rgb: 23, 25, 38;
+  --navbar-bg: rgba(10, 11, 18, 0.75);
   --shadow: rgba(0, 0, 0, 0.6);
 
   /* Shadow scale — opacidad amplificada en dark */
@@ -534,7 +544,23 @@ html {
   text-wrap: balance;
 }
 
-.hero-title em {
+/* ── HERO TITLE — entrada vía SplitText (GSAP), ver components/portfolio/
+   split-text.tsx y hero-section.tsx. Cada línea es su propia instancia:
+   .hero-title-line es el wrapper que SplitText renderiza (recibe estilos
+   inline propios — overflow/display/etc — no hace falta declararlos acá).
+
+   .hero-title-line--accent lleva además el shimmer de gradiente que tenía
+   la línea del medio antes de SplitText. background-clip:text necesita
+   texto propio en el elemento al que se le aplica — mientras SplitText
+   tiene la línea partida en spans por carácter (.split-char, uno por
+   letra), este span "padre" no tiene texto directo y el gradiente no
+   tendría nada que recortar. split-text.tsx llama a splitInstance.revert()
+   apenas termina de animar esa línea, lo que restaura el texto plano acá
+   — ahí SÍ el gradiente funciona, igual que en el <em> original. Mientras
+   tanto (params .split-char abajo) los caracteres se ven en el color
+   sólido de fallback, no transparentes/invisibles heredando el
+   text-fill-color del gradiente sin tener el background detrás. ── */
+.hero-title-line--accent {
   font-style: normal;
   color: var(--accent); /* fallback for non-WebKit */
   background: linear-gradient(110deg, #0062cc 0%, #2997ff 40%, #3aabff 55%, #2997ff 70%, #0062cc 100%);
@@ -545,41 +571,10 @@ html {
   animation: hero-gradient-shift 12s ease-in-out 0.8s infinite;
 }
 
-/* ── HERO TITLE — overflow:hidden line rise (no opacity, pure transform) ──
-   Technique: outer span clips the text, inner span rises from translateY(110%)
-   Used by Basement Studio, Locomotive, Awwwards winners 2024-2025
-─────────────────────────────────────────────────────────────────────────── */
-.hero-line-wrap {
-  display: inline-block;
-  overflow: hidden;
-  /* vertical padding prevents descenders (g, p, y) from clipping */
-  padding-bottom: 0.06em;
-  /* horizontal padding prevents glyph ink overflow (bold fonts extend past advance width) */
-  padding-inline-end: 0.08em;
-  vertical-align: bottom;
-}
-
-.hero-line-inner {
-  display: inline-block;
-  transform: translateY(112%);
-  animation: lineRise 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Dark gradient only on spans that don't wrap an <em> — avoids nested background-clip
-   that leaks the dark gradient through em's glyph anti-aliasing edges */
-.hero-title .hero-line-inner:not(:has(em)) {
-  background: linear-gradient(110deg, #1d1d1f 0%, #2e2e3a 40%, #38384a 55%, #2e2e3a 70%, #1d1d1f 100%);
-  background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation:
-    lineRise 1s cubic-bezier(0.16, 1, 0.3, 1) forwards,
-    hero-gradient-shift 16s ease-in-out 1s infinite;
-}
-
-@keyframes lineRise {
-  to { transform: translateY(0); }
+.hero-title-line--accent .split-char {
+  background: none;
+  -webkit-text-fill-color: var(--accent);
+  color: var(--accent);
 }
 
 @keyframes hero-gradient-shift {
@@ -589,10 +584,9 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-line-wrap { overflow: visible; }
-  .hero-line-inner {
-    transform: none;
-    animation: none;
+  .hero-title-line--accent {
+    background: none !important;
+    -webkit-text-fill-color: var(--accent) !important;
   }
 }
 
@@ -816,7 +810,6 @@ html {
 .hero-wrap        { will-change: transform; }
 /* .p-card-thumb: sin will-change — evita GPU sibling layer que escapa el clip */
 .nav-pill         { will-change: left, width; }
-.hero-line-inner  { will-change: transform; }
 .p-title-word-inner { will-change: transform; }
 
 /* ── REDUCED MOTION ── */
@@ -857,22 +850,10 @@ html {
     opacity: 1 !important;
   }
 
-  .hero-line-wrap { overflow: visible !important; }
-  .hero-line-inner,
   .p-title-word-inner {
     transform: none !important;
     animation: none !important;
     transition: none !important;
-  }
-
-  /* Restore solid text when animation is off */
-  .hero-title .hero-line-inner:not(:has(em)) {
-    background: none !important;
-    -webkit-text-fill-color: var(--txt) !important;
-  }
-  .hero-title em {
-    background: none !important;
-    -webkit-text-fill-color: var(--accent) !important;
   }
 
   /* Modal y panel: sin animación de entrada/salida */
@@ -2162,8 +2143,8 @@ html {
 }
 
 /* ── FOOTER — bookend con paleta por tema ────────────────────────────────
-   Light: blanco puro — contrasta con el #f0f4fb del contenido encima.
-   Dark:  negro puro  — contrasta con el #060c1a del contenido encima.
+   --bg2 en ambos modos — contrasta con --content-sheet (--bg3) del
+   contenido encima, un paso más claro en la misma escala neutra.
    Ambos modos usan la misma estructura: línea accent + resplandor radial.
 ──────────────────────────────────────────────────────────────────────── */
 .footer {
@@ -3141,16 +3122,8 @@ html {
   height: 15px;
 }
 
-/* ── HERO GRADIENT — dark mode overrides ── */
-.dark .hero-title .hero-line-inner:not(:has(em)) {
-  background: linear-gradient(110deg, #f5f5f7 0%, #e8e8f2 40%, #d8d8f0 55%, #e8e8f2 70%, #f5f5f7 100%);
-  background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.dark .hero-title em {
+/* ── HERO GRADIENT — dark mode override ── */
+.dark .hero-title-line--accent {
   background: linear-gradient(110deg, #1a6fdb 0%, #5ac8fa 40%, #a8e8ff 55%, #5ac8fa 70%, #1a6fdb 100%);
   background-size: 300% 100%;
   -webkit-background-clip: text;
@@ -5165,14 +5138,14 @@ html {
   background: linear-gradient(135deg, rgba(41,151,255,0.09) 0%, transparent 100%);
 }
 .ds-screen-bar-content {
-  background: #f0f4fb;
+  background: #f0f0f0;
   flex-shrink: 0;
 }
 .dark .ds-screen-bar-content {
-  background: #060c1a;
+  background: #171926;
 }
 .ds-screen-bar-brands {
-  background: linear-gradient(#d8deec, #e6ebf3);
+  background: linear-gradient(#f8f8f8, #e4e4e4);
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -5180,14 +5153,14 @@ html {
   flex-shrink: 0;
 }
 .dark .ds-screen-bar-brands {
-  background: linear-gradient(#03070e, #060b16);
+  background: linear-gradient(#0a0b12, #171926);
 }
 .ds-screen-bar-blog {
-  background: #f0f4fb;
+  background: #f8f8f8;
   flex-shrink: 0;
 }
 .dark .ds-screen-bar-blog {
-  background: #060c1a;
+  background: #0a0b12;
 }
 .ds-screen-bar-footer {
   background: #ffffff;
@@ -5361,12 +5334,8 @@ html {
     font-size: 77px;
   }
 
-  .hero-wrap--split .hero-title {
+  .hero-wrap--portrait .hero-title {
     font-size: clamp(43px, 5.85vw, 76px);
-  }
-
-  .hero-right {
-    max-width: 558px;
   }
 }
 
@@ -5388,14 +5357,11 @@ html {
     padding-top: 112px;
   }
 
-  /* La corrección real de hero-wrap--split/.hero-title/.hero-sub vive más
-     abajo, junto a las reglas base de HERO V2 (después de línea ~5690) —
-     puestas aquí quedaban sin efecto: esas reglas base, sin media query,
-     aparecen MÁS ABAJO en el archivo y ganaban el empate de especificidad
-     igual (0,2,0 vs 0,2,0), sin importar que este bloque sea condicional. */
-  .hero-right {
-    max-width: 936px;
-  }
+  /* .hero-portrait no va acá: la corrección real vive más abajo, junto a
+     las reglas base de HERO V3 (ver @media min-width:1921px ahí) — puesta
+     aquí quedaba sin efecto, porque esas reglas base sin media query
+     aparecen MÁS ABAJO en el archivo y ganan el empate de especificidad
+     (0,2,0 vs 0,2,0) sin importar que este bloque sea condicional. */
 
   .blog-main,
   .blog-post-main {
@@ -5504,464 +5470,299 @@ html {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   HERO V2 — TWO-COLUMN SPLIT + STACKED DECK GALLERY
-   Proporciones calculadas:
-   · max-width 1380px → inner = 1380 - 56px(left) - 72px(right) = 1252px
-   · Texto (41%) = ~513px   gap (68px)   Galería (flex:1) = ~671px
-   · Título override: clamp(38px,4.5vw,66px) → a 1440px = 64.8px
-     "experiencias" @65px ≈ 390px → cabe en 513px con margen
-   · Galería stage 4:3 → 671-52px overflow padding = 619px × 464px
-     Esta altura (~464px) equilibra el bloque de texto (~460px) visualmente
+   HERO V3 — SPLIT + PORTRAIT BLED TO THE BOTTOM EDGE
+   Texto a la izquierda (centrado verticalmente vía .hero-wrap); el retrato
+   vive DENTRO de .hero-wrap (hermano de .hero-left) para compartir el mismo
+   contenedor centrado (max-width + margin:auto) que el texto — si viviera
+   fuera, en .section-full a lo ancho completo, quedaría pegado al borde
+   real del viewport en vez de alineado con el bloque de texto, rompiendo
+   la composición en pantallas anchas (el hueco entre texto e imagen deja
+   de ser simétrico). Posicionado en absoluto para poder "escapar" del
+   padding de .hero-wrap y llegar al borde inferior real (ver bottom/right
+   negativos más abajo, que cancelan el padding-bottom/right de .hero-wrap).
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Contenedor: row layout ── */
-/*
-   PROPORCIONES CALCULADAS (referencia hero-wrap--split):
-   max-width: 1600px | padding 48px izq + 72px der | inner: 1480px
-
-   hero-left 55%  |  gap 64px  |  hero-right flex:1 (~45%)
-
-   1920px: texto=814px  galería=602px  stage=554×346px  ✓ plena
-   1440px: texto=726px  galería=530px  stage=482×301px  ✓ plena
-   1280px: texto=638px  galería=458px  stage=410×256px  ✓ correcta
-
-   Punto de quiebre: stage < 300px cuando viewport < 1036px
-   → @1060px: bajamos a 50% texto, gap 52px
-     texto=470px  galería=418px  stage=370×231px  ✓ aceptable
-   → @960px: columna única
-*/
-.hero-wrap--split {
+.hero-wrap--portrait {
   align-items: center;
-  /* gap: var(--space-1); */
+  /* Override: la regla base .hero-wrap trae justify-content:center para su
+     layout en columna (centra el bloque de texto verticalmente). En fila,
+     con .hero-left como único hijo flex (el retrato es absolute, no cuenta),
+     ese "center" lo empujaba al medio del ancho total dejando un hueco
+     enorme antes del texto — la causa real de la diagramación descuadrada. */
+  justify-content: flex-start;
   flex-direction: row;
   max-width: 1440px;
-  padding-right: 72px;
 }
 
-/* ── Columna izquierda: texto (48%) ── */
-/*
-   Reducido de 55% → 48% para dar al slider +20% de ancho.
-   1440px: inner=1320px, texto=634px, galería=622px, stage=574×359px (+20%)
-   1920px: inner=1480px, texto=710px, galería=706px, stage=658×411px (+20%)
-*/
+/* ── Columna de texto (50%) ──
+   position:relative + z-index:2 — SIN esto, el texto queda detrás del
+   retrato. Un elemento posicionado con z-index explícito (.hero-portrait,
+   z-index:1) SIEMPRE pinta por encima de contenido no-posicionado (lo que
+   era .hero-left antes, position:static por default) sin importar los
+   números — el z-index de .hero-wrap (2) NO le pasa ese nivel a sus hijos,
+   solo ordena a .hero-wrap contra SUS PROPIOS hermanos. Con el retrato
+   desplazándose hacia arriba en el parallax de scroll, esto hacía que
+   terminara tapando visualmente el subtítulo/CTA en ciertos anchos — se
+   veía como si el texto "desapareciera" aunque su opacity estuviera bien.
+   El scroll-hint se movió afuera de .hero-left (ver JSX) precisamente
+   porque agregarle position acá le cambiaría su containing block. */
 .hero-left {
-  flex: 0 0 48%;
+  position: relative;
+  z-index: 2;
+  flex: 0 0 50%;
   min-width: 0;
   display: flex;
   flex-direction: column;
 }
 
-/*
-   Título +10% sobre el spec DS:
-   DS base: clamp(44px, 5.9vw, 85px) × 1.1 = clamp(48px, 6.5vw, 84px)
-   1440px: 6.5vw = 93.6px → cap 84px
-   1280px: 6.5vw = 83.2px
-   "experiencias" @84px ≈ 528px → cabe en 634px (48% de 1320px) ✓
-*/
-.hero-wrap--split .hero-title {
+.hero-wrap--portrait .hero-title {
   font-size: clamp(43px, 5.85vw, 76px);
 }
 
-/*
-   Subtítulo +10%: DS primitive.fontSize.lg=17px → 19px techo.
-*/
-.hero-wrap--split .hero-sub {
+.hero-wrap--portrait .hero-sub {
   font-size: clamp(15px, 1.5vw, 17px);
 }
 
-/* ── Columna derecha: galería (flex:1 ≈ 45%) ── */
-.hero-right {
-  flex: 1;
-  min-width: 0;
+/* ── Retrato: pegado al borde inferior, sin recortarlo ──
+   right:0 / bottom:-16px — el containing block de un absolute es el padding
+   box de .hero-wrap, cuyo borde coincide con su border-box (sin border),
+   así que right:0 ya cae exacto en el borde real de .hero-wrap: a ras del
+   mismo borde derecho del contenedor centrado que usa el texto.
+   bottom:-16px hunde el retrato 16px MÁS ABAJO del borde real (invisible,
+   .section-full lo recorta con overflow:hidden) — es el colchón para que
+   .hero-portrait-float pueda "flotar" hacia arriba (hasta -10px) sin
+   revelar nunca el borde inferior real de la imagen; con bottom:0 a secas,
+   cada vez que el float subía se veía un hueco/borde debajo del personaje.
+   El padding-right/bottom de .hero-wrap no desplaza ninguna de estas dos
+   referencias, solo empuja su propio contenido (.hero-left) hacia adentro.
+   z-index:1 — el texto le gana el stacking donde se solapen (brazo/torso
+   vs. subtítulo) gracias a .hero-left, que tiene position:relative y
+   z-index:2 (ver esa regla) — un z-index alto en .hero-wrap NO alcanza:
+   z-index solo compara contra hermanos dentro del MISMO stacking context,
+   y .hero-left/.hero-portrait son hermanos entre sí, no comparables contra
+   el z-index de su padre .hero-wrap. */
+.hero-portrait {
+  position: absolute;
+  right: 0;
+  bottom: -16px;
+  z-index: 1;
+  height: min(83vh, 853px);
   display: flex;
-  align-items: center;
-  padding-bottom: var(--space-12); /* 48px — margen para overflow del stack */
-  padding-right:  var(--space-12); /* 48px */
+  align-items: flex-end;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(56px) scale(0.97);
+  filter: blur(10px);
+  animation: heroPortraitIn 1.1s 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* ── Loop idle — el personaje "respira": un balanceo sutil e infinito,
+   en un wrapper aparte para no pelear con el transform de .hero-portrait
+   (entrada + parallax de scroll, vía JS). Arranca a los 1.6s, justo cuando
+   termina la animación de entrada (delay 0.5s + duración 1.1s). */
+.hero-portrait-float {
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  animation: heroPortraitFloat 6s ease-in-out 1.6s infinite;
+}
+
+.hero-portrait-img {
+  height: 100%;
+  width: auto;
+  max-width: none;
+  object-fit: contain;
+  object-position: bottom;
+  display: block;
+  user-select: none;
+}
+
+@keyframes heroPortraitIn {
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes heroPortraitFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-10px) rotate(-0.6deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-portrait {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  .hero-portrait-float {
+    animation: none;
+  }
 }
 
 /*
-   ULTRA-WIDE (≥1921px) — override de las 3 reglas base de arriba.
-   Bug real corregido: el bloque "ULTRA-WIDE" de más arriba (línea ~5478)
-   dejaba hero-wrap--split en 1620px (+1.25% sobre 1600px) y el título
-   topado en 84px (idéntico al tier 1440–1920px) — el hero no escalaba en
-   absoluto entre 1920px y 2560px de viewport, mientras el resto de
-   secciones (.section, .projects-bento, .contact-split) sí crecen ~20-38%
-   en ese mismo tier. Además, puesto ahí arriba nunca llegaba a aplicarse:
-   estas reglas base (sin media query) están MÁS ABAJO en el archivo y
-   ganaban el empate de especificidad (0,2,0 vs 0,2,0) pese a la condición.
-   Este bloque va DESPUÉS de las reglas base por esa misma razón.
-   Ajuste posterior (feedback en vivo): 1900px dejaba aún bastante margen
-   vacío en 2560px — se amplía a 2160px (~84% del viewport en 2560px,
-   similar a la proporción 1600/1920≈83% del tier anterior) para
-   aprovechar mejor el espacio y darle más ancho real al slider
-   (.hero-right sube a 1040px, ver bloque ULTRA-WIDE de más arriba).
+   ULTRA-WIDE (≥1921px) — el retrato crece con el resto del hero.
 */
 @media (min-width: 1921px) {
-  .hero-wrap--split {
+  .hero-wrap--portrait {
     max-width: 1944px;
   }
 
-  .hero-wrap--split .hero-title {
+  .hero-wrap--portrait .hero-title {
     font-size: clamp(43px, 5.85vw, 90px);
   }
 
-  .hero-wrap--split .hero-sub {
+  .hero-wrap--portrait .hero-sub {
     font-size: clamp(15px, 1.5vw, 19px);
+  }
+
+  .hero-portrait {
+    height: min(87vh, 936px);
   }
 }
 
 /*
-   MACBOOK PRO 14"/AIR 13" — resolución escalada por omisión (1440px–1599px)
-   Cubre 1512×982 (MBP 14" default) y 1470×956 (Air 13" default).
-   El tier "1440-1920" (línea ~5359) fija el título en 76px asumiendo
-   monitores anchos ≥1600px; en un viewport de 1512px ese tamaño resulta
-   desproporcionado frente al slider y, con la altura corta (982px) del
-   portátil, el bloque de texto se ve pesado.
-   Ajuste: título −21% (76→60px) y slider +13% (558→630px) para equilibrar
-   el peso visual de ambas columnas.
-   1512px: inner=1320px, texto=634px (48%), slider=630px (capped),
-   espacio libre repartido=56px (28px por lado) — antes eran 128px (64px/lado).
-   Este bloque va DESPUÉS de las reglas base (línea ~5561) por la misma
-   razón documentada arriba en ULTRA-WIDE: empate de especificidad (0,2,0)
-   resuelto por orden de aparición en el archivo, no por la media query.
+   MACBOOK PRO 14"/AIR 13" — resolución escalada por omisión (1440px–1599px).
+   Mismo ajuste que el resto del hero: título más chico en portátiles de
+   altura corta para no competir en peso visual con el retrato.
 */
 @media (min-width: 1440px) and (max-width: 1599px) {
-  .hero-wrap--split .hero-title {
+  .hero-wrap--portrait .hero-title {
     font-size: clamp(43px, 5.85vw, 60px);
   }
 
-  .hero-wrap--split .hero-sub {
+  .hero-wrap--portrait .hero-sub {
     font-size: clamp(15px, 1.5vw, 16px);
   }
 
-  .hero-right {
-    max-width: 630px;
-  }
-}
-
-/* ── Deck Gallery container ── */
-.deck-gallery {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-/*
-   Stage: 16/10 — DS component.project-card.aspect-featured.
-   A 554px (1920px): stage = 554×346px
-   A 482px (1440px): stage = 482×301px
-   A 370px (1060px): stage = 370×231px
-*/
-.deck-stage {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  margin-top: var(--space-4);  /* 16px */
-  margin-bottom: var(--space-5); /* 20px */
-}
-
-/* ── Tarjeta individual ── */
-.deck-card {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--r-xl);
-  overflow: hidden;
-  /*
-    clip-path como fix principal del border-radius en hover:
-    overflow:hidden opera a nivel paint y no afecta capas GPU hijas
-    (deck-card-img tiene will-change:transform → capa separada).
-    clip-path opera a nivel compositor y sí clipea capas hijas.
-  */
-  clip-path: inset(0 round var(--r-xl));
-  will-change: transform, opacity;
-  transform-origin: top left;
-  /* Shadows instead of borders — make-interfaces-feel-better */
-  box-shadow:
-    0 2px 8px  rgba(0, 0, 0, 0.08),
-    0 8px 28px rgba(0, 0, 0, 0.10),
-    0 20px 60px rgba(0, 0, 0, 0.08);
-  outline: 1px solid rgba(0, 0, 0, 0.05);
-  outline-offset: -1px;
-}
-
-/* Carta frontal: sombra más pronunciada */
-.deck-card--front {
-  box-shadow:
-    0 4px 16px  rgba(0, 0, 0, 0.10),
-    0 16px 48px rgba(0, 0, 0, 0.14),
-    0 32px 80px rgba(0, 0, 0, 0.10);
-  outline: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-/* Imagen de la tarjeta — slow zoom (breathe) solo en la frontal */
-.deck-card-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  pointer-events: none;
-  /* Sin animación por defecto (cartas traseras) */
-}
-
-/* Zoom breathe en la carta activa — igual al efecto de P4 */
-@keyframes deck-breathe {
-  0%, 100% { transform: scale(1.00); }
-  50%       { transform: scale(1.045); }
-}
-
-.deck-card--front .deck-card-img {
-  animation: deck-breathe 13s ease-in-out infinite;
-  /* will-change eliminado: el browser promueve automáticamente
-     elementos con CSS animations. El will-change explícito creaba
-     una sub-capa GPU separada que escapaba el clip del padre. */
-}
-
-/* Overlay degradado en la carta frontal */
-.deck-card-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.52) 0%,
-    rgba(0, 0, 0, 0.10) 40%,
-    transparent 65%
-  );
-  display: flex;
-  align-items: flex-end;
-  padding: 18px 20px;
-  pointer-events: none;
-}
-
-.deck-card-category {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.70);
-}
-
-/* ── Eyebrow: label + línea divisora + contador ── */
-.deck-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.deck-eyebrow-label {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--txt3);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.deck-eyebrow-line {
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-.deck-eyebrow-counter {
-  font-size: 9px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.14em;
-  color: var(--txt3);
-  white-space: nowrap;
-  flex-shrink: 0;
-  will-change: opacity, transform;
-}
-
-/* ── Meta row bajo el stack ── */
-.deck-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2px;
-}
-
-.deck-meta-title {
-  font-family: var(--portfolio-heading-font);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--txt2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 70%;
-}
-
-/* ── Dots de navegación ── */
-.deck-dots {
-  display: flex;
-  gap: 7px;
-  align-items: center;
-}
-
-/* make-interfaces-feel-better: hit area ≥ 40px via ::before */
-.deck-dot {
-  position: relative;
-  width: 5px;
-  height: 5px;
-  border-radius: var(--r-full);
-  background: var(--border-h);
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  /* Transiciones específicas — nunca transition: all */
-  transition-property: width, background-color;
-  transition-duration: 280ms;
-  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
-  -webkit-tap-highlight-color: transparent;
-  will-change: width;
-}
-
-.deck-dot::before {
-  content: "";
-  position: absolute;
-  inset: -18px -12px;
-}
-
-.deck-dot--active {
-  width: 18px;
-  background: var(--accent);
-}
-
-.deck-dot:hover:not(.deck-dot--active) {
-  background: var(--txt3);
-}
-
-/* scale on press — make-interfaces-feel-better */
-.deck-dot:active {
-  transform: scale(0.96);
-}
-
-/* ── Reduced motion ── */
-@media (prefers-reduced-motion: reduce) {
-  .deck-card-img,
-  .deck-card--front .deck-card-img {
-    animation: none;
-  }
-  .deck-card {
-    will-change: auto;
+  .hero-portrait {
+    height: min(75vh, 645px);
   }
 }
 
 /*
    ── RESPONSIVE CASCADE ──────────────────────────────────────────────────────
-   Derivado de las proporciones base (55%/45%, max-w 1600px):
-
-   TIER 1  ≥ 1440px  → max-width 1600px, 1440–1920px y ≥1921px arriba
    TIER 2  1281–1439px → laptop HD / MacBook Air 13" (1366×768), título 54px cap
-   TIER 3  1060–1280px → desktop compacto, gap 52px
-   TIER 4  960–1060px  → laptop 11" / tablet landscape, gap 40px
-   TIER 5  < 960px  → columna única, texto arriba, galería abajo
-   TIER 6  < 768px  → mobile, padding reducido, título libre
+   TIER 3  1060–1280px → desktop compacto
+   TIER 4  960–1060px  → laptop 11" / tablet landscape
+   TIER 5  < 960px  → columna única, texto arriba, retrato debajo (estático)
+   TIER 6  < 768px  → mobile, retrato más pequeño
    ──────────────────────────────────────────────────────────────────────────── */
 
-/*
-   TIER 2 — laptop HD / MacBook Air 13"  (1281–1439px)
-   Incluye 1366×768 (resolución más común en laptops de gama media).
-   6.5vw @1366px = 88.8px → cap a 54px para evitar desbordamiento en layout split.
-*/
 @media (min-width: 1281px) and (max-width: 1439px) {
-  .hero-wrap--split .hero-title {
+  .hero-wrap--portrait .hero-title {
     font-size: clamp(48px, 6.5vw, 54px);
+  }
+
+  .hero-portrait {
+    height: min(73vh, 603px);
   }
 }
 
-/*
-   TIER 3 — desktop compacto / laptop 13"  (1060–1280px)
-   Texto 44% → galería 56% − gap
-   1280px: inner=1160px, texto=510px, gap=52px, stage=550×344px ✓
-   1060px: inner=940px,  texto=414px, gap=52px, stage=436×273px ✓
-   Clamp 6.5vw @1280px = 83px, @1060px = 68.9px → escala correctamente.
-*/
 @media (max-width: 1280px) {
-  .hero-wrap--split {
-    gap: 52px;
+  .hero-left {
+    flex: 0 0 46%;
   }
 
+  /* Sin este cap, el título hereda el clamp base (43px, 5.85vw, 76px) —
+     a este ancho de columna (46% del wrap, ~444-545px) el preferred value
+     ya pasa los 70px, y "Productos digitales"/"No solo pantallas" rompen
+     línea A MITAD DE PALABRA (título salta de 3 a 5 líneas). Verificado:
+     50px es el máximo que entra en una sola línea en el extremo angosto
+     del tier (1061px → columna 444px); 52px ya rompe. */
+  .hero-wrap--portrait .hero-title {
+    font-size: clamp(44px, 5vw, 50px);
+  }
+
+  .hero-portrait {
+    height: min(66vh, 541px);
+  }
+}
+
+@media (max-width: 1060px) {
   .hero-left {
     flex: 0 0 44%;
   }
-}
 
-/*
-   TIER 3 — laptop 11" / tablet landscape  (960–1060px)
-   Texto 43% → máximo uso de galería sin colapsar columna de texto.
-   1060px: inner=940px, texto=404px, gap=40px, stage=452×283px ✓
-    960px: inner=840px, texto=361px, gap=40px, stage=400×250px ✓
-   "experiencias" @6.5vw × 960 = 62.4px ≈ 390px → cabe en 361px (justa)
-   → reducimos clamp a 5.8vw para esta franja.
-*/
-@media (max-width: 1060px) {
-  .hero-wrap--split {
-    gap: var(--space-10); /* 40px */
+  /* Mismo problema que el tier de arriba pero peor: columna aún más
+     angosta (44% del wrap, ~381-424px) — el cap anterior (80px) nunca
+     entraba en juego porque 5.8vw ya se quedaba corto de él (61px a
+     1060px, 56px a 961px), y ambos valores igual rompen línea a mitad de
+     palabra. Verificado: 42px es el máximo que entra en una sola línea en
+     el extremo angosto del tier (961px → columna 381px); 44px ya rompe. */
+  .hero-wrap--portrait .hero-title {
+    font-size: clamp(38px, 4.2vw, 42px);
   }
 
-  .hero-left {
-    flex: 0 0 43%;
-  }
-
-  .hero-wrap--split .hero-title {
-    font-size: clamp(44px, 5.8vw, 80px);
+  .hero-portrait {
+    height: min(60vh, 478px);
+    right: 0;
   }
 }
 
 /*
-   TIER 4 — columna única  (< 960px)
-   Textos +10% sobre el valor anterior del tier.
+   TIER 5 — columna única (< 960px). El retrato deja de estar en absoluto:
+   pasa a fluir debajo del texto, centrado, sin invadir el CTA ni el
+   scroll-hint. Sigue "aterrizando" en su propio borde inferior (object
+   -position: bottom dentro de una caja de altura fija), solo que ahora
+   ese borde es el de su propio contenedor y no el del viewport.
 */
 @media (max-width: 960px) {
-  .hero-wrap--split {
+  .hero-wrap--portrait {
     flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-10); /* 40px */
-    padding-right: var(--space-12);
+    align-items: center;
+    gap: var(--space-8); /* 32px */
   }
 
   .hero-left {
     flex: none;
     width: 100%;
+    align-items: flex-start;
   }
 
-  /* +10% vs anterior clamp(44px, 8vw, 80px) */
-  .hero-wrap--split .hero-title {
+  .hero-wrap--portrait .hero-title {
     font-size: clamp(48px, 8.8vw, 88px);
   }
 
-  /* +10% vs anterior clamp(15px, 2vw, 18px) */
-  .hero-wrap--split .hero-sub {
+  .hero-wrap--portrait .hero-sub {
     font-size: clamp(17px, 2.2vw, 20px);
   }
 
-  .hero-right {
-    display: none;
+  .hero-portrait {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    height: min(50vh, 437px);
+    width: 100%;
+    justify-content: center;
   }
 }
 
-/*
-   TIER 5 — mobile portrait  (< 768px)
-   +10% vs anterior tier.
-*/
 @media (max-width: 768px) {
-  .hero-wrap--split {
-    padding: 96px var(--space-6) 56px;
-    gap: var(--space-8); /* 32px */
+  .hero-wrap--portrait {
+    padding-bottom: 0;
+    gap: var(--space-6); /* 24px */
   }
 
-  /* +10% vs anterior clamp(40px, 10vw, 64px) */
-  .hero-wrap--split .hero-title {
-    font-size: clamp(44px, 11vw, 70px);
+  /* El floor anterior (44px) era demasiado grande por debajo de ~430px de
+     ancho: "Productos digitales"/"No solo pantallas" rompían línea a mitad
+     de palabra (título saltaba de 3 a 5 líneas, tapando casi toda la
+     pantalla y dejando el retrato apenas visible). Verificado extremo a
+     extremo sin wrap: 320px→28.8px, 375px→33.75px, 430px→38.7px,
+     600px→54px, 768px→69.12px (clamp corta en 70px recién ahí). */
+  .hero-wrap--portrait .hero-title {
+    font-size: clamp(28px, 9vw, 70px);
   }
 
-  /* +10% → 15px × 1.1 = 16.5 → 17px */
-  .hero-wrap--split .hero-sub {
+  .hero-wrap--portrait .hero-sub {
     font-size: 17px;
+  }
+
+  /* Mobile-first: el retrato se retira por completo (no solo se encoge) —
+     con loading="lazy" en el <img> (ver hero-section.tsx), display:none
+     evita que el navegador siquiera lo descargue en este breakpoint, no
+     solo que lo oculte. */
+  .hero-portrait {
+    display: none;
   }
 }

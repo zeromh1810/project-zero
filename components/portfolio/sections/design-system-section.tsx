@@ -209,7 +209,7 @@ function PageOverview() {
 
       <SectionHeading title="Stack técnico" />
       <div className="ds-stack-row">
-        {["Next.js 16", "React 19", "TypeScript 5.7", "CSS Variables", "Tailwind v4", "DM Sans", "Plus Jakarta Sans", "WebGL / GLSL"].map(t => (
+        {["Next.js 16", "React 19", "TypeScript 5.7", "CSS Variables", "Tailwind v4", "DM Sans", "Plus Jakarta Sans", "WebGL / GLSL", "GSAP"].map(t => (
           <span className="ds-stack-tag" key={t}>{t}</span>
         ))}
       </div>
@@ -223,9 +223,9 @@ function PageColors() {
   const COLOR_TOKENS = [
     {
       group: "Fondos", tokens: [
-        { name: "--bg", light: "#f8f8f8", dark: "#000000", usage: "Fondo base de la app" },
-        { name: "--bg2", light: "#ffffff", dark: "#0a0a0a", usage: "Fondo de tarjetas y superficies elevadas" },
-        { name: "--bg3", light: "#f0f0f0", dark: "#141414", usage: "Fondo de tercer nivel, hover, inputs" },
+        { name: "--bg", light: "#f8f8f8", dark: "#0a0b12", usage: "Fondo base de la app" },
+        { name: "--bg2", light: "#ffffff", dark: "#0f1018", usage: "Fondo de tarjetas y superficies elevadas" },
+        { name: "--bg3", light: "#f0f0f0", dark: "#171926", usage: "Fondo de tercer nivel, hover, inputs" },
       ],
     },
     {
@@ -1741,15 +1741,15 @@ useEffect(() => {
       <SectionHeading title="Gradientes de fondo" />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid var(--border)" }}>
-          <div style={{ height: 64, background: "linear-gradient(#d8deec 0% 26%, #e6ebf3 100%)" }} />
+          <div style={{ height: 64, background: "linear-gradient(180deg, #f8f8f8 0%, #e4e4e4 100%)" }} />
           <div style={{ padding: "10px 14px", fontSize: 11, color: "var(--txt3)", fontFamily: "monospace" }}>
-            light: #d8deec → #e6ebf3
+            light: var(--bg) → var(--bg4)
           </div>
         </div>
         <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid var(--border)" }}>
-          <div style={{ height: 64, background: "linear-gradient(#03070e 0%, #060b16 100%)" }} />
+          <div style={{ height: 64, background: "linear-gradient(180deg, #0a0b12 0%, #171926 100%)" }} />
           <div style={{ padding: "10px 14px", fontSize: 11, color: "var(--txt3)", fontFamily: "monospace" }}>
-            dark: #03070e → #060b16
+            dark: var(--bg) → var(--bg3)
           </div>
         </div>
       </div>
@@ -1762,10 +1762,10 @@ function PageDarkMode() {
   const { isDark } = useTheme()
 
   const TOKEN_PAIRS: { token: string; light: string; dark: string; usage: string }[] = [
-    { token: "--bg",        light: "#f8f8f8",              dark: "#000000",              usage: "Fondo principal de página" },
-    { token: "--bg2",       light: "#ffffff",              dark: "#0a0a0a",              usage: "Superficie elevada (cards, modales)" },
-    { token: "--bg3",       light: "#f0f0f0",              dark: "#141414",              usage: "Superficie deprimida (inputs, chips)" },
-    { token: "--bg4",       light: "#e4e4e4",              dark: "#1e1e1e",              usage: "Profundidad máxima" },
+    { token: "--bg",        light: "#f8f8f8",              dark: "#0a0b12",              usage: "Fondo principal de página" },
+    { token: "--bg2",       light: "#ffffff",              dark: "#0f1018",              usage: "Superficie elevada (cards, modales)" },
+    { token: "--bg3",       light: "#f0f0f0",              dark: "#171926",              usage: "Superficie deprimida (inputs, chips)" },
+    { token: "--bg4",       light: "#e4e4e4",              dark: "#212430",              usage: "Profundidad máxima" },
     { token: "--txt",       light: "#1d1d1f",              dark: "#f5f5f7",              usage: "Texto primario" },
     { token: "--txt2",      light: "#3a3a40",              dark: "#b0b0b5",              usage: "Texto secundario" },
     { token: "--txt3",      light: "#5e5e64",              dark: "#8e8e93",              usage: "Labels, placeholders, muted" },
@@ -1889,7 +1889,7 @@ function PageDarkMode() {
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3, borderRadius: "var(--r-xl)", overflow: "hidden", border: "1px solid var(--border)", marginTop: 16 }}>
         {/* Light mode */}
-        <div style={{ background: "#f0f4fb", padding: "24px 20px" }}>
+        <div style={{ background: "#f0f0f0", padding: "24px 20px" }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#5e5e64", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5e5e64" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
             Modo Claro
@@ -1907,7 +1907,7 @@ function PageDarkMode() {
           </div>
         </div>
         {/* Dark mode */}
-        <div style={{ background: "#060c1a", padding: "24px 20px" }}>
+        <div style={{ background: "#171926", padding: "24px 20px" }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8e8e93", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             Modo Oscuro
@@ -2844,46 +2844,43 @@ useEffect(() => {
 /* Límite: 12 items × 60ms = 720ms total — arriba de eso se siente lento */`} />
 
       {/* ── Hero animations ── */}
-      <SectionHeading title="Hero — Line-rise (text reveal)" />
+      <SectionHeading title="Hero — SplitText (text reveal)" />
       <p className="ds-pattern-desc">
-        Técnica de texto que emerge desde abajo de un clip. El <code>.hero-line-wrap</code> hace <code>overflow: hidden</code> y el <code>.hero-line-inner</code> sube desde <code>translateY(112%)</code> hasta 0. Cada línea tiene un <code>animationDelay</code> escalonado.
+        Entrada del título del hero, carácter por carácter. Componente propio (<code>components/portfolio/split-text.tsx</code>), adaptado de{" "}
+        <a href="https://reactbits.dev/text-animations/split-text" target="_blank" rel="noreferrer">reactbits.dev</a>{" "}
+        — usa <code>gsap/SplitText</code> + <code>ScrollTrigger</code> para partir el texto y animar cada carácter con stagger. Cada línea del título es su propia instancia. Reemplazó a la técnica anterior de line-rise por clip (<code>.hero-line-wrap</code>/<code>.hero-line-inner</code>, ya no existe).
       </p>
-      <CodeBlock code={`/* CSS */
-.hero-line-wrap {
-  display: inline-block;
-  overflow: hidden;        /* el clip que oculta el texto */
-  padding-bottom: 0.06em;  /* espacio para descendentes (g, p, y) */
-  vertical-align: bottom;
-}
-.hero-line-inner {
-  display: inline-block;
-  transform: translateY(112%);
-  animation: lineRise 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-@keyframes lineRise {
-  to { transform: translateY(0); }
-}
-
-/* TSX — delay escalonado por línea */
-<span className="hero-line-wrap">
-  <span className="hero-line-inner" style={{ animationDelay: "0.05s" }}>
-    Diseño
-  </span>
-</span>
+      <CodeBlock code={`// hero-section.tsx
+<SplitText tag="span" text={hero.titleLine1} className="hero-title-line" />
 <br />
-<span className="hero-line-wrap">
-  <span className="hero-line-inner" style={{ animationDelay: "0.18s" }}>
-    <em>experiencias</em>
-  </span>
-</span>`} />
+<SplitText tag="span" text={hero.titleLine2} className="hero-title-line hero-title-line--accent" />
+
+/* CSS — shimmer de gradiente en la línea del medio (recuperado del <em> original) */
+.hero-title-line--accent {
+  color: var(--accent); /* fallback + color de los .split-char mientras animan */
+  background: linear-gradient(110deg, #0062cc 0%, #2997ff 40%, #3aabff 55%, #2997ff 70%, #0062cc 100%);
+  background-size: 300% 100%;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: hero-gradient-shift 12s ease-in-out 0.8s infinite;
+}
+.hero-title-line--accent .split-char {
+  background: none;
+  -webkit-text-fill-color: var(--accent); /* sólido mientras existen los spans por carácter */
+}`} />
+      <p className="ds-pattern-desc" style={{ marginTop: 12 }}>
+        <strong>Cuidado con texto dinámico:</strong> si el <code>text</code> cambia después de que ya animó una vez, el componente NO vuelve a animar (guard interno para no re-disparar en cada re-render). Como el título viene de <code>/api/admin/hero</code> vía fetch, <code>hero-section.tsx</code> espera a que resuelva (<code>heroLoaded</code>) antes de montar el <code>SplitText</code>, para que solo anime una vez con el texto final.
+      </p>
+      <p className="ds-pattern-desc" style={{ marginTop: 12 }}>
+        <strong>Gradiente + SplitText — por qué no es directo:</strong> <code>background-clip: text</code> necesita texto propio en el elemento al que se aplica. Mientras GSAP tiene la línea partida en <code>.split-char</code> por letra, el <code>&lt;span&gt;</code> padre no tiene texto directo — el gradiente no tendría nada que recortar. <code>split-text.tsx</code> llama a <code>splitInstance.revert()</code> en el <code>onComplete</code> del tween (apenas termina de animar esa línea), lo que restaura el texto plano — recién ahí el gradiente se ve. Mientras tanto, <code>.split-char</code> fuerza color sólido para que las letras no queden transparentes/invisibles heredando el <code>text-fill-color</code> del gradiente sin tener background detrás.
+      </p>
 
       {/* ── Keyframes disponibles ── */}
       <SectionHeading title="Keyframes disponibles en portfolio.css" />
       <div className="ds-spec-table">
         {[
           { name: "fadeUp",             desc: "opacity 0→1 + translateY(16px)→0. Usado en hero-tag, hero-sub, hero-cta (CSS animation fill: both)." },
-          { name: "lineRise",           desc: "translateY(112%)→0. Hero text-reveal. Activado por CSS animation en .hero-line-inner." },
-          { name: "hero-gradient-shift",desc: "background-position 0%→100%→0%. Anima el gradiente del texto hero. Ciclo de 12-16s." },
+          { name: "hero-gradient-shift",desc: "background-position 0%→100%→0%. Shimmer de la línea acento del hero-title (.hero-title-line--accent). Ciclo de 12s." },
           { name: "fadeIn",             desc: "opacity 0→1. Overlays, project-view backdrop." },
           { name: "popIn",              desc: "scale(0.88)+opacity 0 → scale(1)+opacity 1. Modal profile, snap easing." },
           { name: "popOut",             desc: "Reverso de popIn. Salida del modal." },
@@ -2954,12 +2951,12 @@ useEffect(() => {
     animation: none !important;
   }
 
-  /* Hero text — mostrar directamente sin clip */
-  .hero-line-wrap { overflow: visible !important; }
-  .hero-line-inner {
-    transform: none !important;
-    animation: none !important;
-  }
+  /* Hero title (SplitText) NO se cubre acá — el guard vive dentro del
+     componente (components/portfolio/split-text.tsx): detecta la media
+     query él mismo, nunca corre el tween de GSAP, y aplica opacity:1 +
+     transform:none directo. Necesario porque el texto lo divide GSAP
+     dinámicamente — un override CSS externo no alcanzaría a los spans
+     que todavía no existen en el momento en que se evalúa esta regla. */
 
   /* Tu nueva animación — patrón a seguir */
   .mi-nuevo-elemento {

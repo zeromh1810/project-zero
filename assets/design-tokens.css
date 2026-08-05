@@ -18,19 +18,11 @@
   --primitive-color-neutral-0: #ffffff;
   --primitive-color-neutral-50: #f8f8f8;
   --primitive-color-neutral-100: #f0f0f0;
-  --primitive-color-neutral-800: #141414;
-  --primitive-color-neutral-900: #0a0a0a;
-  --primitive-color-neutral-950: #000000;
-  --primitive-color-blue-tinted-50: #f0f4fb;
-  --primitive-color-blue-tinted-100: #e8edf7;
-  --primitive-color-blue-tinted-900: #0b1526;
-  --primitive-color-blue-tinted-950: #060c1a;
-  --primitive-color-blue-tinted-brands-start: #03070e;
-  --primitive-color-blue-tinted-brands-end: #060b16;
-  --primitive-color-blue-tinted-blog-dark-start: #0c1325;
-  --primitive-color-blue-tinted-blog-dark-end: #07090e;
+  --primitive-color-neutral-800: #171926;
+  --primitive-color-neutral-900: #0f1018;
+  --primitive-color-neutral-950: #0a0b12;
   --primitive-color-neutral-200: #e4e4e4;
-  --primitive-color-neutral-700: #1e1e1e;
+  --primitive-color-neutral-700: #212430;
   --primitive-color-text-dark-900: #1d1d1f;
   --primitive-color-text-dark-700: #3a3a40;
   --primitive-color-text-dark-500: #5e5e64;
@@ -283,9 +275,10 @@
   --admin-toast-border: rgba(255, 255, 255, 0.09);
   --admin-toast-shadow: 0 8px 32px rgba(0,0,0,0.50), 0 2px 8px rgba(0,0,0,0.30);
   --admin-toast-accent-info: #2997ff;
-  --color-bg: #000000;
-  --color-bg2: #0a0a0a;
-  --color-bg3: #141414;
+  --color-bg: #0a0b12;
+  --color-bg2: #0f1018;
+  --color-bg3: #171926;
+  --color-bg4: #212430;
   --color-txt: #f5f5f7;
   --color-txt2: #b0b0b5;
   --color-txt3: #8e8e93;
@@ -297,7 +290,7 @@
   --color-glass-hover: rgba(255, 255, 255, 0.07);
   --color-card: rgba(255, 255, 255, 0.04);
   --color-card-hover: rgba(255, 255, 255, 0.08);
-  --color-navbar-bg: rgba(0, 0, 0, 0.75);
-  --navbar-bg: rgba(0, 0, 0, 0.75);
+  --color-navbar-bg: rgba(10, 11, 18, 0.75);
+  --navbar-bg: rgba(10, 11, 18, 0.75);
   --color-shadow: rgba(0, 0, 0, 0.60);
 }

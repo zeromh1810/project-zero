@@ -80,7 +80,7 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
                   <circle cx="70" cy="52" r="22"
                     fill={isDark ? "rgba(41,151,255,0.55)" : "rgba(41,151,255,0.45)"} />
                   <text x="70" y="60" textAnchor="middle" fontSize="28"
-                    fontFamily="Plus Jakarta Sans" fontWeight="700" fill="white" opacity="0.9">
+                    style={{ fontFamily: "var(--portfolio-heading-font)" }} fontWeight="700" fill="white" opacity="0.9">
                     A
                   </text>
                 </svg>
