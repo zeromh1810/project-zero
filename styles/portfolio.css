@@ -884,12 +884,8 @@ html {
   /* Modal y panel: sin animación de entrada/salida */
   .overlay,
   .modal,
-  .project-view-backdrop,
-  .project-view-panel,
   .overlay--exiting,
-  .overlay--exiting .modal,
-  .project-view--exiting .project-view-backdrop,
-  .project-view--exiting .project-view-panel {
+  .overlay--exiting .modal {
     animation: none !important;
   }
 
@@ -1162,116 +1158,12 @@ html {
   transition-delay: 0.22s;
 }
 
-/* ── PROJECT VIEW (slide panel — case study) ── */
-.project-view {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-modal);
-  display: flex;
-  align-items: stretch;
-}
-
-.project-view-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(6px);
-  animation: fadeIn 0.3s ease;
-  cursor: pointer;
-}
-
-.project-view-panel {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(720px, 100vw);
-  background: var(--bg2);
-  border-left: 1px solid var(--border);
-  overflow-y: auto;
-  animation: slideInRight 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideOutRight {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(100%);
-  }
-}
-
-/* Exit state: panel slides back out */
-.project-view--exiting .project-view-backdrop {
-  animation: fadeOut 0.3s ease forwards;
-}
-
-.project-view--exiting .project-view-panel {
-  animation: slideOutRight 0.35s cubic-bezier(0.4, 0, 1, 1) forwards;
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-
-.pv-hero {
-  width: 100%;
-  aspect-ratio: 16/8;
-  position: relative;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.pv-close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: white;
-  font-size: 17px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 200ms ease, transform 200ms ease;
-  z-index: 5;
-}
-
-.pv-close:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.8);
-  outline-offset: 2px;
-}
-
-.pv-close:hover {
-  background: rgba(0, 0, 0, 0.75);
-  transform: scale(1.08);
-}
-
-.pv-body {
-  padding: 40px;
-}
-
-.pv-meta {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  margin-bottom: 14px;
-}
+/* ── PROJECT VIEW (slide panel — case study) ──
+   El panel deslizante quedó reemplazado por la página ruteada
+   /projects/[id] (ver project-detail-view.tsx). La mayoría de estas
+   clases ya no se usan en ningún componente — se dejaron solo
+   pv-kpi/pv-kpi-val/pv-kpi-lbl/pv-cat/pv-year, que sí siguen vivas
+   como muestra visual en la documentación del design system (/admin). */
 
 .pv-cat {
   font-size: 11px;
@@ -1284,32 +1176,6 @@ html {
 .pv-year {
   font-size: 12px;
   color: var(--txt3);
-}
-
-.pv-title {
-  font-family: var(--portfolio-heading-font);
-  font-size: clamp(24px, 4vw, 38px);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--txt);
-  margin-bottom: 12px;
-  text-wrap: balance;
-}
-
-.pv-short {
-  font-size: 17px;
-  line-height: 1.65;
-  color: var(--txt2);
-  margin-bottom: 28px;
-  text-wrap: pretty;
-}
-
-/* KPI strip */
-.pv-kpis {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 36px;
 }
 
 .pv-kpi {
@@ -1339,92 +1205,6 @@ html {
   font-size: 11px;
   color: var(--txt3);
   letter-spacing: 0.04em;
-}
-
-/* Case study sections */
-.pv-section {
-  margin-bottom: 32px;
-}
-
-.pv-section-title {
-  font-family: var(--portfolio-heading-font);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.pv-section-title::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-.pv-text {
-  font-size: 15px;
-  line-height: 1.8;
-  color: var(--txt2);
-  text-wrap: pretty;
-}
-
-.pv-text strong {
-  color: var(--txt);
-  font-weight: 500;
-}
-
-/* Result callout */
-.pv-result {
-  padding: 20px 24px;
-  border-radius: 16px;
-  margin-bottom: 32px;
-  background: rgba(48, 209, 88, 0.07);
-  border: 1px solid rgba(48, 209, 88, 0.2);
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--txt2);
-}
-
-.dark .pv-result {
-  background: rgba(48, 209, 88, 0.07);
-  border: 1px solid rgba(48, 209, 88, 0.2);
-}
-
-.pv-result strong {
-  color: var(--success);
-  font-weight: 600;
-}
-
-.pv-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 32px;
-}
-
-.pv-tag {
-  padding: 5px 13px;
-  border-radius: 980px;
-  border: 1px solid var(--border);
-  font-size: 12px;
-  color: var(--txt2);
-}
-
-.pv-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 0 0 28px;
-}
-
-.pv-actions {
-  display: flex;
-  gap: 12px;
-  padding-bottom: 8px;
 }
 
 /* ── ABOUT — Glassmorphism Layered ── */
@@ -2131,40 +1911,6 @@ html {
 .m-link:hover {
   border-color: var(--border-h);
   color: var(--txt);
-}
-
-/* ── CV ── */
-.cv-card {
-  max-width: 440px;
-  margin: 0 auto;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  padding: 64px 40px;
-  text-align: center;
-  opacity: 0;
-  animation: fadeUp 0.5s 0.1s ease forwards;
-}
-
-.cv-icon {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.cv-title {
-  font-family: var(--portfolio-heading-font);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 8px;
-}
-
-.cv-sub {
-  font-size: 15px;
-  color: var(--txt2);
-  line-height: 1.6;
-  margin-bottom: 32px;
 }
 
 /* ── FOOTER — bookend con paleta por tema ────────────────────────────────
@@ -3451,25 +3197,12 @@ html {
     min-height: unset;
   }
 
-  .project-view-panel {
-    width: 100vw;
-  }
-
-  .pv-kpis {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
-
   .pv-kpi {
     padding: 12px 8px;
   }
 
   .pv-kpi-val {
     font-size: 18px;
-  }
-
-  .pv-body {
-    padding: 24px 20px;
   }
 }
 
@@ -3486,12 +3219,6 @@ html {
   transform: translateY(0);
   transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Animation state - applied briefly then removed for entrance effect */
-.project-page.animating {
-  opacity: 0;
-  transform: translateY(20px);
 }
 
 .project-page.mounted {
@@ -4009,7 +3736,6 @@ html {
     padding: 12px 16px;
   }
 
-  .detail-breadcrumb-item,
   .detail-breadcrumb-current {
     display: none;
   }
