@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, KeyboardEvent } from "react"
 import type { ToastType } from "./admin-toast"
 import { type AboutData, type Stat } from "@/lib/types/about"
+import RichTextArea from "./rich-text-area"
 
 const DEFAULT: AboutData = {
   bio1: "Soy <strong>diseñador de producto y desarrollador frontend</strong> con base en Santiago, Chile.",
@@ -189,18 +190,13 @@ export default function AboutTab({ onToast }: Props) {
       {/* Bio */}
       <div className="admin-card">
         <div className="admin-card-title">Biografía</div>
-        <div className="admin-input-hint" style={{ marginBottom: 12, marginTop: -8 }}>
-          Puedes usar <code>&lt;strong&gt;texto&lt;/strong&gt;</code> para negritas
-        </div>
         <div className="admin-field">
           <label className="admin-label">Párrafo 1</label>
-          <textarea className="admin-textarea" value={data.bio1}
-            onChange={e => set("bio1", e.target.value)} style={{ minHeight: 88 }} />
+          <RichTextArea value={data.bio1} onChange={v => set("bio1", v)} minHeight={88} />
         </div>
         <div className="admin-field">
           <label className="admin-label">Párrafo 2</label>
-          <textarea className="admin-textarea" value={data.bio2}
-            onChange={e => set("bio2", e.target.value)} style={{ minHeight: 88 }} />
+          <RichTextArea value={data.bio2} onChange={v => set("bio2", v)} minHeight={88} />
         </div>
       </div>
 

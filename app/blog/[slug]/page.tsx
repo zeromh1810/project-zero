@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { AppNavbar } from "@/components/portfolio/app-navbar"
+import { RichText } from "@/components/portfolio/rich-text"
 import { useIntersection } from "@/hooks/use-intersection"
 import { type BlogPost, formatDate, formatDateShort, excerpt } from "@/lib/types/blog"
 
@@ -144,7 +145,7 @@ export default function BlogPostPage() {
                   </div>
                 )}
 
-                <div className="blog-post-content anim-up">{post.content}</div>
+                <div className="blog-post-content anim-up"><RichText text={post.content} /></div>
 
                 {tags.length > 0 && (
                   <footer className="blog-post-tags anim-up" aria-label="Tags">

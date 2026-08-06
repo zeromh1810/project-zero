@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import RichTextArea from "./rich-text-area"
 
 interface HeroData {
   titleLine1: string
@@ -119,9 +120,11 @@ export default function HeroTab({ onToast }: Props) {
         <div className="admin-card-title">Subtítulo</div>
         <div className="admin-field">
           <label className="admin-label">Texto descriptivo</label>
-          <textarea className="admin-textarea" value={data.subtitle}
-            onChange={e => set("subtitle", e.target.value)}
-            placeholder="Descripción breve que acompaña el título…" />
+          <RichTextArea
+            value={data.subtitle}
+            onChange={v => set("subtitle", v)}
+            placeholder="Descripción breve que acompaña el título…"
+          />
         </div>
       </div>
     </>

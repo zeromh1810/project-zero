@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, KeyboardEvent, ChangeEvent } from "react"
+import RichTextArea from "./rich-text-area"
 
 interface KPI { val: string; lbl: string }
 
@@ -391,21 +392,30 @@ export default function ProjectForm({ initial, onSave, onClose, saving }: Props)
           <div className="admin-card-title" style={{ marginTop: 20 }}>Caso de estudio</div>
           <div className="admin-field">
             <label className="admin-label">Introducción / Problema</label>
-            <textarea className="admin-textarea" style={{ minHeight: 120 }} value={form.intro}
-              onChange={e => set("intro", e.target.value)}
-              placeholder="Describe el contexto y el desafío inicial..." />
+            <RichTextArea
+              value={form.intro}
+              onChange={v => set("intro", v)}
+              minHeight={120}
+              placeholder="Describe el contexto y el desafío inicial..."
+            />
           </div>
           <div className="admin-field">
             <label className="admin-label">Proceso</label>
-            <textarea className="admin-textarea" style={{ minHeight: 120 }} value={form.process}
-              onChange={e => set("process", e.target.value)}
-              placeholder="Explica cómo abordaste el problema..." />
+            <RichTextArea
+              value={form.process}
+              onChange={v => set("process", v)}
+              minHeight={120}
+              placeholder="Explica cómo abordaste el problema..."
+            />
           </div>
           <div className="admin-field">
             <label className="admin-label">Resultado</label>
-            <textarea className="admin-textarea" style={{ minHeight: 100 }} value={form.result}
-              onChange={e => set("result", e.target.value)}
-              placeholder="Describe el impacto y los resultados obtenidos..." />
+            <RichTextArea
+              value={form.result}
+              onChange={v => set("result", v)}
+              minHeight={100}
+              placeholder="Describe el impacto y los resultados obtenidos..."
+            />
           </div>
         </div>
 

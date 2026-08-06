@@ -291,6 +291,59 @@
   box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.12);
 }
 
+/* ── RICH TEXT AREA — barra de formato (bold/italic) ── */
+.admin-richtext {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-richtext-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: -1.5px; /* se funde con el borde superior del textarea */
+  align-self: flex-start;
+}
+
+.admin-richtext-btn {
+  width: 28px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--border);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: var(--bg3);
+  color: var(--txt2);
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.dark .admin-richtext-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-richtext-btn:hover {
+  color: var(--txt);
+  background: var(--bg2);
+}
+
+.admin-richtext-btn:active {
+  background: var(--glass-hover);
+}
+
+.admin-richtext-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.admin-textarea--richtext {
+  border-top-left-radius: 0;
+}
+
 .admin-input-hint {
   font-size: 11px;
   color: var(--txt3);

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import type { Project } from "@/lib/data/projects"
 import { GalleryModal, PlaceholderThumb, type GalleryItem } from "./gallery-modal"
 import { useLogo } from "@/lib/hooks/use-logo"
+import { RichText } from "./rich-text"
 
 interface ProjectDetailViewProps {
   project: Project
@@ -163,25 +164,25 @@ export function ProjectDetailView({
 
           <section className="detail-section">
             <h3 className="detail-section-label">EL DESAFÍO</h3>
-            <p className="detail-section-text" dangerouslySetInnerHTML={{
-              __html: project.intro.replace(/(\d+%)/g, "<strong>$1</strong>"),
-            }} />
+            <p className="detail-section-text">
+              <RichText text={project.intro.replace(/(\d+%)/g, "<strong>$1</strong>")} />
+            </p>
           </section>
 
           <section className="detail-section">
             <h3 className="detail-section-label">PROCESO</h3>
-            <p className="detail-section-text" dangerouslySetInnerHTML={{
-              __html: project.process
+            <p className="detail-section-text">
+              <RichText text={project.process
                 .replace(/(confianza)/gi, "<strong>$1</strong>")
-                .replace(/(insight clave)/gi, "<strong>$1</strong>"),
-            }} />
+                .replace(/(insight clave)/gi, "<strong>$1</strong>")} />
+            </p>
           </section>
 
           <section className="detail-section">
             <h3 className="detail-section-label">EL RESULTADO</h3>
-            <p className="detail-section-text" dangerouslySetInnerHTML={{
-              __html: project.result.replace(/(\+?\d+%|\$[\d.]+[MK]?)/g, "<strong>$1</strong>"),
-            }} />
+            <p className="detail-section-text">
+              <RichText text={project.result.replace(/(\+?\d+%|\$[\d.]+[MK]?)/g, "<strong>$1</strong>")} />
+            </p>
           </section>
 
           <div className="detail-impact-box">

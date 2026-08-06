@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react"
 import { useTheme } from "@/lib/context/theme-context"
 import { buildHeroTerrain } from "@/lib/webgl/hero-terrain"
 import SplitText from "../split-text"
+import { RichText } from "../rich-text"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -260,7 +261,7 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
             )}
           </h1>
 
-          <p className="hero-sub" onAnimationEnd={releaseEntranceAnimation}>{hero.subtitle}</p>
+          <p className="hero-sub" onAnimationEnd={releaseEntranceAnimation}><RichText text={hero.subtitle} /></p>
 
           <div className="hero-cta" onAnimationEnd={releaseEntranceAnimation}>
             <button className="btn-p btn-magnetic" onClick={onNavigateContact}>
