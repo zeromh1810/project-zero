@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import dynamic from "next/dynamic"
 import { useIntersection } from "@/hooks/use-intersection"
 import { AppNavbar, NAV_SESSION_KEY } from "./app-navbar"
 import { BottomNav } from "./bottom-nav"
-import { ProfileModal } from "./profile-modal"
+
+const ProfileModal = dynamic(() => import("./profile-modal").then(mod => mod.ProfileModal), { ssr: false })
 import { ProjectsSection } from "./sections/projects-section"
 import { AboutSection } from "./sections/about-section"
 import { ContactSection } from "./sections/contact-section"
