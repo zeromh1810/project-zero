@@ -1390,6 +1390,44 @@ function handleBack(scrollTarget?: "projects") {
         ))}
       </div>
 
+      {/* ── Casos de uso — journey completo ── */}
+      <SectionHeading title="Caso de uso — el recorrido completo" />
+      <p className="ds-pattern-desc">
+        No es una página aislada — es un ciclo cerrado. Cada paso de ida tiene su equivalente de vuelta, y ambos
+        direcciones respetan las mismas duraciones (más rápida al volver, ver &quot;Reglas&quot; abajo).
+      </p>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 4, marginTop: 12 }}>
+        {[
+          { label: "Bento Grid", desc: "/trabajos" },
+          { label: "Click en p-card", desc: "clone + backdrop" },
+          { label: "Morph 400ms", desc: "fade cruzado" },
+          { label: "Detail View", desc: "mounted=true" },
+          { label: '"Volver"', desc: "handleBack()" },
+          { label: "Exit 300ms", desc: "de vuelta al grid" },
+        ].map((step, i, arr) => (
+          <div key={step.label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{
+              minWidth: 108, padding: "10px 12px", borderRadius: 10, textAlign: "center",
+              background: i === 3 ? "rgba(0,98,204,0.09)" : "var(--bg2)",
+              border: `1px solid ${i === 3 ? "rgba(0,98,204,0.28)" : "var(--border)"}`,
+            }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: i === 3 ? "var(--accent)" : "var(--txt)" }}>{step.label}</div>
+              <div style={{ fontSize: 10, color: "var(--txt3)", marginTop: 2 }}>{step.desc}</div>
+            </div>
+            {i < arr.length - 1 && (
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+                <path d="M4 10h12M12 6l4 4-4 4" stroke="var(--txt3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </div>
+        ))}
+      </div>
+      <p className="ds-pattern-desc" style={{ marginTop: 12 }}>
+        Los dos puntos de entrada al ciclo son el mismo componente pero con distinto <code>scrollTarget</code>: el logo
+        (<code>handleBack()</code>, vuelve donde estaba) y &quot;Trabajos&quot; en el breadcrumb (<code>handleBack(&quot;projects&quot;)</code>,
+        salta directo a la grilla).
+      </p>
+
       <SectionHeading title="Reglas de uso" />
       <div className="ds-rules">
         <RuleChip rule="Mantener EXIT_DURATION de salida más corto que la entrada — las salidas se sienten mejor rápidas" variant="do" />
@@ -1882,6 +1920,44 @@ useEffect(() => {
 // Cada item, si no tiene foto subida:
 { id: 2, label: "Vista móvil", gradient: project.gradient,
   accent: project.accentColor, placeholderType: "mobile" }`} />
+
+      {/* ── Casos de uso — comparación visual ── */}
+      <SectionHeading title="Cuándo usar cada uno — casos de uso" />
+      <p className="ds-pattern-desc">
+        La pregunta que decide cuál usar no es &quot;qué tan grande es el contenido&quot;, es <strong>qué tipo de contenido es</strong>.
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 12 }}>
+        <div style={{ border: "1px solid var(--border)", borderRadius: 14, padding: 20, background: "var(--bg2)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--card)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>💬</div>
+            <div style={{ fontWeight: 700, fontSize: 14, color: "var(--txt)" }}>.overlay / .modal</div>
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--txt3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Usar cuando el contenido es…</div>
+          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: "var(--txt2)", lineHeight: 1.7 }}>
+            <li>Texto, datos o un formulario corto</li>
+            <li>Info de una entidad (perfil, tarjeta de detalle)</li>
+            <li>Una confirmación o una acción puntual</li>
+          </ul>
+          <div style={{ fontSize: 11, color: "var(--txt3)", marginTop: 10 }}>Ejemplo real: Profile Modal</div>
+        </div>
+        <div style={{ border: "1px solid var(--border)", borderRadius: 14, padding: 20, background: "var(--bg2)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--card)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🖼️</div>
+            <div style={{ fontWeight: 700, fontSize: 14, color: "var(--txt)" }}>GalleryModal (Radix)</div>
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--txt3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Usar cuando el contenido es…</div>
+          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: "var(--txt2)", lineHeight: 1.7 }}>
+            <li>Media a pantalla completa — fotos, capturas</li>
+            <li>Una colección navegable (necesita prev/next)</li>
+            <li>Algo que el usuario quiere explorar, no solo leer</li>
+          </ul>
+          <div style={{ fontSize: 11, color: "var(--txt3)", marginTop: 10 }}>Ejemplo real: galería de resultados en Detalle de Proyecto</div>
+        </div>
+      </div>
+      <p className="ds-pattern-desc" style={{ marginTop: 12 }}>
+        Señal rápida: si el usuario va a querer <em>navegar</em> entre varias piezas de contenido (siguiente/anterior), es
+        GalleryModal. Si va a <em>leer o actuar</em> sobre una sola pieza, es .overlay/.modal.
+      </p>
 
       {/* ── Reglas ── */}
       <SectionHeading title="Reglas de uso" />
@@ -3530,6 +3606,35 @@ function PageBlog() {
   transform: translateY(-4px);
   box-shadow: var(--shadow-xl);  /* token — auto dark mode */
 }`} />
+
+      {/* ── Casos de uso — tres cards, tres contextos ── */}
+      <SectionHeading title="Caso de uso — tres cards, tres contextos" />
+      <p className="ds-pattern-desc">
+        Las tres comparten la misma idea (imagen + categoría + título) pero ninguna es intercambiable con otra — cada una
+        está calibrada para la densidad de información de su contexto.
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginTop: 12 }}>
+        {[
+          { name: "BlogCard", where: "/blog — listado completo", density: "Máxima", has: "categoría · título · excerpt · 3 tags · meta row", radius: "18px" },
+          { name: "BlogPreviewCard", where: "Home — “Últimas entradas”", density: "Media", has: "categoría · título · excerpt — sin tags, sin meta", radius: "16px" },
+          { name: "RelatedGridCard", where: "Final del artículo", density: "Mínima", has: "categoría · fecha · título · excerpt — sin tags", radius: "16px" },
+        ].map(({ name, where, density, has, radius }) => (
+          <div key={name} style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 16, background: "var(--bg2)" }}>
+            <div style={{ fontWeight: 700, fontSize: 13, color: "var(--accent)", marginBottom: 8 }}>{name}</div>
+            <div style={{ fontSize: 12, color: "var(--txt)", marginBottom: 10, fontWeight: 600 }}>{where}</div>
+            <div style={{ fontSize: 11, color: "var(--txt3)", lineHeight: 1.6, marginBottom: 10 }}>{has}</div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--txt3)", paddingTop: 8, borderTop: "1px solid var(--border)" }}>
+              <span>Densidad: <strong style={{ color: "var(--txt2)" }}>{density}</strong></span>
+              <span>radius {radius}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="ds-pattern-desc" style={{ marginTop: 12 }}>
+        La regla para elegir: a más cerca del contenido principal que el usuario ya está leyendo, menos información
+        compite por su atención. Related (dentro del artículo) &lt; Preview (home, contexto de descubrimiento) &lt; Card
+        (listado, el usuario está ahí específicamente a explorar).
+      </p>
 
       {/* ── Search Input ── */}
       <SectionHeading title="Search Input — Buscador de entradas" />
