@@ -96,14 +96,19 @@ export default function BlogTab({ onToast }: Props) {
       })
       if (!res.ok) { const d = await res.json(); throw new Error(d.error) }
       const saved = await res.json()
+      const warned = Boolean(saved._githubWarning)
       if (isEdit) {
         setPosts(prev => prev.map(p => p.id === saved.id ? saved : p))
-        onToast("Entrada actualizada", "success")
+        warned
+          ? onToast("Entrada guardada localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
+          : onToast("Entrada actualizada", "success")
         cancelEdit()
       } else {
         setPosts(prev => [saved, ...prev])
         setForm(EMPTY_FORM)
-        onToast("Entrada publicada", "success")
+        warned
+          ? onToast("Entrada guardada localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
+          : onToast("Entrada publicada", "success")
       }
     } catch (e) {
       onToast(e instanceof Error ? e.message : "Error al guardar", "error")
@@ -115,9 +120,12 @@ export default function BlogTab({ onToast }: Props) {
     try {
       const res = await fetch(`/api/admin/blog?id=${id}`, { method: "DELETE" })
       if (!res.ok) throw new Error()
+      const data = await res.json()
       setPosts(prev => prev.filter(p => p.id !== id))
       if (editId === id) cancelEdit()
-      onToast("Entrada eliminada", "success")
+      data._githubWarning
+        ? onToast("Entrada eliminada localmente", "warning", "No se pudo sincronizar con GitHub. La entrada podría reaparecer en el próximo deploy.")
+        : onToast("Entrada eliminada", "success")
     } catch { onToast("Error al eliminar", "error") }
     finally { setDeleting(null) }
   }

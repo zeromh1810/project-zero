@@ -97,6 +97,7 @@ function BlogPageInner() {
   const [page,        setPage]        = useState(1)
   const [loading,     setLoading]     = useState(true)
   const heroRef = useRef<HTMLDivElement>(null)
+  const tagsRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
 
   const revealIn = useCallback((el: Element) => { el.classList.add("visible", "in") }, [])
@@ -144,6 +145,11 @@ function BlogPageInner() {
   // Grid: re-stagger cada vez que cambia el set de posts visibles (filtro/página/carga)
   useIntersection(gridRef, revealIn, [paginated.map(p => p.id).join("|"), loading], 0.05)
 
+  // Tags rápidos: solo existen en el DOM una vez que cargan los posts (llegan
+  // después del fetch async), así que necesitan su propio observer separado
+  // del heroRef (que se monta una sola vez, antes de que existan los tags).
+  useIntersection(tagsRef, revealIn, [allTags.length], 0.1)
+
   return (
     <div className="blog-page">
       <AppNavbar mode="blog" />
@@ -185,14 +191,16 @@ function BlogPageInner() {
 
             {/* Tags rápidos */}
             {allTags.length > 0 && (
-              <div className="blog-tags anim-up" style={{ marginTop: 4 }}>
-                {allTags.map(tag => (
-                  <button
-                    key={tag}
-                    className={`blog-tag${selectedTag === tag ? " active" : ""}`}
-                    onClick={() => handleTagClick(tag)}
-                  >#{tag}</button>
-                ))}
+              <div ref={tagsRef}>
+                <div className="blog-tags anim-up" style={{ marginTop: 4 }}>
+                  {allTags.map(tag => (
+                    <button
+                      key={tag}
+                      className={`blog-tag${selectedTag === tag ? " active" : ""}`}
+                      onClick={() => handleTagClick(tag)}
+                    >#{tag}</button>
+                  ))}
+                </div>
               </div>
             )}
           </div>

@@ -2,10 +2,12 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
+import { writeJsonAndCommit } from "@/lib/admin-json"
 
 export const dynamic = "force-dynamic"
 
-const FILE = path.join(process.cwd(), "data", "blog.json")
+const FILE      = path.join(process.cwd(), "data", "blog.json")
+const DATA_PATH = "data/blog.json"
 
 export interface BlogPost {
   id: string
@@ -22,10 +24,6 @@ export interface BlogPost {
 function read(): { posts: BlogPost[] } {
   try { return JSON.parse(fs.readFileSync(FILE, "utf-8")) }
   catch { return { posts: [] } }
-}
-
-function write(data: unknown) {
-  fs.writeFileSync(FILE, JSON.stringify(data, null, 2), "utf-8")
 }
 
 function toSlug(title: string) {
@@ -80,8 +78,8 @@ export async function POST(request: Request) {
       draft: body.draft === true,
     }
     data.posts.unshift(post)
-    write(data)
-    return NextResponse.json(post, { status: 201 })
+    const synced = await writeJsonAndCommit(FILE, DATA_PATH, data, "chore(data): update blog via admin panel [skip ci]", "blog")
+    return NextResponse.json({ ...post, _githubWarning: !synced }, { status: 201 })
   } catch {
     return NextResponse.json({ error: "Error al crear" }, { status: 500 })
   }
@@ -107,8 +105,8 @@ export async function PUT(request: Request) {
       tags:     body.tags !== undefined ? sanitizeTags(body.tags) : (data.posts[idx].tags ?? []),
       draft:    body.draft    ?? data.posts[idx].draft,
     }
-    write(data)
-    return NextResponse.json(data.posts[idx])
+    const synced = await writeJsonAndCommit(FILE, DATA_PATH, data, "chore(data): update blog via admin panel [skip ci]", "blog")
+    return NextResponse.json({ ...data.posts[idx], _githubWarning: !synced })
   } catch {
     return NextResponse.json({ error: "Error al actualizar" }, { status: 500 })
   }
@@ -126,8 +124,8 @@ export async function DELETE(request: Request) {
     data.posts = data.posts.filter(p => p.id !== id)
     if (data.posts.length === prev)
       return NextResponse.json({ error: "No encontrado" }, { status: 404 })
-    write(data)
-    return NextResponse.json({ ok: true })
+    const synced = await writeJsonAndCommit(FILE, DATA_PATH, data, "chore(data): update blog via admin panel [skip ci]", "blog")
+    return NextResponse.json({ ok: true, _githubWarning: !synced })
   } catch {
     return NextResponse.json({ error: "Error al eliminar" }, { status: 500 })
   }

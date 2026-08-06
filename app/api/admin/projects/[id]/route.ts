@@ -2,17 +2,15 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
+import { writeJsonAndCommit } from "@/lib/admin-json"
 
 export const dynamic = "force-dynamic"
 
-const FILE = path.join(process.cwd(), "data", "projects.json")
+const FILE      = path.join(process.cwd(), "data", "projects.json")
+const DATA_PATH = "data/projects.json"
 
 function read() {
   return JSON.parse(fs.readFileSync(FILE, "utf-8"))
-}
-
-function write(data: unknown) {
-  fs.writeFileSync(FILE, JSON.stringify(data, null, 2), "utf-8")
 }
 
 export async function PUT(
@@ -29,8 +27,8 @@ export async function PUT(
     const updated = projects.map((p: { id: number | string }) =>
       String(p.id) === id ? { ...p, ...body } : p
     )
-    write(updated)
-    return NextResponse.json(body)
+    const synced = await writeJsonAndCommit(FILE, DATA_PATH, updated, "chore(data): update projects via admin panel [skip ci]", "projects")
+    return NextResponse.json({ ...body, _githubWarning: !synced })
   } catch {
     return NextResponse.json({ error: "Error al actualizar" }, { status: 500 })
   }
@@ -49,8 +47,8 @@ export async function DELETE(
     const filtered = projects.filter(
       (p: { id: number | string }) => String(p.id) !== id
     )
-    write(filtered)
-    return NextResponse.json({ ok: true })
+    const synced = await writeJsonAndCommit(FILE, DATA_PATH, filtered, "chore(data): update projects via admin panel [skip ci]", "projects")
+    return NextResponse.json({ ok: true, _githubWarning: !synced })
   } catch {
     return NextResponse.json({ error: "Error al eliminar" }, { status: 500 })
   }

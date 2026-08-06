@@ -2,17 +2,15 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
+import { writeJsonAndCommit } from "@/lib/admin-json"
 
 export const dynamic = "force-dynamic"
 
-const FILE = path.join(process.cwd(), "data", "projects.json")
+const FILE      = path.join(process.cwd(), "data", "projects.json")
+const DATA_PATH = "data/projects.json"
 
 function read() {
   return JSON.parse(fs.readFileSync(FILE, "utf-8"))
-}
-
-function write(data: unknown) {
-  fs.writeFileSync(FILE, JSON.stringify(data, null, 2), "utf-8")
 }
 
 export async function GET() {
@@ -41,8 +39,8 @@ export async function POST(request: Request) {
         .replace(/^-|-$/g, ""),
     }
     projects.push(newProject)
-    write(projects)
-    return NextResponse.json(newProject, { status: 201 })
+    const synced = await writeJsonAndCommit(FILE, DATA_PATH, projects, "chore(data): update projects via admin panel [skip ci]", "projects")
+    return NextResponse.json({ ...newProject, _githubWarning: !synced }, { status: 201 })
   } catch {
     return NextResponse.json({ error: "Error al crear proyecto" }, { status: 500 })
   }

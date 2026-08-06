@@ -37,19 +37,25 @@ export default function ProjectsTab({ onToast }: Props) {
     setSaving(true)
     try {
       if (editing?.id) {
-        await fetch(`/api/admin/projects/${editing.id}`, {
+        const res = await fetch(`/api/admin/projects/${editing.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         })
-        onToast("Proyecto actualizado", "success")
+        const saved = await res.json()
+        saved._githubWarning
+          ? onToast("Proyecto guardado localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
+          : onToast("Proyecto actualizado", "success")
       } else {
-        await fetch("/api/admin/projects", {
+        const res = await fetch("/api/admin/projects", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         })
-        onToast("Proyecto creado", "success")
+        const saved = await res.json()
+        saved._githubWarning
+          ? onToast("Proyecto guardado localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
+          : onToast("Proyecto creado", "success")
       }
       setEditing(undefined)
       load()
@@ -62,8 +68,11 @@ export default function ProjectsTab({ onToast }: Props) {
 
   async function handleDelete(id: number) {
     try {
-      await fetch(`/api/admin/projects/${id}`, { method: "DELETE" })
-      onToast("Proyecto eliminado", "success")
+      const res = await fetch(`/api/admin/projects/${id}`, { method: "DELETE" })
+      const data = await res.json()
+      data._githubWarning
+        ? onToast("Proyecto eliminado localmente", "warning", "No se pudo sincronizar con GitHub. El proyecto podría reaparecer en el próximo deploy.")
+        : onToast("Proyecto eliminado", "success")
       setConfirmDelete(null)
       load()
     } catch {
