@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect, Fragment, Suspense } from "react"
+import { useState, useEffect, useRef, useCallback, Fragment, Suspense } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { AppNavbar } from "@/components/portfolio/app-navbar"
+import { useIntersection } from "@/hooks/use-intersection"
 import { type BlogPost, formatDate, excerpt } from "@/lib/types/blog"
 
 const CATEGORIES = ["Todos", "Diseño", "Desarrollo", "Producto", "UX Research", "Case Study"]
@@ -95,6 +96,13 @@ function BlogPageInner() {
   const [selectedTag, setSelectedTag] = useState<string | null>(searchParams.get("tag"))
   const [page,        setPage]        = useState(1)
   const [loading,     setLoading]     = useState(true)
+  const heroRef = useRef<HTMLDivElement>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
+
+  const revealIn = useCallback((el: Element) => { el.classList.add("visible", "in") }, [])
+
+  // Hero + filtros: reveal único al montar
+  useIntersection(heroRef, revealIn, [], 0.1)
 
   useEffect(() => {
     let ignore = false
@@ -133,56 +141,61 @@ function BlogPageInner() {
   // Todos los tags únicos del total de posts (para mostrar como filtros rápidos)
   const allTags = Array.from(new Set(posts.flatMap(p => p.tags || []))).sort()
 
+  // Grid: re-stagger cada vez que cambia el set de posts visibles (filtro/página/carga)
+  useIntersection(gridRef, revealIn, [paginated.map(p => p.id).join("|"), loading], 0.05)
+
   return (
     <div className="blog-page">
       <AppNavbar mode="blog" />
 
       <main className="blog-main">
 
-        {/* Hero */}
-        <div className="blog-hero">
-          <div className="s-label">Blog</div>
-          <h1 className="blog-hero-title">Perspectivas sobre diseño y producto</h1>
-          <p className="blog-hero-sub">Reflexiones, casos de estudio y exploración de ideas</p>
-        </div>
-
-        {/* Filters */}
-        <div className="blog-filters">
-          <div className="blog-search-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="blog-search-icon">
-              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              className="blog-search"
-              value={search}
-              onChange={e => { setSearch(e.target.value); setSelectedTag(null) }}
-              placeholder="Buscar entradas…"
-            />
+        {/* Hero + filtros */}
+        <div ref={heroRef}>
+          <div className="blog-hero">
+            <div className="s-label anim-up">Blog</div>
+            <h1 className="blog-hero-title anim-up">Perspectivas sobre diseño y producto</h1>
+            <p className="blog-hero-sub anim-up">Reflexiones, casos de estudio y exploración de ideas</p>
           </div>
 
-          {/* Categorías */}
-          <div className="blog-pills">
-            {CATEGORIES.map(c => (
-              <button
-                key={c}
-                className={`blog-pill${category === c && !selectedTag ? " active" : ""}`}
-                onClick={() => { setCategory(c); setSelectedTag(null) }}
-              >{c}</button>
-            ))}
-          </div>
+          {/* Filters */}
+          <div className="blog-filters">
+            <div className="blog-search-wrap anim-up">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="blog-search-icon">
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                className="blog-search"
+                value={search}
+                onChange={e => { setSearch(e.target.value); setSelectedTag(null) }}
+                placeholder="Buscar entradas…"
+              />
+            </div>
 
-          {/* Tags rápidos */}
-          {allTags.length > 0 && (
-            <div className="blog-tags" style={{ marginTop: 4 }}>
-              {allTags.map(tag => (
+            {/* Categorías */}
+            <div className="blog-pills anim-up">
+              {CATEGORIES.map(c => (
                 <button
-                  key={tag}
-                  className={`blog-tag${selectedTag === tag ? " active" : ""}`}
-                  onClick={() => handleTagClick(tag)}
-                >#{tag}</button>
+                  key={c}
+                  className={`blog-pill${category === c && !selectedTag ? " active" : ""}`}
+                  onClick={() => { setCategory(c); setSelectedTag(null) }}
+                >{c}</button>
               ))}
             </div>
-          )}
+
+            {/* Tags rápidos */}
+            {allTags.length > 0 && (
+              <div className="blog-tags anim-up" style={{ marginTop: 4 }}>
+                {allTags.map(tag => (
+                  <button
+                    key={tag}
+                    className={`blog-tag${selectedTag === tag ? " active" : ""}`}
+                    onClick={() => handleTagClick(tag)}
+                  >#{tag}</button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Tag activo */}
@@ -199,24 +212,31 @@ function BlogPageInner() {
         )}
 
         {/* Grid */}
-        {loading ? (
-          <div className="blog-empty">Cargando…</div>
-        ) : filtered.length === 0 ? (
-          <div className="blog-empty">
-            {search || category !== "Todos" || selectedTag
-              ? "No hay entradas que coincidan con tu búsqueda."
-              : "Aún no hay entradas publicadas. ¡Pronto!"}
-          </div>
-        ) : (
-          <>
-            <div className="blog-grid">
-              {paginated.map(post => (
-                <BlogCard key={post.id} post={post} onTagClick={handleTagClick} />
-              ))}
+        <div ref={gridRef}>
+          {loading ? (
+            <div className="blog-empty">
+              <span className="blog-spinner" aria-hidden="true" />
+              Cargando…
             </div>
-            <Paginator page={page} total={totalPages} onChange={setPage} />
-          </>
-        )}
+          ) : filtered.length === 0 ? (
+            <div className="blog-empty anim-up">
+              {search || category !== "Todos" || selectedTag
+                ? "No hay entradas que coincidan con tu búsqueda."
+                : "Aún no hay entradas publicadas. ¡Pronto!"}
+            </div>
+          ) : (
+            <>
+              <div className="blog-grid">
+                {paginated.map(post => (
+                  <div className="anim-up blog-card-anim" key={post.id}>
+                    <BlogCard post={post} onTagClick={handleTagClick} />
+                  </div>
+                ))}
+              </div>
+              <Paginator page={page} total={totalPages} onChange={setPage} />
+            </>
+          )}
+        </div>
 
       </main>
     </div>

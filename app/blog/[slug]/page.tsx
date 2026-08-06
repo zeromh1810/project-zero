@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { AppNavbar } from "@/components/portfolio/app-navbar"
+import { useIntersection } from "@/hooks/use-intersection"
 import { type BlogPost, formatDate, formatDateShort, excerpt } from "@/lib/types/blog"
 
 // ── Related Posts (grid estático, máx 3) ───────────────────────────────────
@@ -19,11 +20,19 @@ function RelatedPosts({ currentSlug, currentCategory, allPosts }: {
     return [...same, ...rest].slice(0, 3)
   }, [allPosts, currentSlug, currentCategory])
 
+  const relatedRef = useRef<HTMLDivElement>(null)
+  useIntersection(
+    relatedRef,
+    useCallback((el: Element) => { el.classList.add("visible", "in") }, []),
+    [related.map(p => p.id).join("|")],
+    0.1
+  )
+
   if (related.length === 0) return null
 
   return (
-    <section className="related-posts" aria-labelledby="related-heading">
-      <div className="related-posts-head">
+    <section className="related-posts" aria-labelledby="related-heading" ref={relatedRef}>
+      <div className="related-posts-head anim-up">
         <div className="s-label">Descubre más</div>
         <h2 className="related-posts-title" id="related-heading">
           También te puede interesar
@@ -32,8 +41,8 @@ function RelatedPosts({ currentSlug, currentCategory, allPosts }: {
 
       <div className="related-posts-grid">
         {related.map(p => (
+          <div className="anim-up" key={p.id}>
           <Link
-            key={p.id}
             href={`/blog/${p.slug}`}
             className="related-grid-card"
             aria-label={p.title}
@@ -53,6 +62,7 @@ function RelatedPosts({ currentSlug, currentCategory, allPosts }: {
               <span className="blog-preview-cta">Leer entrada →</span>
             </div>
           </Link>
+          </div>
         ))}
       </div>
     </section>
@@ -66,6 +76,12 @@ export default function BlogPostPage() {
   const [allPosts, setAllPosts] = useState<BlogPost[]>([])
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState(false)
+  const articleRef = useRef<HTMLDivElement>(null)
+  const sidebarRef = useRef<HTMLDivElement>(null)
+
+  const revealIn = useCallback((el: Element) => { el.classList.add("visible", "in") }, [])
+  useIntersection(articleRef, revealIn, [post?.id], 0.1)
+  useIntersection(sidebarRef, revealIn, [post?.id], 0.1)
 
   useEffect(() => {
     if (!slug) return
@@ -90,10 +106,15 @@ export default function BlogPostPage() {
       <AppNavbar mode="blog" />
 
       <main className="blog-post-main">
-        {loading && <div className="blog-empty">Cargando…</div>}
+        {loading && (
+          <div className="blog-empty">
+            <span className="blog-spinner" aria-hidden="true" />
+            Cargando…
+          </div>
+        )}
 
         {error && (
-          <div className="blog-empty">
+          <div className="blog-empty anim-up">
             Entrada no encontrada.{" "}
             <Link href="/blog" style={{ color: "var(--accent)" }}>Volver al blog →</Link>
           </div>
@@ -104,27 +125,29 @@ export default function BlogPostPage() {
             {/* Wrapper que se convierte en grid 2 cols a ≥1921px */}
             <div className="blog-post-layout">
 
-              <article className="blog-post">
+              <article className="blog-post" ref={articleRef}>
 
-                <Link href="/blog" className="blog-post-back">← Volver al blog</Link>
+                <div className="anim-up">
+                  <Link href="/blog" className="blog-post-back">← Volver al blog</Link>
+                </div>
 
-                <div className="blog-post-meta">
+                <div className="blog-post-meta anim-up">
                   <span className="blog-card-cat">{post.category}</span>
                   <span className="blog-post-date">{formatDate(post.publishedAt)}</span>
                 </div>
 
-                <h1 className="blog-post-title">{post.title}</h1>
+                <h1 className="blog-post-title anim-up">{post.title}</h1>
 
                 {post.image && (
-                  <div className="blog-post-img">
+                  <div className="blog-post-img anim-up">
                     <img src={post.image} alt={post.title} />
                   </div>
                 )}
 
-                <div className="blog-post-content">{post.content}</div>
+                <div className="blog-post-content anim-up">{post.content}</div>
 
                 {tags.length > 0 && (
-                  <footer className="blog-post-tags" aria-label="Tags">
+                  <footer className="blog-post-tags anim-up" aria-label="Tags">
                     {tags.map(tag => (
                       <Link
                         key={tag}
@@ -138,23 +161,25 @@ export default function BlogPostPage() {
               </article>
 
               {/* Sidebar — solo visible a ≥1921px */}
-              <aside className="blog-post-sidebar" aria-label="Información del artículo">
-                <Link href="/blog" className="blog-sidebar-back">← Blog</Link>
+              <aside className="blog-post-sidebar" aria-label="Información del artículo" ref={sidebarRef}>
+                <div className="anim-up">
+                  <Link href="/blog" className="blog-sidebar-back">← Blog</Link>
+                </div>
 
-                <div className="blog-sidebar-section">
+                <div className="blog-sidebar-section anim-up">
                   <div className="blog-sidebar-label">Categoría</div>
                   <span className="blog-card-cat" style={{ display: "block" }}>
                     {post.category}
                   </span>
                 </div>
 
-                <div className="blog-sidebar-section">
+                <div className="blog-sidebar-section anim-up">
                   <div className="blog-sidebar-label">Publicado</div>
                   <span className="blog-post-date">{formatDate(post.publishedAt)}</span>
                 </div>
 
                 {tags.length > 0 && (
-                  <div className="blog-sidebar-section">
+                  <div className="blog-sidebar-section anim-up">
                     <div className="blog-sidebar-label">Etiquetas</div>
                     <div className="blog-sidebar-tags">
                       {tags.map(tag => (
