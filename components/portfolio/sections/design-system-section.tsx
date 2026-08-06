@@ -2848,7 +2848,10 @@ useEffect(() => {
       <p className="ds-pattern-desc">
         Entrada del título del hero, carácter por carácter. Componente propio (<code>components/portfolio/split-text.tsx</code>), adaptado de{" "}
         <a href="https://reactbits.dev/text-animations/split-text" target="_blank" rel="noreferrer">reactbits.dev</a>{" "}
-        — usa <code>gsap/SplitText</code> + <code>ScrollTrigger</code> para partir el texto y animar cada carácter con stagger. Cada línea del título es su propia instancia. Reemplazó a la técnica anterior de line-rise por clip (<code>.hero-line-wrap</code>/<code>.hero-line-inner</code>, ya no existe).
+        — usa <code>gsap/SplitText</code> para partir el texto y animar cada carácter con stagger. Cada línea del título es su propia instancia. Reemplazó a la técnica anterior de line-rise por clip (<code>.hero-line-wrap</code>/<code>.hero-line-inner</code>, ya no existe).
+      </p>
+      <p className="ds-pattern-desc" style={{ marginTop: 12 }}>
+        <strong>useScrollTrigger={"{"}false{"}"} — no es opcional acá:</strong> el componente soporta animar via <code>ScrollTrigger</code> (para contenido que aparece al hacer scroll hacia él, uso pensado para el resto del sitio), pero el hero pasa <code>useScrollTrigger={"{"}false{"}"}</code> en las 3 líneas. Bug real en producción: al volver del detalle de un proyecto, la restauración de scroll propia del sitio remonta el hero con la página YA scrolleada (salta directo a la grilla de Trabajos). Cada línea calcula su punto de disparo de <code>ScrollTrigger</code> de forma async e independiente — según el instante exacto en que cada una lo hace, alguna puede terminar con un umbral ya no alcanzable con el scroll restante, y como es <code>once: true</code>, si nunca se dispara el texto queda en <code>opacity: 0</code> para siempre. El título siempre está visible al cargar (above the fold) — no tiene sentido que dependa del scroll para decidir si animar, así que directamente no usa ScrollTrigger: anima apenas se monta.
       </p>
       <CodeBlock code={`// hero-section.tsx
 <SplitText tag="span" text={hero.titleLine1} className="hero-title-line" />

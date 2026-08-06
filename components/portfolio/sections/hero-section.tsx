@@ -229,12 +229,19 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
         <div className="hero-left">
           <h1 className="hero-title">
             {heroLoaded ? (
+              // useScrollTrigger={false} explícito a propósito: el título
+              // siempre está visible al cargar (above the fold), nunca debe
+              // depender de la posición de scroll para decidir si animar —
+              // ver el comentario del prop en split-text.tsx para el bug
+              // real que causaba (texto que nunca aparecía al volver del
+              // detalle de un proyecto, porque esa vuelta remonta el hero
+              // con la página ya scrolleada).
               <>
-                <SplitText tag="span" text={hero.titleLine1} className="hero-title-line" />
+                <SplitText tag="span" text={hero.titleLine1} className="hero-title-line" useScrollTrigger={false} />
                 <br />
-                <SplitText tag="span" text={hero.titleLine2} className="hero-title-line hero-title-line--accent" />
+                <SplitText tag="span" text={hero.titleLine2} className="hero-title-line hero-title-line--accent" useScrollTrigger={false} />
                 <br />
-                <SplitText tag="span" text={hero.titleLine3} className="hero-title-line" />
+                <SplitText tag="span" text={hero.titleLine3} className="hero-title-line" useScrollTrigger={false} />
               </>
             ) : (
               // Placeholder estático (sin animar) mientras /api/admin/hero

@@ -24,6 +24,19 @@ interface SplitTextProps {
   textAlign?: React.CSSProperties["textAlign"]
   tag?: keyof React.JSX.IntrinsicElements
   onLetterAnimationComplete?: () => void
+  // Si es false, ignora threshold/rootMargin y anima apenas se monta, sin
+  // ScrollTrigger — para contenido que siempre está visible al cargar (ej.
+  // el título del hero). ScrollTrigger calcula su punto de disparo según
+  // la posición de scroll ACTUAL en el momento en que se crea — si el
+  // componente se remonta en una posición de scroll ya avanzada (ej. al
+  // volver de un detalle de proyecto con restauración de scroll propia,
+  // ver hero-section.tsx) y ese cálculo cae en un umbral que ya no es
+  // alcanzable con lo que queda de página para scrollear, el trigger
+  // (once:true) nunca se dispara y el texto queda pegado en su estado
+  // inicial (opacity:0) para siempre — bug real reproducido en producción.
+  // Para contenido above-the-fold no hay motivo para depender del scroll
+  // en absoluto, así que el default es false.
+  useScrollTrigger?: boolean
 }
 
 // Adaptado de https://reactbits.dev/text-animations/split-text — misma
@@ -46,6 +59,7 @@ export default function SplitText({
   textAlign = "center",
   tag = "p",
   onLetterAnimationComplete,
+  useScrollTrigger = false,
 }: SplitTextProps) {
   const ref = useRef<HTMLElement>(null)
   const animationCompletedRef = useRef(false)
@@ -75,6 +89,7 @@ export default function SplitText({
       if (animationCompletedRef.current) return
       const el = ref.current
 
+      // Solo se calcula/usa si useScrollTrigger — ver comentario del prop.
       const startPct = (1 - threshold) * 100
       const marginMatch = /^(-?\d+(?:\.\d+)?)(px|em|rem|%)?$/.exec(rootMargin)
       const marginValue = marginMatch ? parseFloat(marginMatch[1]) : 0
@@ -109,13 +124,17 @@ export default function SplitText({
               duration,
               ease,
               stagger: delay / 1000,
-              scrollTrigger: {
-                trigger: el,
-                start,
-                once: true,
-                fastScrollEnd: true,
-                anticipatePin: 0.4,
-              },
+              ...(useScrollTrigger
+                ? {
+                    scrollTrigger: {
+                      trigger: el,
+                      start,
+                      once: true,
+                      fastScrollEnd: true,
+                      anticipatePin: 0.4,
+                    },
+                  }
+                : null),
               onComplete: () => {
                 animationCompletedRef.current = true
                 // Revierte los spans por-carácter a texto plano apenas
@@ -153,7 +172,7 @@ export default function SplitText({
       }
     },
     {
-      dependencies: [text, delay, duration, ease, splitType, JSON.stringify(from), JSON.stringify(to), threshold, rootMargin, fontsLoaded, reducedMotion],
+      dependencies: [text, delay, duration, ease, splitType, JSON.stringify(from), JSON.stringify(to), threshold, rootMargin, fontsLoaded, reducedMotion, useScrollTrigger],
       scope: ref,
     }
   )
