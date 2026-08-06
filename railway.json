@@ -1,5 +1,12 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "watchPatterns": [
+      "**",
+      "!data/**",
+      "!public/uploads/**"
+    ]
+  },
   "deploy": {
     "startCommand": "pnpm start",
     "restartPolicyType": "ON_FAILURE",
