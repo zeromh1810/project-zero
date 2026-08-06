@@ -7,7 +7,8 @@ import { EmailIcon } from "../icons"
 // ── Types ────────────────────────────────────────────────────────────────────
 type DSPageId =
   | "overview" | "colors" | "typography" | "darkmode" | "primitivos" | "animaciones" | "breakpoints"
-  | "buttons" | "cards" | "forms" | "navigation" | "badges" | "toast" | "patterns" | "brands" | "blog"
+  | "buttons" | "cards" | "forms" | "navigation" | "badges" | "toast" | "modals"
+  | "patterns" | "project-detail" | "brands" | "blog"
 
 const DS_GROUPS: { label: string; items: { id: DSPageId; label: string }[] }[] = [
   {
@@ -31,14 +32,16 @@ const DS_GROUPS: { label: string; items: { id: DSPageId; label: string }[] }[] =
       { id: "navigation", label: "Navegación" },
       { id: "badges",     label: "Badges & Tags" },
       { id: "toast",      label: "Toast" },
+      { id: "modals",     label: "Modales" },
     ],
   },
   {
     label: "Patrones",
     items: [
-      { id: "patterns", label: "Layouts" },
-      { id: "brands",   label: "Brands Section" },
-      { id: "blog",     label: "Blog" },
+      { id: "patterns",       label: "Layouts" },
+      { id: "project-detail", label: "Detalle de Proyecto" },
+      { id: "brands",         label: "Brands Section" },
+      { id: "blog",           label: "Blog" },
     ],
   },
 ]
@@ -93,7 +96,7 @@ function PageOverview() {
   return (
     <div className="ds-page-body">
       <div className="ds-page-header">
-        <div className="ds-page-badge">v1.9.0</div>
+        <div className="ds-page-badge">v1.10.0</div>
         <h2 className="ds-page-title">Project Zero Design System</h2>
         <p className="ds-page-desc">
           Sistema de diseño del portafolio de <strong>Carlos Felipe Rojas Hickmann</strong>. Arquitectura de tokens de 3 capas
@@ -105,7 +108,7 @@ function PageOverview() {
       <div className="ds-overview-grid">
         {[
           { label: "Tokens CSS", value: "120+", desc: "CSS custom properties reales en :root/.dark" },
-          { label: "Páginas DS", value: "16",   desc: "Secciones documentadas en el viewer" },
+          { label: "Páginas DS", value: "18",   desc: "Secciones documentadas en el viewer" },
           { label: "WCAG",       value: "AA",   desc: "Nivel de accesibilidad mínimo" },
           { label: "Modos",      value: "2",    desc: "Light & Dark mode con OS preference" },
         ].map(({ label, value, desc }) => (
@@ -1266,6 +1269,139 @@ function getBentoVariant(i: number): "featured" | "compact" {
   )
 }
 
+// ── Page: Detalle de Proyecto ─────────────────────────────────────────────────
+function PageProjectDetail() {
+  return (
+    <div className="ds-page-body">
+      <div className="ds-page-header">
+        <div className="ds-page-badge">Patrones</div>
+        <h2 className="ds-page-title">Detalle de Proyecto — Vista completa</h2>
+        <p className="ds-page-desc">
+          La vista que reemplaza la card del bento grid cuando se hace click en un proyecto. Es la interacción más elaborada
+          del sitio: no es una navegación normal, es una <strong>transición morph</strong> — la card crece visualmente hasta
+          convertirse en la página de detalle, en vez de cortar a una pantalla nueva.
+        </p>
+      </div>
+
+      <SectionHeading title="Morph Transition — de card a detalle" />
+      <p className="ds-pattern-desc">
+        Al hacer click en una <code>p-card</code>, esta se clona (<code>#project-morph-clone</code>) y se agranda sobre un
+        backdrop (<code>#project-morph-backdrop</code>) que vive directo en <code>&lt;body&gt;</code> — fuera del árbol de
+        React — porque tiene que sobrevivir al cambio de ruta que desmonta el bento grid. La vista de detalle real se monta
+        debajo, invisible, y cuando está lista ambas capas (<code>clone</code> + <code>backdrop</code>) se desvanecen juntas
+        con un <code>fade 400ms</code> para revelarla. Fundirlas juntas (no solo remover el clone) es lo que hace que se vea
+        como una transición y no como un &quot;pop&quot; instantáneo.
+      </p>
+      <div className="ds-layer-diagram">
+        {[
+          { z: "1 · click en p-card", label: "Se clona el nodo real sobre <body>, con su rect ya medido (getBoundingClientRect)" },
+          { z: "2 · navegación",      label: "El bento grid se desmonta, la vista de detalle se monta con mounted=false" },
+          { z: "3 · +50ms",           label: "mounted → true — el contenido real empieza su entrada (stagger propio)" },
+          { z: "4 · fade 400ms",      label: "clone + backdrop fundidos a opacity:0 en paralelo, luego remove() del DOM" },
+        ].map(({ z, label }) => (
+          <div key={z} className="ds-layer-row">
+            <span className="ds-layer-z">{z}</span>
+            <span className="ds-layer-label">{label}</span>
+          </div>
+        ))}
+      </div>
+      <CodeBlock code={`// project-detail-view.tsx — hand-off del clone al contenido real
+useEffect(() => {
+  const clone    = document.getElementById("project-morph-clone")
+  const backdrop = document.getElementById("project-morph-backdrop")
+  if (!clone && !backdrop) return
+
+  // Fade — no remove() directo: si el backdrop desaparece de golpe,
+  // el contenido real (que ya terminó su propia entrada por debajo,
+  // invisible) simplemente "aparece", no hay cross-fade percibido.
+  ;[clone, backdrop].forEach(el => {
+    if (!el) return
+    el.style.transition = "opacity 400ms cubic-bezier(0.16, 1, 0.3, 1)"
+    el.style.opacity = "0"
+  })
+  const t = setTimeout(() => { clone?.remove(); backdrop?.remove() }, 400)
+  return () => clearTimeout(t)
+}, [])
+
+// Salida — misma lógica de guard que Profile Modal, EXIT_DURATION más
+// corto que la entrada (las salidas se sienten mejor rápidas)
+const EXIT_DURATION = 300
+function handleBack(scrollTarget?: "projects") {
+  if (exiting) return
+  setExiting(true)
+  setTimeout(() => onBack(scrollTarget), EXIT_DURATION)
+}`} />
+
+      <SectionHeading title="Breadcrumb Navbar" />
+      <p className="ds-pattern-desc">
+        Navbar propio de la vista de detalle (no reutiliza <code>AppNavbar</code> — el contexto es distinto: no hay secciones
+        que navegar, solo un camino de vuelta).
+      </p>
+      <PreviewBox label="Anatomía">
+        <div style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "12px 16px", borderRadius: 10, background: "var(--bg2)", border: "1px solid var(--border)", fontSize: 13 }}>
+          <span style={{ fontWeight: 700, color: "var(--txt)" }}>Project Zero</span>
+          <span style={{ color: "var(--txt3)" }}>/</span>
+          <span style={{ color: "var(--txt2)" }}>Trabajos</span>
+          <span style={{ color: "var(--txt3)" }}>/</span>
+          <span style={{ color: "var(--accent)", fontWeight: 600 }}>Redesign E-commerce</span>
+        </div>
+      </PreviewBox>
+      <div className="ds-spec-table" style={{ marginTop: 12 }}>
+        {[
+          { prop: "logo → click",     val: "handleBack() — sin scrollTarget, vuelve al home tal cual estaba" },
+          { prop: '"Trabajos" → click', val: 'handleBack("projects") — vuelve directo a la grilla, sin pasar por el hero' },
+          { prop: "current",          val: "no clickeable — var(--txt), sin color de acento" },
+          { prop: "theme toggle",     val: "mismo .toggle-track/.toggle-thumb que el resto del sitio" },
+        ].map(({ prop, val }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+          </div>
+        ))}
+      </div>
+
+      <SectionHeading title="Layout — Contenido + Sidebar sticky" />
+      <p className="ds-pattern-desc">
+        Dos columnas: contenido editorial (desafío / proceso / resultado / galería) a la izquierda, sidebar sticky de datos
+        rápidos + CTAs a la derecha. El texto en negrita dentro de cada sección se inyecta con regex sobre el copy plano
+        (porcentajes, montos, palabras clave) — no es contenido rico editado a mano.
+      </p>
+      <CodeBlock code={`// Negrita automática vía regex — el copy en projects.json es texto plano
+<p dangerouslySetInnerHTML={{
+  __html: project.result.replace(/(\\+?\\d+%|\\$[\\d.]+[MK]?)/g, "<strong>$1</strong>"),
+}} />
+
+// Galería — grid de 6 slots, cada click abre GalleryModal en ese índice
+{galleryItems.map((item, index) => (
+  <button onClick={() => { setModalIndex(index); setModalOpen(true) }}>
+    {item.src ? <img src={item.src} /> : <PlaceholderThumb item={item} />}
+  </button>
+))}`} />
+      <div className="ds-spec-table" style={{ marginTop: 12 }}>
+        {[
+          { prop: "detail-impact-box", val: "KPIs inline separados por · — ver página Tarjetas para el KPI card standalone" },
+          { prop: "detail-gallery-grid", val: "6 slots fijos — imágenes subidas o placeholder, nunca vacío" },
+          { prop: "detail-sidebar",    val: "sticky, se abre GalleryModal (ver página Modales) al click en cualquier slot" },
+        ].map(({ prop, val }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+          </div>
+        ))}
+      </div>
+
+      <SectionHeading title="Reglas de uso" />
+      <div className="ds-rules">
+        <RuleChip rule="Mantener EXIT_DURATION de salida más corto que la entrada — las salidas se sienten mejor rápidas" variant="do" />
+        <RuleChip rule="Fundir clone + backdrop juntos, nunca solo remover uno de los dos de golpe" variant="do" />
+        <RuleChip rule="Rellenar siempre los 6 slots de galería, con placeholder si falta imagen real" variant="do" />
+        <RuleChip rule='Medir el rect del clone después de que Next ya haya podido re-scrollear la página — es una carrera que se pierde siempre' variant="dont" />
+        <RuleChip rule="Reutilizar AppNavbar acá — el breadcrumb es un contexto de navegación distinto, no una sección más" variant="dont" />
+      </div>
+    </div>
+  )
+}
+
 // ── Page: Toast ───────────────────────────────────────────────────────────────
 function PageToast() {
   const { isDark } = useTheme()
@@ -1589,6 +1725,173 @@ onToast("Sin cambios",         "info")`} />
         <RuleChip rule="info → confirmación neutral o estado esperado" variant="do" />
         <RuleChip rule='Mostrar success cuando la operación realmente falló' variant="dont" />
         <RuleChip rule="Apilar varios toasts simultáneos (el sistema no tiene queue)" variant="dont" />
+      </div>
+    </div>
+  )
+}
+
+// ── Page: Modales ─────────────────────────────────────────────────────────────
+function PageModals() {
+  return (
+    <div className="ds-page-body">
+      <div className="ds-page-header">
+        <div className="ds-page-badge">Componentes</div>
+        <h2 className="ds-page-title">Modales y Overlays</h2>
+        <p className="ds-page-desc">
+          Dos sistemas de modal conviven en el sitio, cada uno resuelve un problema distinto: <strong>.overlay/.modal</strong> es
+          la primitiva liviana en CSS puro para diálogos de contenido (perfil, confirmaciones futuras), y <strong>GalleryModal</strong> es
+          un lightbox de media a pantalla completa construido sobre Radix Dialog. No son intercambiables — ver &quot;Reglas&quot; abajo
+          para decidir cuál usar.
+        </p>
+      </div>
+
+      {/* ── Overlay base ── */}
+      <SectionHeading title="Overlay base — .overlay / .modal" />
+      <p className="ds-pattern-desc">
+        La primitiva de diálogo del sitio (fuera del panel admin). <code>position: fixed; inset: 0</code>, backdrop oscuro con blur,
+        tarjeta centrada con <code>popIn</code> spring. El cierre usa una clase de salida (<code>.overlay--exiting</code>) en vez de
+        desmontar directo — así la animación de salida (<code>popOut</code>/<code>fadeOut</code>, 180–200ms) llega a terminar antes
+        de que React quite el nodo del DOM.
+      </p>
+      <PreviewBox label="Backdrop + tarjeta — fondo simulado dentro de la vista previa">
+        <div style={{ position: "relative", width: "100%", height: 220, borderRadius: 12, overflow: "hidden", background: "var(--bg2)" }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(10px)" }} />
+          <div style={{
+            position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
+            width: 180, padding: 20, borderRadius: 16, textAlign: "center",
+            background: "var(--card)", border: "1px solid var(--border)",
+          }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--txt)", marginBottom: 4 }}>.modal</div>
+            <div style={{ fontSize: 10, color: "var(--txt3)" }}>max-width: 340px · radius: 24px</div>
+          </div>
+        </div>
+      </PreviewBox>
+      <div className="ds-spec-table" style={{ marginTop: 12 }}>
+        {[
+          { prop: ".overlay",           val: "position: fixed; inset: 0; z-index: var(--z-modal) + 10" },
+          { prop: "backdrop",           val: "rgba(0,0,0,0.55) + backdrop-filter: blur(10px)" },
+          { prop: "entrada .overlay",   val: "fadeIn 0.2s ease" },
+          { prop: "entrada .modal",     val: "popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) — spring, overshoot 12%" },
+          { prop: "salida .overlay--exiting", val: "fadeOut 0.2s ease forwards" },
+          { prop: "salida .modal (en exiting)", val: "popOut 0.18s ease-in forwards — más rápida que la entrada" },
+          { prop: ".modal",             val: "max-width: 340px · radius: 24px · padding: 32px" },
+        ].map(({ prop, val }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Profile Modal ── */}
+      <SectionHeading title="Profile Modal — anatomía completa" />
+      <p className="ds-pattern-desc">
+        Instancia concreta de <code>.overlay/.modal</code>. Carga el perfil vía <code>fetch(&quot;/api/admin/profile&quot;)</code> con
+        fallback a datos por defecto si la API falla — nunca muestra un modal vacío. El avatar cae a iniciales si no hay foto o si la
+        imagen falla en cargar (<code>onError</code>).
+      </p>
+      <PreviewBox label="Interactivo — contenido real del componente">
+        <div style={{ position: "relative", width: "100%", height: 340, borderRadius: 12, overflow: "hidden", background: "var(--bg2)" }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(10px)" }} />
+          <div className="modal" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", margin: 0 }}>
+            <button className="modal-x" aria-label="Cerrar">✕</button>
+            <div className="m-av">C</div>
+            <div className="m-name">Carlos Felipe Rojas Hickmann</div>
+            <div className="m-role">Product Designer & Frontend Developer · Santiago</div>
+            <div className="m-links">
+              <span className="m-link">LinkedIn</span>
+              <span className="m-link">GitHub</span>
+            </div>
+            <button className="btn-p" style={{ width: "100%", justifyContent: "center" }}>Contactar</button>
+          </div>
+        </div>
+      </PreviewBox>
+      <div className="ds-spec-table" style={{ marginTop: 12 }}>
+        {[
+          { prop: ".m-av",    val: "88px · circle · gradient accent→#5ac8fa · fallback: primera letra del nombre" },
+          { prop: ".m-name",  val: "20px / w700 / -0.02em · heading font" },
+          { prop: ".m-role",  val: "14px / var(--txt2)" },
+          { prop: ".m-link",  val: "pill 12px · glass bg · solo se renderiza si el link existe (filter Boolean)" },
+          { prop: "cierre",   val: "click en backdrop, ESC, o botón X — guardados detrás de un closingRef para evitar doble-cierre" },
+          { prop: "CTA secundario", val: '"Acceso a administrador" → /admin, siempre visible al final' },
+        ].map(({ prop, val }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+          </div>
+        ))}
+      </div>
+      <CodeBlock code={`// Guard con ref — evita cerrar dos veces si el usuario
+// presiona ESC justo cuando ya empezó la animación de salida
+const closingRef = useRef(false)
+
+function handleClose() {
+  if (closingRef.current) return
+  closingRef.current = true
+  setExiting(true)
+  setTimeout(onClose, EXIT_DURATION) // 200ms — debe calzar con popOut/fadeOut en CSS
+}
+
+useEffect(() => {
+  const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose() }
+  window.addEventListener("keydown", onKey)
+  return () => window.removeEventListener("keydown", onKey)
+}, [])
+
+<div
+  className={\`overlay\${exiting ? " overlay--exiting" : ""}\`}
+  role="dialog" aria-modal="true"
+  onClick={(e) => e.target === e.currentTarget && handleClose()}
+>
+  <div className="modal">…</div>
+</div>`} />
+
+      {/* ── Gallery Modal ── */}
+      <SectionHeading title="Gallery Modal — Lightbox de galería" />
+      <p className="ds-pattern-desc">
+        Único componente del sitio construido sobre <strong>Radix Dialog + Tailwind</strong> en vez de CSS a mano — se eligió Radix
+        aquí porque el foco trap, el manejo de scroll del body y el <code>aria-describedby</code> de un lightbox real son
+        complejos de reimplementar bien, y no hay otro lightbox en el sitio que justifique escribirlo desde cero.
+        Navegación por teclado (← →), swipe táctil (umbral 50px) y dots de posición. Cuando el proyecto no tiene imágenes
+        subidas, cada slot cae a un <code>PlaceholderLayout</code> distinto (mobile/desktop/components/flow/research/final)
+        en vez de dejar el slot vacío.
+      </p>
+      <div className="ds-spec-table">
+        {[
+          { prop: "overlay",      val: "bg-black/95 + backdrop-blur-xl · fade 300ms (Radix data-state)" },
+          { prop: "swipe threshold", val: "50px — por debajo se interpreta como tap/scroll, no navegación" },
+          { prop: "teclado",      val: "ArrowLeft / ArrowRight — wrap-around (último → primero)" },
+          { prop: "controles prev/next", val: "hidden en mobile (sm:flex) — el swipe cubre la navegación ahí" },
+          { prop: "dots",         val: "8px circle · activo: scale(1.25) + bg blanco sólido" },
+          { prop: "placeholder",  val: "6 tipos de layout SVG-like generados con divs — nunca un slot vacío" },
+        ].map(({ prop, val }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+          </div>
+        ))}
+      </div>
+      <CodeBlock code={`<GalleryModal
+  items={galleryItems}       // GalleryItem[] — src opcional, cae a placeholder si falta
+  currentIndex={modalIndex}
+  open={modalOpen}
+  onOpenChange={setModalOpen}
+  onNavigate={setModalIndex}
+/>
+
+// Cada item, si no tiene foto subida:
+{ id: 2, label: "Vista móvil", gradient: project.gradient,
+  accent: project.accentColor, placeholderType: "mobile" }`} />
+
+      {/* ── Reglas ── */}
+      <SectionHeading title="Reglas de uso" />
+      <div className="ds-rules">
+        <RuleChip rule="Usar .overlay/.modal para cualquier diálogo de contenido nuevo — confirmaciones, formularios cortos, info" variant="do" />
+        <RuleChip rule="Reservar GalleryModal (Radix) solo para visores de media a pantalla completa" variant="do" />
+        <RuleChip rule="Guardar el cierre detrás de un ref (closingRef) si hay animación de salida con timeout" variant="do" />
+        <RuleChip rule="Siempre cargar datos con fallback — un modal de perfil vacío se ve roto, no vacío-intencional" variant="do" />
+        <RuleChip rule="Construir un nuevo modal a mano con Radix — usar Radix solo para media, para lo demás .overlay/.modal ya está resuelto" variant="dont" />
+        <RuleChip rule="Desmontar el modal sin esperar la animación de salida — corta popOut/fadeOut a mitad" variant="dont" />
       </div>
     </div>
   )
@@ -3228,6 +3531,131 @@ function PageBlog() {
   box-shadow: var(--shadow-xl);  /* token — auto dark mode */
 }`} />
 
+      {/* ── Search Input ── */}
+      <SectionHeading title="Search Input — Buscador de entradas" />
+      <p className="ds-pattern-desc">
+        Filtra por título y contenido en tiempo real (sin debounce — el dataset es lo bastante chico como para no
+        necesitarlo). El ícono cambia a <code>var(--accent)</code> con <code>:focus-within</code> en el wrapper, no con
+        <code>:focus</code> en el input — así reacciona aunque el foco esté en el ícono o en cualquier hijo.
+      </p>
+      <PreviewBox>
+        <div className="blog-search-wrap" style={{ maxWidth: 320 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="blog-search-icon">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input className="blog-search" placeholder="Buscar entradas…" />
+        </div>
+      </PreviewBox>
+      <div className="ds-spec-table" style={{ marginTop: 12 }}>
+        {[
+          { prop: "focus",       val: "border-color: var(--accent) + box-shadow: 0 0 0 3px rgba(41,151,255,0.1)" },
+          { prop: "focus-within", val: "el ícono (.blog-search-icon) pasa a var(--accent) — 200ms" },
+          { prop: "click en tag mientras hay texto", val: "limpia search y selectedTag entre sí — son filtros mutuamente excluyentes" },
+        ].map(({ prop, val }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Pagination ── */}
+      <SectionHeading title="Paginador — Blog Pagination" />
+      <p className="ds-pattern-desc">
+        9 posts por página. La ventana de páginas visibles siempre incluye primera, última, y las 3 alrededor de la
+        actual — el resto se colapsa en <code>…</code>. Se recalcula la ventana en cada cambio de página, no una vez al montar.
+      </p>
+      <PreviewBox>
+        <nav className="blog-pagination" aria-label="Paginación demo">
+          <button className="blog-page-btn">←</button>
+          <button className="blog-page-btn">1</button>
+          <span className="blog-page-ellipsis">…</span>
+          <button className="blog-page-btn active">4</button>
+          <button className="blog-page-btn">5</button>
+          <span className="blog-page-ellipsis">…</span>
+          <button className="blog-page-btn">9</button>
+          <button className="blog-page-btn">→</button>
+        </nav>
+      </PreviewBox>
+      <div className="ds-spec-table" style={{ marginTop: 12 }}>
+        {[
+          { prop: "active",   val: "bg var(--accent) · texto blanco · font-weight 600" },
+          { prop: "disabled", val: "opacity 0.32 — primera/última página en los extremos ← →" },
+          { prop: "hover",    val: "border + color + bg accent al 5% — no aplica sobre disabled" },
+          { prop: "active (press)", val: "scale(0.9), 80ms — feedback táctil en el click, no confundir con .active de página" },
+          { prop: "focus-visible",  val: "outline 2px accent, offset 2px — igual que pills y tags" },
+        ].map(({ prop, val }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+          </div>
+        ))}
+      </div>
+      <CodeBlock code={`// Ventana de páginas visibles — recalculada en cada render, no memoizada
+// porque el dataset es chico y no vale la pena la complejidad extra
+const near = new Set([1, total, page - 1, page, page + 1]
+  .filter(p => p >= 1 && p <= total))
+const visible = all.filter(p => near.has(p))
+// Un salto > 1 entre páginas consecutivas visibles = renderizar "…"`} />
+
+      {/* ── Empty & Loading states ── */}
+      <SectionHeading title="Empty & Loading States" />
+      <p className="ds-pattern-desc">
+        Tres estados comparten el mismo contenedor <code>.blog-empty</code> (flex column, centrado): cargando (spinner),
+        sin resultados por filtro activo, y sin posts publicados. El mensaje cambia según si hay un filtro activo —
+        &quot;no hay resultados&quot; y &quot;todavía no hay contenido&quot; son problemas distintos y no deberían leerse igual.
+      </p>
+      <PreviewBox label="Estado: cargando">
+        <div className="blog-empty">
+          <span className="blog-spinner" aria-hidden="true" />
+          Cargando…
+        </div>
+      </PreviewBox>
+      <PreviewBox label="Estado: sin resultados (filtro activo)">
+        <div className="blog-empty">No hay entradas que coincidan con tu búsqueda.</div>
+      </PreviewBox>
+      <CodeBlock code={`{loading ? (
+  <div className="blog-empty">
+    <span className="blog-spinner" aria-hidden="true" />
+    Cargando…
+  </div>
+) : filtered.length === 0 ? (
+  <div className="blog-empty anim-up">
+    {search || category !== "Todos" || selectedTag
+      ? "No hay entradas que coincidan con tu búsqueda."
+      : "Aún no hay entradas publicadas. ¡Pronto!"}
+  </div>
+) : ( /* grid */ )}`} />
+
+      {/* ── Scroll reveal — gotcha específico del blog ── */}
+      <SectionHeading title="Scroll Reveal — la trampa del contenido async" />
+      <p className="ds-pattern-desc">
+        El patrón general <code>anim-up + useIntersection</code> está documentado en la página Animaciones — esta es la
+        particularidad del blog que vale la pena señalar porque ya causó un bug real: el listado tiene <strong>tres</strong>{" "}
+        observers separados, no uno solo, porque partes del contenido no existen todavía en el primer render.
+      </p>
+      <div className="ds-spec-table">
+        {[
+          { prop: "heroRef",  val: "hero + filtros — reveal único al montar (deps: [])" },
+          { prop: "tagsRef",  val: "tags rápidos — su propio observer, deps: [allTags.length]" },
+          { prop: "gridRef",  val: "grid de posts — re-stagger en cada cambio de filtro/página (deps: [ids, loading])" },
+        ].map(({ prop, val }) => (
+          <div key={prop} className="ds-spec-row">
+            <span className="ds-spec-name">{prop}</span>
+            <span className="ds-spec-val">{val}</span>
+          </div>
+        ))}
+      </div>
+      <p className="ds-pattern-desc" style={{ marginTop: 12 }}>
+        La fila de tags rápidos solo existe en el DOM <em>después</em> de que resuelve el fetch de posts (es
+        <code>{"{allTags.length > 0 && (…)}"}</code>). <code>heroRef</code> monta su observer 50ms después del mount inicial
+        — en ese momento los posts casi nunca llegaron todavía, así que un observer que solo corre una vez
+        <strong> nunca ve </strong> esa fila. Se queda en <code>opacity: 0</code> para siempre, sin error en consola,
+        sin nada que lo delate salvo que el usuario note que falta algo. Cualquier bloque cuyo montaje dependa de un
+        fetch async necesita su propio <code>useIntersection</code> con esa condición en las <code>deps</code> — nunca
+        asumir que va a quedar atrapado por el observer de un contenedor que ya montó antes que él.
+      </p>
+
       {/* ── Responsive ── */}
       <SectionHeading title="Breakpoints del sistema blog" />
       <div className="ds-spec-table">
@@ -3254,6 +3682,8 @@ function PageBlog() {
         <RuleChip rule="Máximo 3 tags por card (slice 0,3) — más de 3 satura visualmente" variant="do" />
         <RuleChip rule="box-shadow en hover usando var(--shadow-xl) — el token ajusta automático dark mode" variant="do" />
         <RuleChip rule="blog-post-sidebar solo se activa a ≥1921px — no añadir media queries intermedios" variant="do" />
+        <RuleChip rule="Dar su propio useIntersection a cualquier bloque que dependa de datos async — nunca asumir que un observer que ya montó lo va a atrapar" variant="do" />
+        <RuleChip rule="Distinguir el copy de 'sin resultados por filtro' de 'sin contenido publicado' — son problemas distintos para quien lee" variant="do" />
         <RuleChip rule="Mostrar 4+ tags por card — solo mostrar los 3 más relevantes (slice)" variant="dont" />
         <RuleChip rule="Usar blog-grid para la sección home — usar blog-preview-grid allí" variant="dont" />
         <RuleChip rule="hardcodear box-shadow en hover de cards — usar var(--shadow-xl)" variant="dont" />
@@ -3805,7 +4235,9 @@ const PAGE_MAP: Record<DSPageId, React.ComponentType> = {
   navigation:  PageNavigation,
   badges:      PageBadges,
   toast:       PageToast,
+  modals:      PageModals,
   patterns:    PagePatterns,
+  "project-detail": PageProjectDetail,
   brands:      PageBrands,
   blog:        PageBlog,
 }
@@ -3836,7 +4268,7 @@ export function DesignSystemSection({ adminMode }: { adminMode?: boolean }) {
           </div>
           <div className="ds-brand-info">
             <div className="ds-brand-title">Project Zero DS</div>
-            <div className="ds-brand-version">v1.9.0</div>
+            <div className="ds-brand-version">v1.10.0</div>
           </div>
         </div>
         <nav className="ds-nav">
