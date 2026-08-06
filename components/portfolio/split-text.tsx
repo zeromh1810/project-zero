@@ -1,200 +1,99 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
-import { gsap } from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { SplitText as GSAPSplitText } from "gsap/SplitText"
-import { useGSAP } from "@gsap/react"
-
-gsap.registerPlugin(ScrollTrigger, GSAPSplitText, useGSAP)
-
-type SplitType = "chars" | "words" | "lines" | "words, chars"
+import { useEffect, useRef, useState } from "react"
 
 interface SplitTextProps {
   text: string
   className?: string
-  delay?: number
-  duration?: number
-  ease?: string
-  splitType?: SplitType
-  from?: gsap.TweenVars
-  to?: gsap.TweenVars
-  threshold?: number
-  rootMargin?: string
-  textAlign?: React.CSSProperties["textAlign"]
   tag?: keyof React.JSX.IntrinsicElements
+  /** Delay entre el inicio de cada carácter, en ms. */
+  delay?: number
+  /** Duración de la animación de cada carácter, en ms. */
+  duration?: number
   onLetterAnimationComplete?: () => void
-  // Si es false, ignora threshold/rootMargin y anima apenas se monta, sin
-  // ScrollTrigger — para contenido que siempre está visible al cargar (ej.
-  // el título del hero). ScrollTrigger calcula su punto de disparo según
-  // la posición de scroll ACTUAL en el momento en que se crea — si el
-  // componente se remonta en una posición de scroll ya avanzada (ej. al
-  // volver de un detalle de proyecto con restauración de scroll propia,
-  // ver hero-section.tsx) y ese cálculo cae en un umbral que ya no es
-  // alcanzable con lo que queda de página para scrollear, el trigger
-  // (once:true) nunca se dispara y el texto queda pegado en su estado
-  // inicial (opacity:0) para siempre — bug real reproducido en producción.
-  // Para contenido above-the-fold no hay motivo para depender del scroll
-  // en absoluto, así que el default es false.
-  useScrollTrigger?: boolean
 }
 
-// Adaptado de https://reactbits.dev/text-animations/split-text — misma
-// lógica de animación (GSAP SplitText + ScrollTrigger), portado a TS y con
-// un guard de prefers-reduced-motion que el original no trae: sin esto,
-// alguien con esa preferencia del SO igual ve el texto entrar carácter por
-// carácter, que es exactamente el tipo de movimiento que esa preferencia
-// pide evitar.
+// Reveal de texto carácter por carácter, en CSS puro — sin dependencias.
+// Reemplaza una versión anterior basada en gsap/SplitText + ScrollTrigger:
+// esa combinación agregaba ~130KB comprimidos de JS (gsap + el plugin
+// SplitText + ScrollTrigger) para animar, en este sitio, únicamente las
+// 3 líneas del título del hero — nada más en el proyecto usaba gsap.
+// Este componente reproduce el mismo efecto visual (opacity 0→1,
+// translateY 40px→0, ~50ms de stagger por letra) con @keyframes CSS,
+// que el navegador puede correr en el compositor (GPU) sin tocar el
+// hilo principal por frame — más liviano que un tween JS por carácter.
+//
+// También evita por completo la clase de bug que tenía la versión con
+// ScrollTrigger: como no depende en absoluto de la posición de scroll,
+// no puede quedar con un punto de disparo inalcanzable si el componente
+// se remonta con la página ya scrolleada (ver hero-section.tsx —
+// bug real reproducido en producción tras volver del detalle de un
+// proyecto).
 export default function SplitText({
   text,
   className = "",
+  tag = "span",
   delay = 50,
-  duration = 1.25,
-  ease = "power3.out",
-  splitType = "chars",
-  from = { opacity: 0, y: 40 },
-  to = { opacity: 1, y: 0 },
-  threshold = 0.1,
-  rootMargin = "-100px",
-  textAlign = "center",
-  tag = "p",
+  duration = 1250,
   onLetterAnimationComplete,
-  useScrollTrigger = false,
 }: SplitTextProps) {
-  const ref = useRef<HTMLElement>(null)
-  const animationCompletedRef = useRef(false)
+  const containerRef = useRef<HTMLElement>(null)
   const onCompleteRef = useRef(onLetterAnimationComplete)
-  const [fontsLoaded, setFontsLoaded] = useState(false)
   const [reducedMotion, setReducedMotion] = useState(false)
+  // Una vez que termina de animar, se vuelve a texto plano — no hace
+  // falta que los spans por-carácter persistan, y es lo que permite que
+  // un className con gradiente + background-clip:text funcione (necesita
+  // texto propio en el elemento, no hijos con el texto adentro — ver
+  // .hero-title-line--accent en portfolio.css).
+  const [done, setDone] = useState(false)
 
   useEffect(() => {
     onCompleteRef.current = onLetterAnimationComplete
   }, [onLetterAnimationComplete])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- lee matchMedia (externo, no existe en SSR), no hay forma de derivarlo durante el render
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches)
   }, [])
 
+  const chars = Array.from(text)
+
   useEffect(() => {
-    if (document.fonts.status === "loaded") {
-      setFontsLoaded(true)
-    } else {
-      document.fonts.ready.then(() => setFontsLoaded(true))
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza con el setTimeout de abajo (sistema externo), no es derivable durante el render
+    setDone(false)
+    if (reducedMotion || chars.length === 0) {
+      setDone(true)
+      onCompleteRef.current?.()
+      return
     }
-  }, [])
-
-  useGSAP(
-    () => {
-      if (!ref.current || !text || !fontsLoaded || reducedMotion) return
-      if (animationCompletedRef.current) return
-      const el = ref.current
-
-      // Solo se calcula/usa si useScrollTrigger — ver comentario del prop.
-      const startPct = (1 - threshold) * 100
-      const marginMatch = /^(-?\d+(?:\.\d+)?)(px|em|rem|%)?$/.exec(rootMargin)
-      const marginValue = marginMatch ? parseFloat(marginMatch[1]) : 0
-      const marginUnit = marginMatch ? marginMatch[2] || "px" : "px"
-      const sign =
-        marginValue === 0 ? "" : marginValue < 0 ? `-=${Math.abs(marginValue)}${marginUnit}` : `+=${marginValue}${marginUnit}`
-      const start = `top ${startPct}%${sign}`
-
-      let targets: Element[] | undefined
-      const assignTargets = (self: GSAPSplitText) => {
-        if (splitType.includes("chars") && self.chars.length) targets = self.chars
-        if (!targets && splitType.includes("words") && self.words.length) targets = self.words
-        if (!targets && splitType.includes("lines") && self.lines.length) targets = self.lines
-        if (!targets) targets = self.chars || self.words || self.lines
-      }
-
-      const splitInstance = new GSAPSplitText(el, {
-        type: splitType,
-        smartWrap: true,
-        autoSplit: splitType === "lines",
-        linesClass: "split-line",
-        wordsClass: "split-word",
-        charsClass: "split-char",
-        reduceWhiteSpace: false,
-        onSplit: (self: GSAPSplitText) => {
-          assignTargets(self)
-          return gsap.fromTo(
-            targets!,
-            { ...from },
-            {
-              ...to,
-              duration,
-              ease,
-              stagger: delay / 1000,
-              ...(useScrollTrigger
-                ? {
-                    scrollTrigger: {
-                      trigger: el,
-                      start,
-                      once: true,
-                      fastScrollEnd: true,
-                      anticipatePin: 0.4,
-                    },
-                  }
-                : null),
-              onComplete: () => {
-                animationCompletedRef.current = true
-                // Revierte los spans por-carácter a texto plano apenas
-                // termina de animar — no hace falta que persistan (el
-                // ripple del hero terrain no depende de esto, por ejemplo),
-                // y deja el elemento en un estado más simple para
-                // selección de texto / lectores de pantalla. También es lo
-                // que permite que un className con gradiente + background-
-                // clip:text funcione en el elemento (necesita texto propio,
-                // no hijos con el texto adentro — ver .hero-title-line--accent
-                // en portfolio.css).
-                try {
-                  splitInstance.revert()
-                } catch {
-                  /* noop */
-                }
-                onCompleteRef.current?.()
-              },
-              willChange: "transform, opacity",
-              force3D: true,
-            }
-          )
-        },
-      })
-
-      return () => {
-        ScrollTrigger.getAll().forEach(st => {
-          if (st.trigger === el) st.kill()
-        })
-        try {
-          splitInstance.revert()
-        } catch {
-          /* noop */
-        }
-      }
-    },
-    {
-      dependencies: [text, delay, duration, ease, splitType, JSON.stringify(from), JSON.stringify(to), threshold, rootMargin, fontsLoaded, reducedMotion, useScrollTrigger],
-      scope: ref,
-    }
-  )
+    const total = (chars.length - 1) * delay + duration
+    const id = setTimeout(() => {
+      setDone(true)
+      onCompleteRef.current?.()
+    }, total)
+    return () => clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo debe re-correr si cambia el texto/timing, no en cada re-render
+  }, [text, reducedMotion, delay, duration])
 
   const Tag = tag as React.ElementType
-  const style: React.CSSProperties = {
-    textAlign,
-    overflow: "hidden",
-    display: "inline-block",
-    whiteSpace: "normal",
-    wordWrap: "break-word",
-    // Con reduced motion nunca corre el tween de GSAP — el texto debe
-    // arrancar visible y sin transform, o se quedaría pegado al estado
-    // `from` (típicamente opacity:0) para siempre. No reutilizamos `to`
-    // acá porque sus valores son vars de GSAP (ej. `y`), no CSS real —
-    // asignarlos tal cual a `style` no aplicaría ninguna transformación.
-    ...(reducedMotion ? { opacity: 1, transform: "none" } : undefined),
-  }
 
   return (
-    <Tag ref={ref} style={style} className={`split-parent ${className}`}>
-      {text}
+    <Tag ref={containerRef} className={`split-parent ${className}`} aria-label={text}>
+      {done || reducedMotion ? (
+        text
+      ) : (
+        <span aria-hidden="true">
+          {chars.map((char, i) => (
+            <span
+              key={i}
+              className="split-char"
+              style={{ animationDelay: `${i * delay}ms`, animationDuration: `${duration}ms` }}
+            >
+              {char === " " ? " " : char}
+            </span>
+          ))}
+        </span>
+      )}
     </Tag>
   )
 }

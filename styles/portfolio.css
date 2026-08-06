@@ -544,22 +544,47 @@ html {
   text-wrap: balance;
 }
 
-/* ── HERO TITLE — entrada vía SplitText (GSAP), ver components/portfolio/
-   split-text.tsx y hero-section.tsx. Cada línea es su propia instancia:
-   .hero-title-line es el wrapper que SplitText renderiza (recibe estilos
-   inline propios — overflow/display/etc — no hace falta declararlos acá).
+/* ── HERO TITLE — entrada vía SplitText (CSS puro, sin dependencias — ver
+   components/portfolio/split-text.tsx y hero-section.tsx). Cada línea es
+   su propia instancia: .hero-title-line es el wrapper (span), .split-char
+   cada letra mientras anima.
 
    .hero-title-line--accent lleva además el shimmer de gradiente que tenía
-   la línea del medio antes de SplitText. background-clip:text necesita
-   texto propio en el elemento al que se le aplica — mientras SplitText
-   tiene la línea partida en spans por carácter (.split-char, uno por
-   letra), este span "padre" no tiene texto directo y el gradiente no
-   tendría nada que recortar. split-text.tsx llama a splitInstance.revert()
-   apenas termina de animar esa línea, lo que restaura el texto plano acá
-   — ahí SÍ el gradiente funciona, igual que en el <em> original. Mientras
-   tanto (params .split-char abajo) los caracteres se ven en el color
-   sólido de fallback, no transparentes/invisibles heredando el
-   text-fill-color del gradiente sin tener el background detrás. ── */
+   la línea del medio en el diseño original. background-clip:text necesita
+   texto propio en el elemento al que se le aplica — mientras la línea
+   está partida en spans por carácter (.split-char, uno por letra), este
+   span "padre" no tiene texto directo y el gradiente no tendría nada que
+   recortar. split-text.tsx vuelve a texto plano apenas termina de animar
+   esa línea — ahí SÍ el gradiente funciona. Mientras tanto (.split-char
+   abajo) los caracteres se ven en el color sólido de fallback, no
+   transparentes/invisibles heredando el text-fill-color del gradiente
+   sin tener el background detrás. ── */
+.split-char {
+  display: inline-block;
+  white-space: pre;
+  opacity: 0;
+  transform: translateY(40px);
+  animation-name: split-char-in;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes split-char-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .split-char {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
 .hero-title-line--accent {
   font-style: normal;
   color: var(--accent); /* fallback for non-WebKit */

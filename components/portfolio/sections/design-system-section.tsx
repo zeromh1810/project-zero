@@ -209,7 +209,7 @@ function PageOverview() {
 
       <SectionHeading title="Stack técnico" />
       <div className="ds-stack-row">
-        {["Next.js 16", "React 19", "TypeScript 5.7", "CSS Variables", "Tailwind v4", "DM Sans", "Plus Jakarta Sans", "WebGL / GLSL", "GSAP"].map(t => (
+        {["Next.js 16", "React 19", "TypeScript 5.7", "CSS Variables", "Tailwind v4", "DM Sans", "Plus Jakarta Sans", "WebGL / GLSL"].map(t => (
           <span className="ds-stack-tag" key={t}>{t}</span>
         ))}
       </div>
@@ -2844,19 +2844,32 @@ useEffect(() => {
 /* Límite: 12 items × 60ms = 720ms total — arriba de eso se siente lento */`} />
 
       {/* ── Hero animations ── */}
-      <SectionHeading title="Hero — SplitText (text reveal)" />
+      <SectionHeading title="Hero — SplitText (text reveal, CSS puro)" />
       <p className="ds-pattern-desc">
-        Entrada del título del hero, carácter por carácter. Componente propio (<code>components/portfolio/split-text.tsx</code>), adaptado de{" "}
-        <a href="https://reactbits.dev/text-animations/split-text" target="_blank" rel="noreferrer">reactbits.dev</a>{" "}
-        — usa <code>gsap/SplitText</code> para partir el texto y animar cada carácter con stagger. Cada línea del título es su propia instancia. Reemplazó a la técnica anterior de line-rise por clip (<code>.hero-line-wrap</code>/<code>.hero-line-inner</code>, ya no existe).
+        Entrada del título del hero, carácter por carácter. Componente propio (<code>components/portfolio/split-text.tsx</code>), sin dependencias — divide el texto en spans por carácter vía JS y anima cada uno con un <code>@keyframes</code> CSS (<code>animation-delay</code> escalonado, 50ms por letra). Cada línea del título es su propia instancia. Reemplazó dos técnicas anteriores: primero line-rise por clip (<code>.hero-line-wrap</code>/<code>.hero-line-inner</code>), después una versión basada en <code>gsap/SplitText</code> + <code>ScrollTrigger</code> — ninguna de las dos existe ya.
       </p>
       <p className="ds-pattern-desc" style={{ marginTop: 12 }}>
-        <strong>useScrollTrigger={"{"}false{"}"} — no es opcional acá:</strong> el componente soporta animar via <code>ScrollTrigger</code> (para contenido que aparece al hacer scroll hacia él, uso pensado para el resto del sitio), pero el hero pasa <code>useScrollTrigger={"{"}false{"}"}</code> en las 3 líneas. Bug real en producción: al volver del detalle de un proyecto, la restauración de scroll propia del sitio remonta el hero con la página YA scrolleada (salta directo a la grilla de Trabajos). Cada línea calcula su punto de disparo de <code>ScrollTrigger</code> de forma async e independiente — según el instante exacto en que cada una lo hace, alguna puede terminar con un umbral ya no alcanzable con el scroll restante, y como es <code>once: true</code>, si nunca se dispara el texto queda en <code>opacity: 0</code> para siempre. El título siempre está visible al cargar (above the fold) — no tiene sentido que dependa del scroll para decidir si animar, así que directamente no usa ScrollTrigger: anima apenas se monta.
+        <strong>Por qué ya no usa una librería:</strong> gsap + el plugin SplitText + ScrollTrigger agregaban ~130KB comprimidos de JS al bundle — y en todo el proyecto, esa librería solo animaba estas 3 líneas. Además causó un bug real en producción: <code>ScrollTrigger</code> decide cuándo animar según la posición de scroll, pero la restauración de scroll propia del sitio remonta el hero con la página YA scrolleada al volver del detalle de un proyecto (salta directo a la grilla de Trabajos) — cada línea calculaba su punto de disparo de forma async e independiente, y según el instante exacto en que cada una lo hacía, alguna terminaba con un umbral ya no alcanzable con el scroll restante; como era <code>once: true</code>, si nunca se disparaba el texto quedaba en <code>opacity: 0</code> para siempre. El título siempre está visible al cargar (above the fold) — nunca debería depender del scroll para decidir si animar. Esta versión anima apenas se monta, sin ScrollTrigger ni ninguna otra dependencia de scroll, así que esa clase de bug ya no puede pasar.
       </p>
       <CodeBlock code={`// hero-section.tsx
 <SplitText tag="span" text={hero.titleLine1} className="hero-title-line" />
 <br />
 <SplitText tag="span" text={hero.titleLine2} className="hero-title-line hero-title-line--accent" />
+
+/* CSS — animación por carácter */
+.split-char {
+  display: inline-block;
+  white-space: pre;
+  opacity: 0;
+  transform: translateY(40px);
+  animation-name: split-char-in;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: forwards;
+  /* animation-delay / animation-duration van inline, por carácter (ver split-text.tsx) */
+}
+@keyframes split-char-in {
+  to { opacity: 1; transform: translateY(0); }
+}
 
 /* CSS — shimmer de gradiente en la línea del medio (recuperado del <em> original) */
 .hero-title-line--accent {
@@ -2872,10 +2885,10 @@ useEffect(() => {
   -webkit-text-fill-color: var(--accent); /* sólido mientras existen los spans por carácter */
 }`} />
       <p className="ds-pattern-desc" style={{ marginTop: 12 }}>
-        <strong>Cuidado con texto dinámico:</strong> si el <code>text</code> cambia después de que ya animó una vez, el componente NO vuelve a animar (guard interno para no re-disparar en cada re-render). Como el título viene de <code>/api/admin/hero</code> vía fetch, <code>hero-section.tsx</code> espera a que resuelva (<code>heroLoaded</code>) antes de montar el <code>SplitText</code>, para que solo anime una vez con el texto final.
+        <strong>Texto dinámico:</strong> a diferencia de la versión anterior (gsap/SplitText tenía un guard que impedía re-animar si el texto cambiaba después de completar), esta versión SÍ vuelve a animar cuando cambia <code>text</code> — más simple y sin ese riesgo. Aun así, <code>hero-section.tsx</code> sigue esperando a que <code>/api/admin/hero</code> resuelva (<code>heroLoaded</code>) antes de montar el <code>SplitText</code>, para evitar el &quot;flash&quot; de animar primero el texto DEFAULT de placeholder y después el real.
       </p>
       <p className="ds-pattern-desc" style={{ marginTop: 12 }}>
-        <strong>Gradiente + SplitText — por qué no es directo:</strong> <code>background-clip: text</code> necesita texto propio en el elemento al que se aplica. Mientras GSAP tiene la línea partida en <code>.split-char</code> por letra, el <code>&lt;span&gt;</code> padre no tiene texto directo — el gradiente no tendría nada que recortar. <code>split-text.tsx</code> llama a <code>splitInstance.revert()</code> en el <code>onComplete</code> del tween (apenas termina de animar esa línea), lo que restaura el texto plano — recién ahí el gradiente se ve. Mientras tanto, <code>.split-char</code> fuerza color sólido para que las letras no queden transparentes/invisibles heredando el <code>text-fill-color</code> del gradiente sin tener background detrás.
+        <strong>Gradiente + SplitText — por qué no es directo:</strong> <code>background-clip: text</code> necesita texto propio en el elemento al que se aplica. Mientras la línea está partida en <code>.split-char</code> por letra, el <code>&lt;span&gt;</code> padre no tiene texto directo — el gradiente no tendría nada que recortar. <code>split-text.tsx</code> vuelve a texto plano (<code>setTimeout</code> con la duración total calculada) apenas termina de animar esa línea — recién ahí el gradiente se ve. Mientras tanto, <code>.split-char</code> fuerza color sólido para que las letras no queden transparentes/invisibles heredando el <code>text-fill-color</code> del gradiente sin tener background detrás.
       </p>
 
       {/* ── Keyframes disponibles ── */}
@@ -2883,6 +2896,7 @@ useEffect(() => {
       <div className="ds-spec-table">
         {[
           { name: "fadeUp",             desc: "opacity 0→1 + translateY(16px)→0. Usado en hero-tag, hero-sub, hero-cta (CSS animation fill: both)." },
+          { name: "split-char-in",      desc: "opacity 0→1 + translateY(40px)→0. Entrada por carácter del hero-title (.split-char), 50ms de stagger vía animation-delay inline." },
           { name: "hero-gradient-shift",desc: "background-position 0%→100%→0%. Shimmer de la línea acento del hero-title (.hero-title-line--accent). Ciclo de 12s." },
           { name: "fadeIn",             desc: "opacity 0→1. Overlays, project-view backdrop." },
           { name: "popIn",              desc: "scale(0.88)+opacity 0 → scale(1)+opacity 1. Modal profile, snap easing." },
@@ -2956,10 +2970,10 @@ useEffect(() => {
 
   /* Hero title (SplitText) NO se cubre acá — el guard vive dentro del
      componente (components/portfolio/split-text.tsx): detecta la media
-     query él mismo, nunca corre el tween de GSAP, y aplica opacity:1 +
-     transform:none directo. Necesario porque el texto lo divide GSAP
-     dinámicamente — un override CSS externo no alcanzaría a los spans
-     que todavía no existen en el momento en que se evalúa esta regla. */
+     query él mismo y renderiza el texto plano directo, sin pasar por los
+     spans por-carácter en absoluto. .split-char sí tiene su propio
+     override en portfolio.css (por si el componente llega a renderizarlos
+     antes de que el efecto de matchMedia corra, ej. durante hidratación). */
 
   /* Tu nueva animación — patrón a seguir */
   .mi-nuevo-elemento {

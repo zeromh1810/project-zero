@@ -63,12 +63,12 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
   const scrollHintRef  = useRef<HTMLDivElement>(null)
 
   const [hero, setHero] = useState<HeroData>(DEFAULT)
-  // SplitText no debe montarse dos veces con textos distintos (ver comentario
-  // en split-text.tsx): si ya terminó de animar una vez, un cambio de texto
-  // posterior no la vuelve a disparar. Como este título es editable desde
-  // /admin y llega vía fetch después del mount, esperamos a que ese fetch
-  // resuelva (éxito o error) para recién ahí montar el SplitText con el
-  // texto definitivo — así anima una sola vez, con el texto correcto.
+  // El título es editable desde /admin y llega vía fetch después del mount
+  // — sin esto, SplitText animaría primero el texto DEFAULT de placeholder
+  // y, apenas resuelva el fetch, se vería un segundo "flash" de entrada con
+  // el texto real. Esperamos a que el fetch resuelva (éxito o error) para
+  // recién ahí montar el SplitText, así anima una sola vez con el texto
+  // definitivo.
   const [heroLoaded, setHeroLoaded] = useState(false)
 
   // ── Scroll: parallax + disolución, todo en un solo listener con rAF ────────
@@ -229,19 +229,22 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
         <div className="hero-left">
           <h1 className="hero-title">
             {heroLoaded ? (
-              // useScrollTrigger={false} explícito a propósito: el título
-              // siempre está visible al cargar (above the fold), nunca debe
-              // depender de la posición de scroll para decidir si animar —
-              // ver el comentario del prop en split-text.tsx para el bug
-              // real que causaba (texto que nunca aparecía al volver del
-              // detalle de un proyecto, porque esa vuelta remonta el hero
-              // con la página ya scrolleada).
+              // Sin ScrollTrigger ni ninguna dependencia de la posición de
+              // scroll a propósito: el título siempre está visible al
+              // cargar (above the fold), nunca debería depender del scroll
+              // para decidir si animar. La versión anterior (gsap/SplitText
+              // + ScrollTrigger) sí dependía de eso y causó un bug real en
+              // producción — el texto quedaba invisible para siempre si el
+              // componente se remontaba con la página ya scrolleada (pasa
+              // al volver del detalle de un proyecto). Esta versión en CSS
+              // puro anima apenas se monta, sin ese riesgo, y de paso saca
+              // del bundle ~130KB comprimidos de gsap que solo se usaban acá.
               <>
-                <SplitText tag="span" text={hero.titleLine1} className="hero-title-line" useScrollTrigger={false} />
+                <SplitText tag="span" text={hero.titleLine1} className="hero-title-line" />
                 <br />
-                <SplitText tag="span" text={hero.titleLine2} className="hero-title-line hero-title-line--accent" useScrollTrigger={false} />
+                <SplitText tag="span" text={hero.titleLine2} className="hero-title-line hero-title-line--accent" />
                 <br />
-                <SplitText tag="span" text={hero.titleLine3} className="hero-title-line" useScrollTrigger={false} />
+                <SplitText tag="span" text={hero.titleLine3} className="hero-title-line" />
               </>
             ) : (
               // Placeholder estático (sin animar) mientras /api/admin/hero
