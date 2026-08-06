@@ -42,12 +42,16 @@ export default function HeroTab({ onToast }: Props) {
   async function save() {
     setSaving(true)
     try {
-      await fetch("/api/admin/hero", {
+      const res = await fetch("/api/admin/hero", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
-      onToast("Hero actualizado", "success")
+      if (!res.ok) throw new Error()
+      const saved = await res.json()
+      saved._githubWarning
+        ? onToast("Hero guardado localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
+        : onToast("Hero actualizado", "success")
     } catch {
       onToast("Error al guardar", "error")
     } finally {

@@ -20,8 +20,8 @@ export async function PUT(request: Request) {
   }
   try {
     const body = await request.json()
-    await writeJsonAndCommit(FILE, DATA_PATH, body, "chore(data): update hero via admin panel [skip ci]", "hero")
-    return NextResponse.json(body)
+    const synced = await writeJsonAndCommit(FILE, DATA_PATH, body, "chore(data): update hero via admin panel [skip ci]", "hero")
+    return NextResponse.json({ ...body, _githubWarning: !synced })
   } catch {
     return NextResponse.json({ error: "Error al guardar" }, { status: 500 })
   }

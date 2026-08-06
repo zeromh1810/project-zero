@@ -83,9 +83,12 @@ export default function SocialTab({ onToast }: Props) {
         body: JSON.stringify(social),
       })
       if (!res.ok) throw new Error()
+      const saved = await res.json()
       setSavedSocial({ ...social })
       invalidateSocial()
-      onToast("Redes sociales guardadas", "success")
+      saved._githubWarning
+        ? onToast("Redes sociales guardadas localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
+        : onToast("Redes sociales guardadas", "success")
     } catch {
       onToast("Error al guardar", "error")
     } finally {
@@ -102,9 +105,12 @@ export default function SocialTab({ onToast }: Props) {
         body: JSON.stringify(footer),
       })
       if (!res.ok) throw new Error()
+      const saved = await res.json()
       setSavedFooter({ ...footer })
       invalidateFooter()
-      onToast("Footer guardado", "success")
+      saved._githubWarning
+        ? onToast("Footer guardado localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
+        : onToast("Footer guardado", "success")
     } catch {
       onToast("Error al guardar", "error")
     } finally {

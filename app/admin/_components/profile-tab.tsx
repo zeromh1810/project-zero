@@ -99,8 +99,11 @@ export default function ProfileTab({ onToast }: Props) {
         body:    JSON.stringify(data),
       })
       if (!res.ok) throw new Error()
+      const result = await res.json()
       setSaved({ ...data })
-      onToast("Perfil guardado", "success")
+      result._githubWarning
+        ? onToast("Perfil guardado localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
+        : onToast("Perfil guardado", "success")
     } catch {
       onToast("Error al guardar", "error")
     } finally {

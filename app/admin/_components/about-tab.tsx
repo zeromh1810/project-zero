@@ -102,12 +102,16 @@ export default function AboutTab({ onToast }: Props) {
   async function save() {
     setSaving(true)
     try {
-      await fetch("/api/admin/about", {
+      const res = await fetch("/api/admin/about", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
-      onToast("Sección actualizada", "success")
+      if (!res.ok) throw new Error()
+      const saved = await res.json()
+      saved._githubWarning
+        ? onToast("Sección guardada localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
+        : onToast("Sección actualizada", "success")
     } catch {
       onToast("Error al guardar", "error")
     } finally {

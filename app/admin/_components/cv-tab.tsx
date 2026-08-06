@@ -42,12 +42,16 @@ export default function CVTab({ onToast }: Props) {
   async function save() {
     setSaving(true)
     try {
-      await fetch("/api/admin/cv", {
+      const res = await fetch("/api/admin/cv", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
-      onToast("CV actualizado", "success")
+      if (!res.ok) throw new Error()
+      const saved = await res.json()
+      saved._githubWarning
+        ? onToast("CV guardado localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
+        : onToast("CV actualizado", "success")
     } catch {
       onToast("Error al guardar", "error")
     } finally {

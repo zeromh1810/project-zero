@@ -28,8 +28,8 @@ export async function PUT(request: Request) {
       linkedin:  String(body.linkedin  ?? ""),
       instagram: String(body.instagram ?? ""),
     }
-    await writeJsonAndCommit(FILE, DATA_PATH, updated, "chore(data): update profile via admin panel [skip ci]", "profile")
-    return NextResponse.json(updated)
+    const synced = await writeJsonAndCommit(FILE, DATA_PATH, updated, "chore(data): update profile via admin panel [skip ci]", "profile")
+    return NextResponse.json({ ...updated, _githubWarning: !synced })
   } catch {
     return NextResponse.json({ error: "Error al guardar" }, { status: 500 })
   }
