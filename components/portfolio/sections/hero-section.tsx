@@ -250,14 +250,17 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
             ) : (
               // Placeholder estático (sin animar) mientras /api/admin/hero
               // resuelve — ver comentario de heroLoaded arriba. Misma
-              // estructura que el resultado final para no saltar de layout.
-              <>
+              // estructura que el resultado final para no saltar de layout,
+              // pero invisible: son valores DEFAULT hardcodeados, no el
+              // título real, así que no deben llegar a verse — solo ocupan
+              // el espacio hasta que heroLoaded confirma el texto definitivo.
+              <span style={{ visibility: "hidden" }}>
                 <span className="hero-title-line">{hero.titleLine1}</span>
                 <br />
                 <span className="hero-title-line hero-title-line--accent">{hero.titleLine2}</span>
                 <br />
                 <span className="hero-title-line">{hero.titleLine3}</span>
-              </>
+              </span>
             )}
           </h1>
 
