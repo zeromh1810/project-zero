@@ -1,24 +1,18 @@
-import { Fragment } from "react"
+import DOMPurify from "isomorphic-dompurify"
+import type { HTMLAttributes } from "react"
 
-// Allowlist parser — reconoce solo <strong> y <em> y trata todo lo demás como
-// texto literal (React escapa los Fragments automáticamente). Nunca usa
-// dangerouslySetInnerHTML: el contenido admin-editado no puede inyectar
-// markup arbitrario, solo estas dos etiquetas conocidas.
-const SPLIT_PATTERN = /(<strong>.*?<\/strong>|<em>.*?<\/em>)/g
-const STRONG_MATCH  = /^<strong>(.*?)<\/strong>$/
-const EM_MATCH      = /^<em>(.*?)<\/em>$/
+// Único punto de entrada para contenido editado en el admin (Tiptap) hacia
+// el sitio público. La lista de etiquetas permitidas espeja exactamente las
+// extensiones activas en app/admin/_components/rich-text-area.tsx — si se
+// habilita una extensión nueva ahí (heading, link...), hay que agregarla acá
+// también o el HTML que produzca se va a limpiar silenciosamente.
+const ALLOWED_TAGS = ["p", "strong", "em", "ul", "ol", "li", "br"]
 
-export function RichText({ text }: { text: string }) {
-  const parts = text.split(SPLIT_PATTERN)
-  return (
-    <>
-      {parts.map((part, i) => {
-        const strong = part.match(STRONG_MATCH)
-        if (strong) return <strong key={i}>{strong[1]}</strong>
-        const em = part.match(EM_MATCH)
-        if (em) return <em key={i}>{em[1]}</em>
-        return <Fragment key={i}>{part}</Fragment>
-      })}
-    </>
-  )
+interface Props extends HTMLAttributes<HTMLDivElement> {
+  text: string
+}
+
+export function RichText({ text, ...rest }: Props) {
+  const clean = DOMPurify.sanitize(text, { ALLOWED_TAGS, ALLOWED_ATTR: [] })
+  return <div {...rest} dangerouslySetInnerHTML={{ __html: clean }} />
 }

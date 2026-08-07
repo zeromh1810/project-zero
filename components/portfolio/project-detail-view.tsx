@@ -164,25 +164,28 @@ export function ProjectDetailView({
 
           <section className="detail-section">
             <h3 className="detail-section-label">EL DESAFÍO</h3>
-            <p className="detail-section-text">
-              <RichText text={project.intro.replace(/(\d+%)/g, "<strong>$1</strong>")} />
-            </p>
+            <RichText
+              text={project.intro.replace(/(\d+%)/g, "<strong>$1</strong>")}
+              className="detail-section-text"
+            />
           </section>
 
           <section className="detail-section">
             <h3 className="detail-section-label">PROCESO</h3>
-            <p className="detail-section-text">
-              <RichText text={project.process
+            <RichText
+              text={project.process
                 .replace(/(confianza)/gi, "<strong>$1</strong>")
-                .replace(/(insight clave)/gi, "<strong>$1</strong>")} />
-            </p>
+                .replace(/(insight clave)/gi, "<strong>$1</strong>")}
+              className="detail-section-text"
+            />
           </section>
 
           <section className="detail-section">
             <h3 className="detail-section-label">EL RESULTADO</h3>
-            <p className="detail-section-text">
-              <RichText text={project.result.replace(/(\+?\d+%|\$[\d.]+[MK]?)/g, "<strong>$1</strong>")} />
-            </p>
+            <RichText
+              text={project.result.replace(/(\+?\d+%|\$[\d.]+[MK]?)/g, "<strong>$1</strong>")}
+              className="detail-section-text"
+            />
           </section>
 
           <div className="detail-impact-box">

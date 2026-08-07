@@ -627,6 +627,11 @@ html {
   animation: fadeUp 0.75s 0.72s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Contenido viene del editor Tiptap del admin — reset del <p> propio */
+.hero-sub p {
+  margin: 0;
+}
+
 .hero-cta {
   display: flex;
   gap: 14px;
@@ -1404,6 +1409,25 @@ html {
 .about-bio strong {
   color: var(--txt);
   font-weight: 500;
+}
+
+/* Contenido viene del editor Tiptap del admin (ver rich-text.tsx) — sus
+   <p>/<ul>/<ol> propios necesitan reset de margen del navegador */
+.about-bio p:not(:last-child) {
+  margin-bottom: 0.6em;
+}
+
+/* list-style explícito — Tailwind Preflight resetea ul/ol a list-style:none */
+.about-bio ul {
+  list-style: disc outside;
+  margin: 0.4em 0;
+  padding-left: 1.3em;
+}
+
+.about-bio ol {
+  list-style: decimal outside;
+  margin: 0.4em 0;
+  padding-left: 1.3em;
 }
 
 .skills-label {
@@ -2748,7 +2772,35 @@ html {
   font-size: 17px;
   line-height: 1.85;
   color: var(--txt2);
+  /* Compat con posts viejos guardados como texto plano con \n\n literal
+     (antes del editor Tiptap) — sin esto perderían sus saltos de párrafo.
+     Es inerte para contenido nuevo, que ya viene en <p> reales. */
   white-space: pre-wrap;
+}
+
+.blog-post-content p:not(:last-child) {
+  margin-bottom: 1.2em;
+}
+
+.blog-post-content ul {
+  list-style: disc outside;
+  margin: 0 0 1.2em;
+  padding-left: 1.5em;
+}
+
+.blog-post-content ol {
+  list-style: decimal outside;
+  margin: 0 0 1.2em;
+  padding-left: 1.5em;
+}
+
+.blog-post-content li {
+  margin-bottom: 0.4em;
+}
+
+.blog-post-content strong {
+  color: var(--txt);
+  font-weight: 700;
 }
 
 /* ── Blog preview (home section) ── — vuelve a blanco/negro puro después
@@ -3563,6 +3615,26 @@ html {
 .detail-section-text b {
   color: var(--highlight);
   font-weight: 500;
+}
+
+.detail-section-text p:not(:last-child) {
+  margin-bottom: 0.8em;
+}
+
+.detail-section-text ul {
+  list-style: disc outside;
+  margin: 0.4em 0;
+  padding-left: 1.4em;
+}
+
+.detail-section-text ol {
+  list-style: decimal outside;
+  margin: 0.4em 0;
+  padding-left: 1.4em;
+}
+
+.detail-section-text li {
+  margin-bottom: 0.3em;
 }
 
 /* ── Impact Box ── */

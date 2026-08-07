@@ -291,18 +291,40 @@
   box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.12);
 }
 
-/* ── RICH TEXT AREA — barra de formato (bold/italic) ── */
+/* ── RICH TEXT AREA — editor Tiptap con toolbar propio (bold/italic/listas) ── */
 .admin-richtext {
   display: flex;
   flex-direction: column;
 }
 
+/* Chrome (toolbar) en --bg3 vs. papel (contenido) en --bg2 blanco puro —
+   la barra de control se lee como UI, el área de escritura se lee como el
+   documento en sí. --border-h (no --border) para que el borde no se pierda
+   contra el blanco; --border sigue reservado para la línea divisoria interna. */
 .admin-richtext-toolbar {
   display: flex;
-  gap: 4px;
-  padding: 4px;
-  margin-bottom: -1.5px; /* se funde con el borde superior del textarea */
-  align-self: flex-start;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 6px;
+  border: 1.5px solid var(--border-h);
+  border-bottom: 1px solid var(--border);
+  border-radius: 10px 10px 0 0;
+  background: var(--bg3);
+  transition: border-color 0.2s ease;
+}
+
+.dark .admin-richtext-toolbar {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-richtext:focus-within .admin-richtext-toolbar {
+  border-color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.admin-richtext:focus-within .admin-textarea--richtext {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.12);
 }
 
 .admin-richtext-btn {
@@ -311,28 +333,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid var(--border);
-  border-bottom: none;
-  border-radius: 6px 6px 0 0;
-  background: var(--bg3);
+  border: none;
+  border-radius: 6px;
+  background: transparent;
   color: var(--txt2);
   font-size: 13px;
   cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease;
-}
-
-.dark .admin-richtext-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.1);
+  transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .admin-richtext-btn:hover {
   color: var(--txt);
   background: var(--bg2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.dark .admin-richtext-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+
+.admin-richtext-btn.active {
+  color: var(--accent);
+  background: rgba(41, 151, 255, 0.12);
+}
+
+.admin-richtext-btn.active:hover {
+  background: rgba(41, 151, 255, 0.18);
+  box-shadow: none;
 }
 
 .admin-richtext-btn:active {
-  background: var(--glass-hover);
+  transform: scale(0.92);
 }
 
 .admin-richtext-btn:focus-visible {
@@ -340,8 +372,70 @@
   outline-offset: 1px;
 }
 
+.admin-richtext-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border-h);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+.dark .admin-richtext-sep {
+  background: rgba(255, 255, 255, 0.14);
+}
+
 .admin-textarea--richtext {
+  background: var(--bg2);
+  border: 1.5px solid var(--border-h);
+  border-top: none;
   border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  cursor: text;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: var(--rt-min-h, 96px);
+  height: auto;
+}
+
+.dark .admin-textarea--richtext {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-textarea--richtext .tiptap {
+  outline: none;
+  min-height: var(--rt-min-h, 96px);
+}
+
+.admin-textarea--richtext p {
+  margin: 0 0 0.6em;
+}
+
+.admin-textarea--richtext p:last-child {
+  margin-bottom: 0;
+}
+
+/* list-style explícito — Tailwind Preflight resetea ul/ol a list-style:none */
+.admin-textarea--richtext ul {
+  list-style: disc outside;
+  margin: 0 0 0.6em;
+  padding-left: 1.4em;
+}
+
+.admin-textarea--richtext ol {
+  list-style: decimal outside;
+  margin: 0 0 0.6em;
+  padding-left: 1.4em;
+}
+
+.admin-textarea--richtext li {
+  margin-bottom: 0.2em;
+}
+
+.admin-textarea--richtext .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--txt3);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }
 
 .admin-input-hint {

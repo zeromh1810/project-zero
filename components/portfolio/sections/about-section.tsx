@@ -120,8 +120,8 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
             ))}
           </div>
 
-          <p className="about-bio anim-up"><RichText text={data.bio1} /></p>
-          <p className="about-bio anim-up"><RichText text={data.bio2} /></p>
+          <RichText text={data.bio1} className="about-bio anim-up" />
+          <RichText text={data.bio2} className="about-bio anim-up" />
 
           <div className="skills-label anim-up">Stack & Herramientas</div>
           <div className="skills-wrap anim-up">

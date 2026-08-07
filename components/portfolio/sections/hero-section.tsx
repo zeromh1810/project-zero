@@ -261,7 +261,7 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
             )}
           </h1>
 
-          <p className="hero-sub" onAnimationEnd={releaseEntranceAnimation}><RichText text={hero.subtitle} /></p>
+          <RichText text={hero.subtitle} className="hero-sub" onAnimationEnd={releaseEntranceAnimation} />
 
           <div className="hero-cta" onAnimationEnd={releaseEntranceAnimation}>
             <button className="btn-p btn-magnetic" onClick={onNavigateContact}>
