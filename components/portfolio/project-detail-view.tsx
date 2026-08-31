@@ -148,11 +148,7 @@ export function ProjectDetailView({
             <span className="detail-tag-year">{project.year}</span>
           </div>
 
-          <h1 className="detail-title">
-            {project.title.split(" ").map((word, i, arr) => (
-              <span key={i}>{word}{i < arr.length - 1 && <br />}</span>
-            ))}
-          </h1>
+          <h1 className="detail-title">{project.title}</h1>
 
           <p className="detail-description">{project.desc}</p>
 
