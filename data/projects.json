@@ -2,10 +2,10 @@
   {
     "id": 1,
     "slug": "ecommerce-redesign",
-    "title": "Amelia | Plataforma de IA de LATAM",
+    "title": "Amelia: cómo LATAM centralizó la atención a sus colaboradores y automatizó su trabajo en una sola plataforma de IA",
     "category": "Product design",
     "year": 2025,
-    "desc": "Rediseño completo de plataforma de comercio electrónico con foco en conversión.",
+    "desc": "Amelia pasó de resolver dudas de RRHH a ser el espacio donde cada colaborador crea sus propios asistentes para automatizar tareas, y conversa, redacta y genera contenido multimedia como en un ChatGPT corporativo.",
     "kpis": [
       {
         "val": "+34%",
@@ -20,9 +20,9 @@
         "lbl": "Duración"
       }
     ],
-    "intro": "Una marca de moda premium con 8 años de historia acumulaba deuda técnica y de diseño que estaba frenando su crecimiento online. La tasa de conversión era de 1.2%, muy por debajo del benchmark del sector (2.8%), y el abandono del carrito superaba el 72%.",
-    "process": "Comencé con 3 semanas de investigación: entrevistas con 18 compradores habituales, análisis de heatmaps y grabaciones de sesiones. El problema principal no era el checkout — era la confianza. Los usuarios no encontraban suficiente información del producto antes de añadirlo al carrito. Rediseñé la arquitectura de información completa, creé un design system de 240 componentes y prototipé 6 variantes del flujo de compra que validamos con A/B testing.",
-    "result": "En los 60 días posteriores al lanzamiento, la conversión subió de 1.2% a 1.98% (+34%), el abandono bajó 18 puntos y el ticket promedio aumentó un 12% gracias a la nueva sección de «completa el look».",
+    "intro": "<p>LATAM Airlines, una compañía con miles de colaboradores, necesitaba reducir la carga de RRHH y Service Desk respondiendo dudas repetitivas sobre beneficios, procesos laborales y soporte técnico. La compañía pidió una plataforma de IA generativa \"world class\" que centralizara esa atención — bajo una restricción no negociable: no exponer datos internos a internet. El desafío no era solo resolver consultas, sino hacerlo con un producto usable para un rango etario amplio de colaboradores, muchos sin experiencia previa con herramientas de IA.</p>",
+    "process": "<p>Trabajando junto al PM, diseñé la segmentación de la plataforma en módulos independientes en vez de un solo asistente de acceso abierto, como respuesta directa a la restricción de privacidad. Construí un UI kit escalable nutrido del sistema de diseño de LATAM, y lideré entrevistas y testing de usabilidad con colaboradores a lo largo del crecimiento del producto. El hallazgo más significativo surgió en el módulo de creación de asistentes: el flujo técnico existente (conexiones a MCP, BigQuery) generaba fricción y algo de temor en usuarios no técnicos. A partir de ese testing, rediseñé el flujo en pasos simples que reducen la curva de aprendizaje, dejando las configuraciones avanzadas disponibles para los perfiles más técnicos.</p>",
+    "result": "<p>Amelia pasó de ser un canal de consultas de RRHH a una plataforma de productividad usada activamente por colaboradores de toda la compañía, con crecimiento sostenido mes a mes desde su lanzamiento [placeholder: reemplazar por la curva de adopción si consigues los datos históricos]. El módulo de creación de asistentes permitió que cientos de colaboradores automatizaran tareas repetitivas de su propio trabajo [placeholder: número de asistentes creados]. Además, la plataforma comenzó a resolver directamente parte de la carga operativa que antes recaía en RRHH y Soporte, como la gestión de certificados laborales y tickets [placeholder: cifras específicas].</p>",
     "tags": [
       "Figma",
       "User Research",
