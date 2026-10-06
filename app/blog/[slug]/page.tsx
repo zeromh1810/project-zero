@@ -145,7 +145,7 @@ export default function BlogPostPage() {
                   </div>
                 )}
 
-                <RichText text={post.content} className="blog-post-content anim-up" />
+                <RichText text={post.content} variant="full" className="blog-post-content anim-up" />
 
                 {tags.length > 0 && (
                   <footer className="blog-post-tags anim-up" aria-label="Tags">

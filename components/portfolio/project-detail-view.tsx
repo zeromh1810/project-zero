@@ -6,6 +6,15 @@ import { GalleryModal, PlaceholderThumb, type GalleryItem } from "./gallery-moda
 import { useLogo } from "@/lib/hooks/use-logo"
 import { RichText } from "./rich-text"
 
+// Resalta coincidencias solo en los nodos de texto del HTML — nunca dentro de
+// una etiqueta, para no inyectar <strong> en un src/href (p. ej. "%20" en una URL).
+function highlightText(html: string, re: RegExp) {
+  return html
+    .split(/(<[^>]*>)/)
+    .map(part => (part.startsWith("<") ? part : part.replace(re, "<strong>$1</strong>")))
+    .join("")
+}
+
 interface ProjectDetailViewProps {
   project: Project
   isDark: boolean
@@ -161,7 +170,8 @@ export function ProjectDetailView({
           <section className="detail-section">
             <h3 className="detail-section-label">EL DESAFÍO</h3>
             <RichText
-              text={project.intro.replace(/(\d+%)/g, "<strong>$1</strong>")}
+              text={highlightText(project.intro, /(\d+%)/g)}
+              variant="full"
               className="detail-section-text"
             />
           </section>
@@ -169,9 +179,8 @@ export function ProjectDetailView({
           <section className="detail-section">
             <h3 className="detail-section-label">PROCESO</h3>
             <RichText
-              text={project.process
-                .replace(/(confianza)/gi, "<strong>$1</strong>")
-                .replace(/(insight clave)/gi, "<strong>$1</strong>")}
+              text={highlightText(project.process, /(confianza|insight clave)/gi)}
+              variant="full"
               className="detail-section-text"
             />
           </section>
@@ -179,7 +188,8 @@ export function ProjectDetailView({
           <section className="detail-section">
             <h3 className="detail-section-label">EL RESULTADO</h3>
             <RichText
-              text={project.result.replace(/(\+?\d+%|\$[\d.]+[MK]?)/g, "<strong>$1</strong>")}
+              text={highlightText(project.result, /(\+?\d+%|\$[\d.]+[MK]?)/g)}
+              variant="full"
               className="detail-section-text"
             />
           </section>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, KeyboardEvent, ChangeEvent } from "react"
 import RichTextArea from "./rich-text-area"
+import { uploadImage as uploadFile } from "./upload"
 
 interface KPI { val: string; lbl: string }
 
@@ -41,18 +42,6 @@ interface Props {
   onSave: (data: ProjectData) => Promise<void>
   onClose: () => void
   saving: boolean
-}
-
-async function uploadFile(file: File): Promise<string> {
-  const fd = new FormData()
-  fd.append("file", file)
-  const res = await fetch("/api/admin/upload", { method: "POST", body: fd })
-  if (!res.ok) {
-    const err = await res.json()
-    throw new Error(err.error || "Error al subir")
-  }
-  const { url } = await res.json()
-  return url
 }
 
 export default function ProjectForm({ initial, onSave, onClose, saving }: Props) {
@@ -393,6 +382,7 @@ export default function ProjectForm({ initial, onSave, onClose, saving }: Props)
           <div className="admin-field">
             <label className="admin-label">Introducción / Problema</label>
             <RichTextArea
+              variant="full"
               value={form.intro}
               onChange={v => set("intro", v)}
               minHeight={120}
@@ -402,6 +392,7 @@ export default function ProjectForm({ initial, onSave, onClose, saving }: Props)
           <div className="admin-field">
             <label className="admin-label">Proceso</label>
             <RichTextArea
+              variant="full"
               value={form.process}
               onChange={v => set("process", v)}
               minHeight={120}
@@ -411,6 +402,7 @@ export default function ProjectForm({ initial, onSave, onClose, saving }: Props)
           <div className="admin-field">
             <label className="admin-label">Resultado</label>
             <RichTextArea
+              variant="full"
               value={form.result}
               onChange={v => set("result", v)}
               minHeight={100}

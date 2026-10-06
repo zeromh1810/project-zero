@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, ChangeEvent, KeyboardEvent } from "react"
 import type { ToastType } from "./admin-toast"
 import RichTextArea from "./rich-text-area"
+import { plainText } from "@/lib/types/blog"
 
 interface BlogPost {
   id: string; slug: string; title: string; content: string
@@ -244,13 +245,14 @@ export default function BlogTab({ onToast }: Props) {
         <div className="admin-field">
           <label className="admin-label">Contenido *</label>
           <RichTextArea
+            variant="full"
             value={form.content}
             onChange={v => setForm(p => ({ ...p, content: v }))}
             placeholder="Escribe el contenido de la entrada…"
             minHeight={200}
           />
           <div className="admin-input-hint">
-            {form.content.length} caracteres · Los primeros 100 aparecerán como resumen en el portafolio.
+            {plainText(form.content).length} caracteres · Los primeros 100 aparecerán como resumen en el portafolio.
           </div>
         </div>
 
