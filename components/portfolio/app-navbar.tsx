@@ -5,7 +5,9 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "@/lib/context/theme-context"
 import { useLogo } from "@/lib/hooks/use-logo"
-import { SunIcon, MoonIcon } from "./icons"
+import { SunIcon, MoonIcon, ArrowLeftIcon } from "./icons"
+
+import { switchThemeWithTransition } from "@/lib/theme-transition"
 
 export const NAV_SESSION_KEY = "portfolio-nav-target"
 
@@ -33,13 +35,21 @@ const SECTION_ITEMS: { key: Section; label: string }[] = [
 ]
 
 // ── Theme toggle (shared) ─────────────────────────────────────────────────
-function ThemeToggle() {
+export function ThemeToggle() {
   const { isDark, toggleTheme } = useTheme()
+  // Revelado circular desde el botón presionado (lib/theme-transition.ts).
+  // El ícono que pasa a activo gira al entrar (.theme-switched, ver CSS).
+  const switchTo = (dark: boolean) => (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (dark === isDark) return
+    const r = e.currentTarget.getBoundingClientRect()
+    document.documentElement.classList.add("theme-switched")
+    switchThemeWithTransition(toggleTheme, dark, { x: r.left + r.width / 2, y: r.top + r.height / 2 })
+  }
   return (
     <div className="theme-toggle" role="group" aria-label="Modo de color">
       <button
         className={`theme-toggle-btn${!isDark ? " active" : ""}`}
-        onClick={() => isDark && toggleTheme()}
+        onClick={switchTo(false)}
         aria-label="Modo claro"
         aria-pressed={!isDark}
       >
@@ -47,13 +57,29 @@ function ThemeToggle() {
       </button>
       <button
         className={`theme-toggle-btn${isDark ? " active" : ""}`}
-        onClick={() => !isDark && toggleTheme()}
+        onClick={switchTo(true)}
         aria-label="Modo oscuro"
         aria-pressed={isDark}
       >
         <MoonIcon />
       </button>
     </div>
+  )
+}
+
+// ── Zero design system ────────────────────────────────────────────────────
+// El DS es público: muestra cómo está construido el sitio. En anchos medios
+// el nombre completo no cabe junto a las demás secciones: se abrevia a
+// "Zero DS".
+function DsNavLink({ active = false }: { active?: boolean }) {
+  return (
+    // Sin aria-label: el nombre accesible es el texto visible (WCAG 2.5.3);
+    // la versión oculta con display:none no se anuncia.
+    <Link href="/design-system" data-nav="ds" className={`nav-item nav-item--ds${active ? " active" : ""}`}
+      aria-current={active ? "page" : undefined}>
+      <span className="nav-ds-full">Zero design system</span>
+      <span className="nav-ds-short">Zero DS</span>
+    </Link>
   )
 }
 
@@ -113,6 +139,25 @@ function PortfolioNavbar({ currentSection, onNavigate, onProfileClick }: Omit<Po
     if (currentSection !== "trabajos") setActiveKey(currentSection)
   }, [currentSection])
 
+  // Scroll-spy (M-19): dentro de "trabajos" la página tiene dos zonas — el
+  // hero (Home) y la grilla (Trabajos). La píldora sigue a la que está bajo
+  // el navbar, así refleja dónde está el usuario y no solo el último click.
+  useEffect(() => {
+    if (currentSection !== "trabajos") return
+    let raf = 0
+    const update = () => {
+      raf = 0
+      const sheet = document.querySelector(".projects-sheet")
+      if (!sheet) return
+      const next = sheet.getBoundingClientRect().top <= 96 ? "trabajos" : "home"
+      setActiveKey((k) => (k === next ? k : next))
+    }
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update) }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    update()
+    return () => { window.removeEventListener("scroll", onScroll); if (raf) cancelAnimationFrame(raf) }
+  }, [currentSection])
+
   const { navCenterRef, pillRef } = usePill(activeKey)
 
   function goHome() {
@@ -137,11 +182,11 @@ function PortfolioNavbar({ currentSection, onNavigate, onProfileClick }: Omit<Po
 
   return (
     <nav className="navbar">
-      <div className="nav-logo" onClick={goHome} style={{ cursor: "pointer" }}>
+      <button type="button" className="nav-logo" onClick={goHome} aria-label={`${logoText} — Inicio`}>
         {logoUrl
-          ? <img src={logoUrl} alt={logoText} className="nav-logo-img" />
-          : <><span className="nav-logo-dot" />{logoText}</>}
-      </div>
+          ? <img src={logoUrl} alt="" className="nav-logo-img" />
+          : <><span className="nav-logo-dot" aria-hidden="true" />{logoText}</>}
+      </button>
 
       <div className="nav-center" ref={navCenterRef}>
         <span ref={pillRef} className="nav-pill" aria-hidden="true" />
@@ -163,6 +208,7 @@ function PortfolioNavbar({ currentSection, onNavigate, onProfileClick }: Omit<Po
           </button>
         ))}
         <Link href="/blog" data-nav="blog" className="nav-item">Blog</Link>
+        <DsNavLink />
       </div>
 
       <div className="nav-right">
@@ -183,7 +229,7 @@ function BlogNavbarInner() {
   const logoUrl  = isDark ? (logo.darkUrl || logo.lightUrl) : (logo.lightUrl || logo.darkUrl)
   const logoText = logo.fallbackText || "Project Zero"
 
-  const activeKey = pathname.startsWith("/blog") ? "blog" : "home"
+  const activeKey = pathname.startsWith("/blog") ? "blog" : pathname.startsWith("/design-system") ? "ds" : "home"
   const { navCenterRef, pillRef } = usePill(activeKey)
 
   // Escribe el destino en sessionStorage y navega al portfolio
@@ -194,10 +240,10 @@ function BlogNavbarInner() {
 
   return (
     <nav className="navbar">
-      <Link href="/" className="nav-logo" style={{ textDecoration: "none", color: "inherit" }}>
+      <Link href="/" className="nav-logo" aria-label={`${logoText} — Inicio`}>
         {logoUrl
-          ? <img src={logoUrl} alt={logoText} className="nav-logo-img" />
-          : <><span className="nav-logo-dot" />{logoText}</>}
+          ? <img src={logoUrl} alt="" className="nav-logo-img" />
+          : <><span className="nav-logo-dot" aria-hidden="true" />{logoText}</>}
       </Link>
 
       <div className="nav-center" ref={navCenterRef}>
@@ -213,11 +259,12 @@ function BlogNavbarInner() {
         <Link href="/blog" data-nav="blog" className={`nav-item${activeKey === "blog" ? " active" : ""}`}>
           Blog
         </Link>
+        <DsNavLink active={activeKey === "ds"} />
       </div>
 
       <div className="nav-right">
         <ThemeToggle />
-        <Link href="/" className="btn-profile" style={{ textDecoration: "none" }}>← Portafolio</Link>
+        <Link href="/" className="btn-profile" style={{ textDecoration: "none" }} aria-label="Volver al portafolio"><ArrowLeftIcon className="btn-arrow-back" /> <span className="nav-back-label" aria-hidden="true">Portafolio</span></Link>
       </div>
     </nav>
   )

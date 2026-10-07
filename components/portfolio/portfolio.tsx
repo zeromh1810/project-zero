@@ -11,6 +11,7 @@ const ProfileModal = dynamic(() => import("./profile-modal").then(mod => mod.Pro
 import { ProjectsSection } from "./sections/projects-section"
 import { AboutSection } from "./sections/about-section"
 import { ContactSection } from "./sections/contact-section"
+import { ClosingCta } from "./sections/closing-cta"
 import type { Project } from "@/lib/data/projects"
 import { useSocial, type SocialData } from "@/lib/hooks/use-social"
 import { useFooter, type FooterData } from "@/lib/hooks/use-footer"
@@ -102,14 +103,9 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
     return () => clearTimeout(exitTimer)
   }, [section, displaySection])
 
-  // ESC to close modals
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowProfile(false)
-    }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [])
+  // ESC del modal de perfil: lo maneja Radix Dialog dentro del propio modal
+  // (con su animación de salida). Antes había además un listener acá que lo
+  // desmontaba de golpe, saltándose la salida.
 
   // scrollTarget reuses the same pendingScrollRef the sessionStorage flow
   // uses (see the two effects above) — set before setSection so the
@@ -173,8 +169,13 @@ export function Portfolio({ initialSocial, initialFooter }: { initialSocial?: So
         {displaySection === "contacto" && <ContactSection />}
       </div>
 
+      {/* Cierre con invitación a contactar — no en Contacto, donde ya está el formulario */}
+      {displaySection !== "contacto" && (
+        <ClosingCta email={social.email} onNavigateContact={() => navigateTo("contacto")} />
+      )}
+
       <footer className="footer">
-        <div className="footer-mark">✦</div>
+        <div className="footer-mark" aria-hidden="true">✦</div>
         <div className="footer-brand">{footerData.brand}</div>
         <div className="footer-tagline">{footerData.tagline}</div>
         <div className="footer-social">

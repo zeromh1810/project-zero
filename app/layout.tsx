@@ -33,6 +33,8 @@ export const metadata: Metadata = {
     "Portfolio", "Portafolio", "Santiago", "Chile",
   ],
   authors: [{ name: "Carlos Felipe Rojas Hickmann" }],
+  // Favicon editable desde Admin → Logo (app/brand-icon/route.ts).
+  icons: { icon: "/brand-icon", shortcut: "/brand-icon" },
   openGraph: {
     title: "Project Zero | Portafolio de trabajos",
     description:

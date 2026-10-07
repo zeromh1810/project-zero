@@ -38,7 +38,6 @@ export function ProjectsSection({ onNavigateContact, onNavigateAbout, onSelectPr
     if (!el) return
 
     const update = () => {
-      const isDark = document.documentElement.classList.contains("dark")
       const rect   = el.getBoundingClientRect()
       const navH   = 64
       // alpha va de 0.82 → 1.0 mientras el top del sheet viaja
@@ -47,13 +46,13 @@ export function ProjectsSection({ onNavigateContact, onNavigateAbout, onSelectPr
         (window.innerHeight - rect.top) / (window.innerHeight - navH)
       ))
       const alpha = (0.82 + 0.18 * progress).toFixed(3)
-      // rgb triplets match --bg2/--bg (blanco / navy-tinted oscuro): más
-      // contraste con el terreno del hero que el --bg3 gris usado antes, y
-      // coherente con que brands/blog-preview también vuelven a esos
-      // extremos de la escala más abajo.
-      el.style.background = isDark
-        ? `rgba(10, 11, 18, ${alpha})`
-        : `rgba(255, 255, 255, ${alpha})`
+      // v2.0.0 — Solo la opacidad sale de JS; el color lo pone el CSS según
+      // el tema (.projects-sheet / .dark .projects-sheet). Antes JS pintaba
+      // el color leyendo el tema en el momento del scroll: si el tema oscuro
+      // llegaba después del primer pintado (OS en dark), la hoja quedaba
+      // blanca con texto claro — "Proyectos que me definen" a 1.37:1 —
+      // hasta que el usuario scrolleaba.
+      el.style.setProperty("--sheet-alpha", alpha)
     }
 
     window.addEventListener("scroll", update, { passive: true })

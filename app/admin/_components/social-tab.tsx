@@ -1,344 +1,107 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import type { ToastType } from "./admin-toast"
 import { invalidateSocial } from "@/lib/hooks/use-social"
 import { invalidateFooter } from "@/lib/hooks/use-footer"
+import { Field } from "./ui/field"
+import { Card, SectionHeader } from "./ui/display"
+import { UnsavedBar } from "./ui/dirty"
+import { useResource } from "./ui/use-resource"
+import { ExternalIcon } from "@/components/portfolio/icons"
 
 interface Props {
   onToast: (title: string, type: ToastType, msg?: string) => void
 }
 
-interface SocialForm {
-  linkedin:  string
-  instagram: string
-  github:    string
-  email:     string
-}
-
-interface FooterForm {
-  brand:   string
-  tagline: string
-  copy:    string
-}
+interface SocialForm { linkedin: string; instagram: string; github: string; email: string }
+interface FooterForm { brand: string; tagline: string; copy: string }
 
 const SOCIAL_EMPTY: SocialForm = { linkedin: "", instagram: "", github: "", email: "" }
-const FOOTER_EMPTY: FooterForm = {
-  brand:   "Project Zero",
-  tagline: "Product Designer & Frontend Developer · Santiago",
-  copy:    "© 2026 Carlos Felipe Rojas Hickmann",
-}
+const FOOTER_EMPTY: FooterForm = { brand: "", tagline: "", copy: "" }
 
-const SOCIAL_FIELDS: { key: keyof SocialForm; label: string; placeholder: string; prefix: string }[] = [
-  { key: "linkedin",  label: "LinkedIn",  placeholder: "https://linkedin.com/in/tu-perfil", prefix: "in" },
-  { key: "instagram", label: "Instagram", placeholder: "https://instagram.com/tu-usuario",  prefix: "IG" },
-  { key: "github",    label: "GitHub",    placeholder: "https://github.com/tu-usuario",     prefix: "GH" },
-  { key: "email",     label: "Email",     placeholder: "tu@email.com",                      prefix: "✉"  },
+const SOCIAL_FIELDS: { key: keyof SocialForm; label: string; placeholder: string; hint: string }[] = [
+  { key: "linkedin",  label: "LinkedIn",  placeholder: "https://linkedin.com/in/tu-perfil", hint: "Footer, Contacto y CTA de cierre." },
+  { key: "instagram", label: "Instagram", placeholder: "https://instagram.com/tu-usuario",  hint: "Footer y Contacto." },
+  { key: "github",    label: "GitHub",    placeholder: "https://github.com/tu-usuario",     hint: "Footer y Contacto." },
+  { key: "email",     label: "Email",     placeholder: "tu@email.com",                      hint: "Contacto y botón «Copiar» del CTA de cierre." },
 ]
 
+const URL_RE = /^https?:\/\/\S+\.\S+/
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
+// Redes y footer (DS v2.1.0). Antes: "Footer" en la navegación aunque editaba
+// también las redes, dos botones de guardar, prefijos de texto (in, IG, GH, ✉)
+// pegados sobre el input y links sin validar. Ahora: un solo guardado para lo
+// que cambió, validación de URL/email y dónde aparece cada dato en el sitio.
 export default function SocialTab({ onToast }: Props) {
-  const [social, setSocial]         = useState<SocialForm>(SOCIAL_EMPTY)
-  const [savedSocial, setSavedSocial] = useState<SocialForm>(SOCIAL_EMPTY)
-  const [savingSocial, setSavingSocial] = useState(false)
-  const [loadingSocial, setLoadingSocial] = useState(true)
-
-  const [footer, setFooter]         = useState<FooterForm>(FOOTER_EMPTY)
-  const [savedFooter, setSavedFooter] = useState<FooterForm>(FOOTER_EMPTY)
-  const [savingFooter, setSavingFooter] = useState(false)
-  const [loadingFooter, setLoadingFooter] = useState(true)
-
-  const hasSocialChanges = JSON.stringify(social) !== JSON.stringify(savedSocial)
-  const hasFooterChanges = JSON.stringify(footer) !== JSON.stringify(savedFooter)
-
-  useEffect(() => {
-    fetch("/api/admin/social", { cache: "no-store" })
-      .then(r => r.json())
-      .then(d => {
-        const loaded = { ...SOCIAL_EMPTY, ...d }
-        setSocial(loaded)
-        setSavedSocial(loaded)
-      })
-      .catch(() => onToast("Error cargando redes sociales", "error"))
-      .finally(() => setLoadingSocial(false))
-  }, [])
-
-  useEffect(() => {
-    fetch("/api/admin/footer", { cache: "no-store" })
-      .then(r => r.json())
-      .then(d => {
-        const loaded = { ...FOOTER_EMPTY, ...d }
-        setFooter(loaded)
-        setSavedFooter(loaded)
-      })
-      .catch(() => onToast("Error cargando footer", "error"))
-      .finally(() => setLoadingFooter(false))
-  }, [])
-
-  async function handleSaveSocial() {
-    setSavingSocial(true)
-    try {
-      const res = await fetch("/api/admin/social", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(social),
-      })
-      if (!res.ok) throw new Error()
-      const saved = await res.json()
-      setSavedSocial({ ...social })
-      invalidateSocial()
-      saved._githubWarning
-        ? onToast("Redes sociales guardadas localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
-        : onToast("Redes sociales guardadas", "success")
-    } catch {
-      onToast("Error al guardar", "error")
-    } finally {
-      setSavingSocial(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const checkSocial = (d: SocialForm) => {
+    const e: Record<string, string> = {}
+    for (const f of SOCIAL_FIELDS) {
+      const v = d[f.key]
+      if (!v) continue
+      if (f.key === "email" ? !EMAIL_RE.test(v) : !URL_RE.test(v))
+        e[f.key] = f.key === "email" ? "Revisa el email." : "El link debe empezar con https://"
     }
+    setErrors(e)
+    return Object.keys(e).length === 0
   }
 
-  async function handleSaveFooter() {
-    setSavingFooter(true)
-    try {
-      const res = await fetch("/api/admin/footer", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(footer),
-      })
-      if (!res.ok) throw new Error()
-      const saved = await res.json()
-      setSavedFooter({ ...footer })
-      invalidateFooter()
-      saved._githubWarning
-        ? onToast("Footer guardado localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
-        : onToast("Footer guardado", "success")
-    } catch {
-      onToast("Error al guardar", "error")
-    } finally {
-      setSavingFooter(false)
-    }
-  }
+  const social = useResource<SocialForm>({ key: "redes", url: "/api/admin/social", defaults: SOCIAL_EMPTY, onToast, label: "Redes", validate: checkSocial, onSaved: invalidateSocial })
+  const footer = useResource<FooterForm>({ key: "footer", url: "/api/admin/footer", defaults: FOOTER_EMPTY, onToast, label: "Footer", onSaved: invalidateFooter })
 
-  if (loadingSocial || loadingFooter) {
-    return (
-      <div style={{ padding: "48px 0", display: "flex", justifyContent: "center", alignItems: "center", gap: 10, color: "var(--txt3)", fontSize: 14 }}>
-        <div className="admin-spinner" />
-        Cargando…
-      </div>
-    )
+  const loading = social.loading || footer.loading
+  const dirty = social.dirty || footer.dirty
+  const saving = social.saving || footer.saving
+
+  async function saveAll() {
+    if (social.dirty) await social.save()
+    if (footer.dirty) await footer.save()
   }
 
   return (
     <>
-      {/* Header */}
-      <div className="admin-section-header">
-        <div>
-          <div className="admin-section-title">Footer</div>
-          <div className="admin-section-sub">
-            Contenido del pie de página y redes sociales
-          </div>
-        </div>
-      </div>
+      <SectionHeader
+        title="Redes y footer"
+        description="Links a tus redes y textos del pie de página."
+        action={<a className="a-btn a-btn--ghost" href="/" target="_blank" rel="noreferrer"><ExternalIcon /> Ver en el sitio</a>}
+      />
 
-      {/* Footer text content */}
-      <div className="admin-card">
-        <div className="admin-card-title">Contenido del footer</div>
+      {loading ? <div className="a-card"><div className="skeleton skeleton-line" style={{ width: "40%" }} /><div className="skeleton skeleton-line" /></div> : (
+        <>
+          <Card title="Redes sociales" description="Deja vacío lo que no uses: ese ícono no se muestra.">
+            {SOCIAL_FIELDS.map(({ key, label, placeholder, hint }) => (
+              <Field key={key} label={label} hint={hint} error={errors[key]}
+                aside={social.data[key] && !errors[key] ? (
+                  <a className="a-link-sm" href={key === "email" ? `mailto:${social.data[key]}` : social.data[key]}
+                    target={key === "email" ? undefined : "_blank"} rel="noopener noreferrer">
+                    Probar link <ExternalIcon size={12} />
+                  </a>
+                ) : undefined}>
+                {(p) => <input {...p} className="admin-input" type={key === "email" ? "email" : "url"} inputMode={key === "email" ? "email" : "url"}
+                  autoComplete={key === "email" ? "email" : "url"} placeholder={placeholder} value={social.data[key]}
+                  onChange={e => { social.set(key, e.target.value); if (errors[key]) setErrors(x => ({ ...x, [key]: "" })) }} />}
+              </Field>
+            ))}
+          </Card>
 
-        <div className="admin-field">
-          <label className="admin-label">Nombre / Marca</label>
-          <input
-            className="admin-input"
-            type="text"
-            value={footer.brand}
-            onChange={e => setFooter(prev => ({ ...prev, brand: e.target.value }))}
-            placeholder="Project Zero"
-          />
-        </div>
+          <Card title="Footer">
+            <Field label="Nombre / marca">
+              {(p) => <input {...p} className="admin-input" value={footer.data.brand} onChange={e => footer.set("brand", e.target.value)} />}
+            </Field>
+            <Field label="Tagline" hint="Una línea bajo la marca.">
+              {(p) => <input {...p} className="admin-input" value={footer.data.tagline} onChange={e => footer.set("tagline", e.target.value)} />}
+            </Field>
+            <Field label="Copyright">
+              {(p) => <input {...p} className="admin-input" value={footer.data.copy} onChange={e => footer.set("copy", e.target.value)} />}
+            </Field>
+          </Card>
 
-        <div className="admin-field">
-          <label className="admin-label">Tagline</label>
-          <input
-            className="admin-input"
-            type="text"
-            value={footer.tagline}
-            onChange={e => setFooter(prev => ({ ...prev, tagline: e.target.value }))}
-            placeholder="Product Designer & Frontend Developer · Santiago"
-          />
-        </div>
-
-        <div className="admin-field" style={{ marginBottom: 0 }}>
-          <label className="admin-label">Copyright</label>
-          <input
-            className="admin-input"
-            type="text"
-            value={footer.copy}
-            onChange={e => setFooter(prev => ({ ...prev, copy: e.target.value }))}
-            placeholder="© 2026 Carlos Felipe Rojas Hickmann"
-          />
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
-          <button
-            className="btn-p"
-            onClick={handleSaveFooter}
-            disabled={savingFooter || !hasFooterChanges}
-          >
-            {savingFooter ? "Guardando…" : hasFooterChanges ? "Guardar footer" : "Sin cambios"}
-          </button>
-        </div>
-      </div>
-
-      {/* Social links */}
-      <div className="admin-card">
-        <div className="admin-card-title">Redes sociales</div>
-        {SOCIAL_FIELDS.map(({ key, label, placeholder, prefix }) => (
-          <div key={key} className="admin-field">
-            <label className="admin-label">{label}</label>
-            <div style={{ position: "relative" }}>
-              <span style={{
-                position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
-                fontSize: 11, fontWeight: 700, color: "var(--txt3)",
-                letterSpacing: "0.04em", pointerEvents: "none", userSelect: "none",
-              }}>
-                {prefix}
-              </span>
-              <input
-                className="admin-input"
-                type={key === "email" ? "email" : "url"}
-                value={social[key]}
-                onChange={e => setSocial(prev => ({ ...prev, [key]: e.target.value }))}
-                placeholder={placeholder}
-                style={{ paddingLeft: 36 }}
-              />
-            </div>
-            {social[key] && (
-              <div className="admin-input-hint" style={{ marginTop: 4 }}>
-                <a href={key === "email" ? `mailto:${social[key]}` : social[key]}
-                  target={key === "email" ? undefined : "_blank"}
-                  rel="noopener noreferrer"
-                  style={{ color: "var(--accent)", textDecoration: "none", fontSize: 12 }}>
-                  Verificar enlace ↗
-                </a>
-              </div>
-            )}
-          </div>
-        ))}
-        <div className="admin-input-hint" style={{ marginTop: 4 }}>
-          Deja en blanco los campos que no quieras mostrar.
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
-          <button
-            className="btn-p"
-            onClick={handleSaveSocial}
-            disabled={savingSocial || !hasSocialChanges}
-          >
-            {savingSocial ? "Guardando…" : hasSocialChanges ? "Guardar redes" : "Sin cambios"}
-          </button>
-        </div>
-      </div>
-
-      {/* Preview */}
-      <div className="admin-card">
-        <div className="admin-card-title">Vista previa — Footer</div>
-
-        {/* Replica fiel del .footer real */}
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "40px 32px 36px",
-          background: "var(--bg3)",
-          borderRadius: 16,
-          borderTop: "1px solid var(--border)",
-          boxShadow: "inset 0 1px 0 var(--border)",
-          overflow: "hidden",
-        }}>
-          {/* ✦ mark */}
-          <div style={{
-            fontSize: 18,
-            color: "var(--accent)",
-            opacity: 0.8,
-            marginBottom: 16,
-          }}>
-            ✦
-          </div>
-
-          {/* Brand */}
-          <div style={{
-            fontFamily: "var(--portfolio-heading-font)",
-            fontSize: 22,
-            fontWeight: 700,
-            color: "var(--txt)",
-            letterSpacing: "-0.03em",
-            marginBottom: 8,
-          }}>
-            {footer.brand || "Project Zero"}
-          </div>
-
-          {/* Tagline */}
-          <div style={{
-            fontSize: 13,
-            color: "var(--txt3)",
-            textAlign: "center",
-            lineHeight: 1.5,
-            marginBottom: 28,
-          }}>
-            {footer.tagline || "Product Designer & Frontend Developer · Santiago"}
-          </div>
-
-          {/* Social icons */}
-          {(social.linkedin || social.instagram || social.github) ? (
-            <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
-              {social.linkedin && (
-                <div style={{
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  width: 40, height: 40, borderRadius: "9999px",
-                  border: "1px solid var(--border)", color: "var(--txt3)",
-                }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 17, height: 17 }}>
-                    <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z" />
-                    <rect x="2" y="9" width="4" height="12" />
-                    <circle cx="4" cy="4" r="2" />
-                  </svg>
-                </div>
-              )}
-              {social.instagram && (
-                <div style={{
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  width: 40, height: 40, borderRadius: "9999px",
-                  border: "1px solid var(--border)", color: "var(--txt3)",
-                }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 17, height: 17 }}>
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                  </svg>
-                </div>
-              )}
-              {social.github && (
-                <div style={{
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  width: 40, height: 40, borderRadius: "9999px",
-                  border: "1px solid var(--border)", color: "var(--txt3)",
-                }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 17, height: 17 }}>
-                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22" />
-                  </svg>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div style={{ fontSize: 12, color: "var(--txt3)", fontStyle: "italic", marginBottom: 28 }}>
-              Sin redes configuradas
-            </div>
-          )}
-
-          {/* Copyright */}
-          <div style={{ fontSize: 12, color: "var(--txt3)", opacity: 0.7 }}>
-            {footer.copy || "© 2026 Carlos Felipe Rojas Hickmann"}
-          </div>
-        </div>
-      </div>
+          <UnsavedBar dirty={dirty} saving={saving} onSave={saveAll}
+            onDiscard={() => { social.discard(); footer.discard(); setErrors({}) }} />
+        </>
+      )}
     </>
   )
 }

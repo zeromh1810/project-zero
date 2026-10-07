@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { AppNavbar } from "@/components/portfolio/app-navbar"
+import { ArrowLeftIcon, ArrowRightIcon } from "@/components/portfolio/icons"
 import { RichText } from "@/components/portfolio/rich-text"
 import { useIntersection } from "@/hooks/use-intersection"
 import { type BlogPost, formatDate, formatDateShort, excerpt } from "@/lib/types/blog"
@@ -60,7 +61,7 @@ function RelatedPosts({ currentSlug, currentCategory, allPosts }: {
               </div>
               <h3 className="blog-preview-title">{p.title}</h3>
               <p className="blog-preview-excerpt">{excerpt(p.content, 88)}</p>
-              <span className="blog-preview-cta">Leer entrada →</span>
+              <span className="blog-preview-cta">Leer entrada <ArrowRightIcon className="btn-arrow" /></span>
             </div>
           </Link>
           </div>
@@ -117,7 +118,7 @@ export default function BlogPostPage() {
         {error && (
           <div className="blog-empty anim-up">
             Entrada no encontrada.{" "}
-            <Link href="/blog" style={{ color: "var(--accent)" }}>Volver al blog →</Link>
+            <Link href="/blog" className="link-underline" style={{ color: "var(--accent)" }}>Volver al blog <ArrowRightIcon className="btn-arrow" /></Link>
           </div>
         )}
 
@@ -129,7 +130,7 @@ export default function BlogPostPage() {
               <article className="blog-post" ref={articleRef}>
 
                 <div className="anim-up">
-                  <Link href="/blog" className="blog-post-back">← Volver al blog</Link>
+                  <Link href="/blog" className="blog-post-back"><ArrowLeftIcon className="btn-arrow-back" /> Volver al blog</Link>
                 </div>
 
                 <div className="blog-post-meta anim-up">
@@ -164,7 +165,7 @@ export default function BlogPostPage() {
               {/* Sidebar — solo visible a ≥1921px */}
               <aside className="blog-post-sidebar" aria-label="Información del artículo" ref={sidebarRef}>
                 <div className="anim-up">
-                  <Link href="/blog" className="blog-sidebar-back">← Blog</Link>
+                  <Link href="/blog" className="blog-sidebar-back"><ArrowLeftIcon className="btn-arrow-back" /> Blog</Link>
                 </div>
 
                 <div className="blog-sidebar-section anim-up">

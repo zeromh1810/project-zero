@@ -124,7 +124,7 @@
   --color-txt3: #5e5e64;
   --color-accent: #0062cc;
   --color-accent-h: #1a7fd4;
-  --color-highlight: #3b82f6;
+  --color-highlight: #0062cc; /* v2.0.0: antes #3b82f6 (3.5:1) */
   --color-success: #30d158;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
@@ -293,4 +293,83 @@
   --color-navbar-bg: rgba(10, 11, 18, 0.75);
   --navbar-bg: rgba(10, 11, 18, 0.75);
   --color-shadow: rgba(0, 0, 0, 0.60);
+}
+
+/* === v2.0.0 — REFINAMIENTO UI (sitio público) ===
+   Bloque aditivo y mantenido a mano igual que las capas de z-index/shadows
+   de arriba: espeja design-tokens.json → primitive.fontScale/fontWeight/easing.in,
+   semantic.layout/type/motion y los colores nuevos. No renombra ni pisa nada
+   que use admin.css. Nombres cortos (--fs-*, --dur-*…) porque son los que
+   consume portfolio.css. */
+:root {
+  /* Escala tipográfica fluida — piso 12px */
+  --fs-micro:   12px;
+  --fs-small:   clamp(13px, 0.2vw + 12.5px, 14px);
+  --fs-body:    16px;
+  --fs-lead:    clamp(17px, 0.4vw + 15.5px, 20px);
+  --fs-h4:      clamp(18px, 0.5vw + 16px, 22px);
+  --fs-h3:      clamp(22px, 1vw + 18px, 28px);
+  --fs-h2:      clamp(32px, 2.6vw + 20px, 56px);
+  --fs-h1:      clamp(36px, 3vw + 24px, 64px);
+  --fs-display: clamp(40px, 5.2vw + 16px, 96px);
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-bold:    700;
+  --fw-display: 800;
+
+  --ff-body:    var(--font-dm-sans), "Helvetica Neue", system-ui, sans-serif;
+  --ff-display: var(--font-plus-jakarta), system-ui, sans-serif;
+
+  --ls-display:    -0.04em;
+  --ls-display-sm: -0.025em;
+  --ls-heading:    -0.025em;
+  --ls-eyebrow:    0.08em;
+  --lh-display: 1.05;
+  --lh-heading: 1.15;
+  --lh-body:    1.6;
+  --lh-prose:   1.75;
+
+  --measure-prose: 62ch;
+  --measure-lead:  46ch;
+
+  /* Layout */
+  --container:      1320px;
+  --container-wide: 1600px;
+  --gutter:         clamp(16px, 4vw, 48px);
+  --section-gap:    clamp(80px, 10vw, 160px);
+
+  /* Motion — salidas más rápidas que entradas; solo transform/opacity */
+  --primitive-easing-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --dur-press:  100ms;
+  --dur-hover:  160ms;
+  --dur-exit:   160ms;
+  --dur-enter:  240ms;
+  --dur-reveal: 480ms;
+  --dur-hero:   700ms;
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:       var(--primitive-easing-in);
+  --ease-standard: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --reveal-distance: 12px;
+  --stagger-step: 60ms;
+  --stagger-max:  360ms;
+
+  /* Color — nuevos semánticos */
+  --color-on-accent:        #ffffff;
+  --color-txt-muted:        #5e5e64;
+  --color-success-text:     #146c2e;
+  --color-btn-primary-bg:   #0062cc;
+  --color-btn-primary-bg-h: #0058b8;
+  --color-error-text:       #b42318; /* 6.6:1 sobre blanco; #ef4444 daba 3.8 */
+  --color-error-bg:         #b42318; /* fondo de estado de error con texto blanco */
+  --color-success-bg:       #146c2e; /* fondo de estado de éxito con texto blanco (6.5:1) */
+}
+
+.dark {
+  --color-txt-muted:        #b0b0b5;
+  --color-success-text:     #30d158;
+  --color-btn-primary-bg:   #0071e3;
+  --color-btn-primary-bg-h: #0062cc;
+  --color-error-text:       #ff8a80;
 }

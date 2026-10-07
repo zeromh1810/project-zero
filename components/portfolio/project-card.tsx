@@ -1,8 +1,10 @@
 "use client"
 
 import { useRef, useCallback } from "react"
+import { ArrowRightIcon } from "./icons"
 import { useTheme } from "@/lib/context/theme-context"
 import type { Project } from "@/lib/data/projects"
+import { CountUp } from "./count-up"
 
 interface ProjectCardProps {
   project: Project
@@ -56,7 +58,7 @@ function predictHeroRect(vw: number) {
 
 export function ProjectCard({ project, onClick, variant = "featured", index }: ProjectCardProps) {
   const { isDark } = useTheme()
-  const cardRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLAnchorElement>(null)
   const thumbRef = useRef<HTMLImageElement>(null)
   const frameRef = useRef<number>(0)
 
@@ -69,7 +71,12 @@ export function ProjectCard({ project, onClick, variant = "featured", index }: P
   // unmounts), grows it toward the detail page's hero-image footprint, then
   // hands off to the real content once project-detail-view.tsx mounts
   // (see its cleanup effect) — same "image takes over" feel, no API to fight.
-  const handleClick = useCallback(() => {
+  // Es un <a href> real: Ctrl/Cmd/Shift/middle-click y "abrir en pestaña
+  // nueva" se dejan al navegador. Solo el click primario sin modificadores
+  // se intercepta para hacer el morph antes de navegar.
+  const handleClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    e.preventDefault()
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     if (prefersReduced || !thumbRef.current || !project.thumbnail) {
       onClick()
@@ -131,7 +138,16 @@ export function ProjectCard({ project, onClick, variant = "featured", index }: P
     window.setTimeout(onClick, 480)
   }, [onClick, project.thumbnail])
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  // Tilt solo con mouse/trackpad real y sin reduced-motion: en touch los
+  // eventos de mouse emulados lo dejaban torcido tras el tap. v2.0.0: 4° (antes
+  // 6–8°) y sin scale extra — el zoom del thumbnail ya comunica el hover;
+  // apilar tilt + scale + zoom + doble sombra era ruido.
+  const canTilt = useCallback(() =>
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches, [])
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!canTilt()) return
     cancelAnimationFrame(frameRef.current)
     frameRef.current = requestAnimationFrame(() => {
       const card = cardRef.current
@@ -139,32 +155,40 @@ export function ProjectCard({ project, onClick, variant = "featured", index }: P
       const rect = card.getBoundingClientRect()
       const x = (e.clientX - rect.left) / rect.width - 0.5
       const y = (e.clientY - rect.top) / rect.height - 0.5
-      const intensity = variant === "featured" ? 6 : 8
-      card.style.transform = `perspective(900px) rotateX(${-y * intensity}deg) rotateY(${x * intensity}deg) translateZ(10px) scale(1.015)`
-      card.style.transition = "transform 80ms linear"
+      const intensity = 4
+      // Solo variables: el transform lo compone .p-card.visible en el CSS
+      // (así :active puede sumar el scale de presión encima del tilt).
+      card.style.setProperty("--rx", `${(-y * intensity).toFixed(2)}deg`)
+      card.style.setProperty("--ry", `${(x * intensity).toFixed(2)}deg`)
+      card.style.transition = "transform 80ms linear, filter var(--dur-hover) var(--ease-standard)"
     })
-  }, [variant])
+  }, [canTilt])
 
   const handleMouseLeave = useCallback(() => {
     cancelAnimationFrame(frameRef.current)
     const card = cardRef.current
     if (!card) return
-    card.style.transition = "transform 550ms cubic-bezier(0.16, 1, 0.3, 1), filter 400ms ease"
-    card.style.transform = "perspective(1000px) rotateX(0deg) translateY(0)"
+    if (!card.style.getPropertyValue("--rx")) return
+    card.style.transition = "transform 550ms var(--ease-out), filter var(--dur-hover) var(--ease-standard)"
+    card.style.setProperty("--rx", "0deg")
+    card.style.setProperty("--ry", "0deg")
+    // Al terminar el retorno se suelta el transition inline: vuelven a regir
+    // los tiempos del CSS (incluido el press de :active).
+    window.setTimeout(() => {
+      if (card.style.getPropertyValue("--rx") === "0deg") card.style.transition = ""
+    }, 600)
   }, [])
 
   const num = String(index + 1).padStart(2, "0")
 
   return (
-    <div
+    <a
       ref={cardRef}
+      href={`/projects/${project.id}`}
       className={`p-card p-card--${variant}`}
       onClick={handleClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && handleClick()}
       aria-label={`Ver proyecto: ${project.title}`}
     >
       {/* Background gradient */}
@@ -173,25 +197,30 @@ export function ProjectCard({ project, onClick, variant = "featured", index }: P
         style={{ background: isDark ? project.gradient : project.lightGradient }}
       />
 
-      {/* Thumbnail */}
-      {project.thumbnail && (
-        <>
-          <img
-            ref={thumbRef}
-            src={project.thumbnail}
-            alt={project.title}
-            className="p-card-thumb"
-            loading="lazy"
-          />
-          <div className="p-card-thumb-overlay" />
-        </>
+      {/* Thumbnail — o, si el proyecto no tiene, un estado vacío diseñado
+          (UI-10): el número del proyecto en grande, en trazo, sobre su
+          propio gradiente. El overlay inferior va siempre: sin él, el texto
+          blanco quedaba sobre el gradiente claro y casi no se leía. */}
+      {project.thumbnail ? (
+        <img
+          ref={thumbRef}
+          src={project.thumbnail}
+          alt=""
+          className="p-card-thumb"
+          loading="lazy"
+        />
+      ) : (
+        <div className="p-card-empty" aria-hidden="true">
+          <span className="p-card-empty-num">{num}</span>
+        </div>
       )}
+      <div className="p-card-thumb-overlay" />
 
       {/* Project index number */}
       <span className="p-card-num" aria-hidden="true">{num}</span>
 
       {/* Stat badge */}
-      <span className="p-stat p-stat--animated">{project.stat}</span>
+      <span className="p-stat p-stat--animated"><CountUp text={project.stat} /></span>
 
       {/* Card bottom info */}
       <div className="p-card-info">
@@ -203,11 +232,11 @@ export function ProjectCard({ project, onClick, variant = "featured", index }: P
             <p className="p-desc">{project.desc}</p>
             <div className="p-meta">
               <span className="p-year">{project.year}</span>
-              <span className="p-cta-hint">Ver caso <span aria-hidden="true">→</span></span>
+              <span className="p-cta-hint">Ver caso <ArrowRightIcon className="btn-arrow" /></span>
             </div>
           </>
         )}
       </div>
-    </div>
+    </a>
   )
 }

@@ -22,6 +22,10 @@ export interface Project {
   stat: string
   thumbnail?: string
   gallery?: string[]
+  /** v2.0.0 — Rol en el proyecto (detalle). Sin dato: "Lead Designer". */
+  role?: string
+  /** v2.0.0 — URL del proyecto publicado. Sin dato: no se muestra el CTA "Ver proyecto live". */
+  liveUrl?: string
 }
 
 export const PROJECTS: Project[] = [

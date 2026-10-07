@@ -1,9 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef, ChangeEvent } from "react"
-
 import type { ToastType } from "./admin-toast"
 import { invalidateLogo } from "@/lib/hooks/use-logo"
+import { Field } from "./ui/field"
+import { Dropzone } from "./ui/dropzone"
+import { Card, SectionHeader } from "./ui/display"
+import { UnsavedBar } from "./ui/dirty"
+import { useResource } from "./ui/use-resource"
 
 interface Props {
   onToast: (title: string, type: ToastType, msg?: string) => void
@@ -13,17 +16,47 @@ interface LogoForm {
   lightUrl: string
   darkUrl: string
   fallbackText: string
+  /** v2.1.0 — Favicon del sitio (data URL). Vacío: se usa el isotipo del logo. */
+  faviconUrl: string
 }
 
-const EMPTY: LogoForm = { lightUrl: "", darkUrl: "", fallbackText: "Project Zero" }
+const EMPTY: LogoForm = { lightUrl: "", darkUrl: "", fallbackText: "", faviconUrl: "" }
 
-async function uploadSvg(file: File): Promise<string> {
+const ICON_TYPES = ["image/svg+xml", "image/png", "image/x-icon", "image/vnd.microsoft.icon"]
+
+// Favicon: SVG, PNG o ICO, cuadrado y liviano (se sirve en cada pestaña del
+// sitio desde /brand-icon). Se guarda inline como los SVG del logo.
+async function readIcon(file: File): Promise<string> {
+  const isSvg = file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg")
+  const isIco = file.name.toLowerCase().endsWith(".ico")
+  if (!isSvg && !isIco && !ICON_TYPES.includes(file.type)) throw new Error("Usa un archivo SVG, PNG o ICO")
+  if (file.size > 100 * 1024) throw new Error("El favicon supera el límite de 100 KB")
+  const url = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(new Error("No se pudo leer el archivo"))
+    reader.readAsDataURL(file)
+  })
+  if (!isSvg && !isIco) {
+    const { w, h } = await new Promise<{ w: number; h: number }>((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight })
+      img.onerror = () => reject(new Error("No se pudo leer la imagen"))
+      img.src = url
+    })
+    if (w !== h) throw new Error(`El favicon debe ser cuadrado (este mide ${w}×${h}px)`)
+    if (w < 48) throw new Error(`El favicon debe medir al menos 48×48px (este mide ${w}×${h}px)`)
+  }
+  return url
+}
+
+// El SVG se guarda inline como data URL (lo commitea la API de logo); no pasa
+// por /api/admin/upload.
+async function readSvg(file: File): Promise<string> {
   if (!file.name.toLowerCase().endsWith(".svg") && file.type !== "image/svg+xml") {
     throw new Error("Solo se aceptan archivos .svg")
   }
-  if (file.size > 500 * 1024) {
-    throw new Error("El SVG supera el límite de 500 KB")
-  }
+  if (file.size > 500 * 1024) throw new Error("El SVG supera el límite de 500 KB")
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(reader.result as string)
@@ -32,409 +65,91 @@ async function uploadSvg(file: File): Promise<string> {
   })
 }
 
-/* ── Zona de upload individual ── */
-function UploadZone({
-  label,
-  bgStyle,
-  url,
-  uploading,
-  onFile,
-  onRemove,
-}: {
-  label: string
-  bgStyle: React.CSSProperties
-  url: string
-  uploading: boolean
-  onFile: (file: File) => void
-  onRemove: () => void
-}) {
-  const [dragging, setDragging] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault()
-    setDragging(false)
-    const file = e.dataTransfer.files[0]
-    if (file) onFile(file)
-  }
-
-  return (
-    <div>
-      <div style={{
-        fontSize: 11, fontWeight: 700, letterSpacing: "0.08em",
-        textTransform: "uppercase", color: "var(--txt3)", marginBottom: 10,
-      }}>
-        {label}
-      </div>
-
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".svg,image/svg+xml"
-        style={{ display: "none" }}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          const file = e.target.files?.[0]
-          if (file) onFile(file)
-          e.target.value = ""
-        }}
-      />
-
-      {url ? (
-        /* ── Preview con fondo del modo correspondiente ── */
-        <div style={{
-          ...bgStyle,
-          borderRadius: 14,
-          padding: "20px 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          minHeight: 80,
-        }}>
-          <img
-            src={url}
-            alt={`Logo ${label}`}
-            loading="lazy"
-            style={{ height: 32, width: "auto", maxWidth: 140, objectFit: "contain", display: "block" }}
-          />
-          <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-            <button
-              onClick={() => inputRef.current?.click()}
-              style={{
-                padding: "6px 12px", borderRadius: 7, border: "none",
-                background: "#2997ff", color: "white", fontSize: 11,
-                fontWeight: 600, cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(41,151,255,0.35)",
-                transition: "opacity 150ms ease",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-              onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-            >
-              Cambiar
-            </button>
-            <button
-              onClick={onRemove}
-              style={{
-                padding: "6px 12px", borderRadius: 7, border: "none",
-                background: "#ef4444", color: "white", fontSize: 11,
-                fontWeight: 600, cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(239,68,68,0.35)",
-                transition: "opacity 150ms ease",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-              onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-            >
-              Quitar
-            </button>
-          </div>
-        </div>
-      ) : (
-        /* ── Drop zone vacía ── */
-        <div
-          onClick={() => !uploading && inputRef.current?.click()}
-          onDragOver={e => { e.preventDefault(); setDragging(true) }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={handleDrop}
-          style={{
-            border: `2px dashed ${dragging ? "var(--accent)" : "var(--border)"}`,
-            borderRadius: 14,
-            padding: "28px 20px",
-            textAlign: "center",
-            cursor: uploading ? "default" : "pointer",
-            background: dragging ? "rgba(41,151,255,0.05)" : "var(--bg3)",
-            transition: "all 0.2s ease",
-            minHeight: 80,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {uploading ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--txt2)" }}>
-              <div className="admin-spinner" />
-              <span style={{ fontSize: 13 }}>Subiendo…</span>
-            </div>
-          ) : (
-            <div style={{ color: "var(--txt3)" }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                strokeWidth="1.5" style={{ margin: "0 auto 8px", display: "block" }}>
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="17 8 12 3 7 8" />
-                <line x1="12" y1="3" x2="12" y2="15" />
-              </svg>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--txt)", marginBottom: 2 }}>
-                Subir SVG
-              </div>
-              <div style={{ fontSize: 11 }}>Arrastra o haz click · máx. 500 KB</div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
-/* ── Main component ── */
+// Logo (DS v2.1.0). Antes: 46 estilos inline (el tab con más), botones
+// "Cambiar/Quitar" con #2997ff/#ef4444 a 11px (3.02:1) y un dropzone propio.
+// Ahora: Dropzone del DS con el fondo de cada modo, vista previa del navbar
+// real en claro y oscuro, y guardado con cambios sin guardar.
 export default function LogoTab({ onToast }: Props) {
-  const [form, setForm] = useState<LogoForm>(EMPTY)
-  const [saved, setSaved] = useState<LogoForm>(EMPTY)
-  const [uploadingLight, setUploadingLight] = useState(false)
-  const [uploadingDark, setUploadingDark]  = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const r = useResource<LogoForm>({ key: "logo", url: "/api/admin/logo", defaults: EMPTY, onToast, label: "Logo", onSaved: invalidateLogo })
+  const { data, set } = r
+  const text = data.fallbackText || "Project Zero"
 
-  const hasChanges = JSON.stringify(form) !== JSON.stringify(saved)
-
-  useEffect(() => {
-    fetch("/api/admin/logo", { cache: "no-store" })
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`)
-        return r.json()
-      })
-      .then(d => {
-        const loaded: LogoForm = { ...EMPTY, ...d }
-        setForm(loaded)
-        setSaved(loaded)
-      })
-      .catch(() => onToast("Error cargando logo", "error"))
-      .finally(() => setLoading(false))
-  }, [])
-
-  async function handleUpload(file: File, variant: "light" | "dark") {
-    if (variant === "light") setUploadingLight(true)
-    else setUploadingDark(true)
-    try {
-      const url = await uploadSvg(file)
-      setForm(prev => ({ ...prev, [variant === "light" ? "lightUrl" : "darkUrl"]: url }))
-    } catch (err) {
-      onToast(err instanceof Error ? err.message : "Error al subir", "error")
-    } finally {
-      if (variant === "light") setUploadingLight(false)
-      else setUploadingDark(false)
-    }
-  }
-
-  async function handleSave() {
-    setSaving(true)
-    try {
-      const res = await fetch("/api/admin/logo", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      })
-      if (!res.ok) throw new Error()
-      const data = await res.json()
-      setSaved({ ...form })
-      invalidateLogo()
-      if (data._githubWarning) {
-        onToast("Logo guardado localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
-      } else {
-        onToast("Logo guardado correctamente", "success")
-      }
-    } catch {
-      onToast("Error al guardar", "error")
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const activeUrl = form.lightUrl || form.darkUrl
-
-  if (loading) {
+  // Función, no componente: declarado dentro del render sería un tipo nuevo en
+  // cada render (se re-montaría siempre).
+  const navPreview = (mode: "light" | "dark") => {
+    const url = mode === "light" ? (data.lightUrl || data.darkUrl) : (data.darkUrl || data.lightUrl)
     return (
-      <div style={{ padding: "48px 0", display: "flex", justifyContent: "center", alignItems: "center", gap: 10, color: "var(--txt3)", fontSize: 14 }}>
-        <div className="admin-spinner" />
-        Cargando logo…
+      <div key={mode} className={`a-logo-preview a-logo-preview--${mode}`}>
+        <span className="a-logo-preview-mode">{mode === "light" ? "Modo claro" : "Modo oscuro"}</span>
+        <div className="a-logo-preview-bar">
+          {url ? <img src={url} alt="" /> : <span className="a-logo-preview-text"><span className="nav-logo-dot" aria-hidden="true" />{text}</span>}
+          <span className="a-logo-preview-nav" aria-hidden="true"><i /><i /><i /></span>
+        </div>
       </div>
     )
   }
 
+  // Vista previa del favicon en una pestaña del navegador, en ambos temas.
+  const tabPreview = (mode: "light" | "dark") => (
+    <div key={mode} className={`a-tab-preview a-tab-preview--${mode}`}>
+      <span className="a-logo-preview-mode">{mode === "light" ? "Navegador claro" : "Navegador oscuro"}</span>
+      <div className="a-tab-preview-bar">
+        <div className="a-tab-preview-tab">
+          {/* eslint-disable-next-line @next/next/no-img-element -- data URL de 16px, next/image no aporta */}
+          <img src={data.faviconUrl || "/brand-icon"} alt="" width={16} height={16} />
+          <span>Project Zero | Portafolio de trabajos</span>
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <>
-      {/* ── Header ── */}
-      <div className="admin-section-header">
-        <div>
-          <div className="admin-section-title">Logo del sitio</div>
-          <div className="admin-section-sub">
-            Personaliza el logo y el texto de la barra de navegación
-          </div>
-        </div>
-        <button
-          className="btn-p"
-          onClick={handleSave}
-          disabled={saving || !hasChanges}
-        >
-          {saving ? "Guardando…" : hasChanges ? "Guardar cambios" : "Sin cambios"}
-        </button>
-      </div>
+      <SectionHeader title="Logo" description="Logo de la barra de navegación del sitio y del admin." />
 
-      {/* ── Texto por defecto ── */}
-      <div className="admin-card" style={{ marginBottom: 16 }}>
-        <div className="admin-card-title">Texto por defecto</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "flex-end" }}>
-          <div className="admin-field" style={{ marginBottom: 0 }}>
-            <label className="admin-label">Nombre del sitio</label>
-            <input
-              className="admin-input"
-              value={form.fallbackText}
-              onChange={e => setForm(prev => ({ ...prev, fallbackText: e.target.value }))}
-              placeholder="Project Zero"
-              maxLength={40}
-            />
-          </div>
-          {/* Live preview */}
-          <div style={{
-            height: 42,
-            padding: "0 16px",
-            background: "var(--bg3)",
-            border: "1.5px solid var(--border)",
-            borderRadius: 10,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            fontFamily: "var(--portfolio-heading-font)",
-            fontWeight: 700,
-            fontSize: 15,
-            color: "var(--txt)",
-            whiteSpace: "nowrap",
-          }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--accent)", display: "inline-block", flexShrink: 0 }} />
-            {form.fallbackText || "Project Zero"}
-          </div>
-        </div>
-        <div className="admin-input-hint" style={{ marginTop: 8 }}>
-          Se muestra cuando no hay ningún archivo SVG subido. Máx. 40 caracteres.
-        </div>
-      </div>
+      {r.loading ? <div className="a-card"><div className="skeleton skeleton-line" style={{ width: "40%" }} /><div className="skeleton skeleton-line" /></div> : (
+        <>
+          <Card title="Vista previa del navbar">
+            <div className="a-row-2">
+              {navPreview("light")}
+              {navPreview("dark")}
+            </div>
+          </Card>
 
-      {/* ── Logos por modo ── */}
-      <div className="admin-card" style={{ marginBottom: 16 }}>
-        <div className="admin-card-title">Logos por modo de visualización</div>
+          <Card title="Archivos SVG" description="Sube una versión para cada modo. Si solo subes una, se usa en ambos.">
+            <div className="a-row-2">
+              <Dropzone label="Versión para modo claro" hint="SVG · máx. 500 KB" accept=".svg,image/svg+xml" aspect="3 / 1"
+                previewBg="var(--primitive-color-neutral-0)" value={data.lightUrl || undefined}
+                onUpload={async file => set("lightUrl", await readSvg(file))} onRemove={() => set("lightUrl", "")} />
+              <Dropzone label="Versión para modo oscuro" hint="SVG · máx. 500 KB" accept=".svg,image/svg+xml" aspect="3 / 1"
+                previewBg="var(--primitive-color-neutral-950)" value={data.darkUrl || undefined}
+                onUpload={async file => set("darkUrl", await readSvg(file))} onRemove={() => set("darkUrl", "")} />
+            </div>
+          </Card>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-          <UploadZone
-            label="Versión modo claro"
-            bgStyle={{
-              background: "rgba(248,248,248,0.95)",
-              border: "1.5px solid rgba(0,0,0,0.08)",
-            }}
-            url={form.lightUrl}
-            uploading={uploadingLight}
-            onFile={file => handleUpload(file, "light")}
-            onRemove={() => setForm(prev => ({ ...prev, lightUrl: "" }))}
-          />
-          <UploadZone
-            label="Versión modo oscuro"
-            bgStyle={{
-              background: "rgba(10,10,10,0.92)",
-              border: "1.5px solid rgba(255,255,255,0.08)",
-            }}
-            url={form.darkUrl}
-            uploading={uploadingDark}
-            onFile={file => handleUpload(file, "dark")}
-            onRemove={() => setForm(prev => ({ ...prev, darkUrl: "" }))}
-          />
-        </div>
-
-        <div className="admin-input-hint" style={{ marginTop: 12 }}>
-          Puedes subir solo uno y se usará para ambos modos. SVG con fondo transparente recomendado.
-          Proporciones sugeridas: 120 × 32 px.
-        </div>
-      </div>
-
-      {/* ── Vista previa de la navbar ── */}
-      {activeUrl && (
-        <div className="admin-card" style={{ marginBottom: 16 }}>
-          <div className="admin-card-title">Cómo se verá en la navbar</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {/* Light navbar simulation */}
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--txt3)", marginBottom: 6 }}>
-                Modo claro
+          <Card title="Favicon" description="El ícono de la pestaña del navegador y de los favoritos. Si no subes uno, se usa el isotipo de tu logo.">
+            <div className="a-row-2">
+              <div className="a-favicon-drop">
+              <Dropzone label="Archivo del favicon" hint="SVG, o PNG/ICO cuadrado de 512×512px · máx. 100 KB" accept=".svg,.png,.ico,image/svg+xml,image/png,image/x-icon"
+                aspect="1 / 1" previewBg="var(--bg2)" value={data.faviconUrl || undefined}
+                onUpload={async file => set("faviconUrl", await readIcon(file))} onRemove={() => set("faviconUrl", "")} />
               </div>
-              <div style={{
-                background: "rgba(248,248,248,0.88)",
-                border: "1px solid rgba(0,0,0,0.07)",
-                borderRadius: 12,
-                padding: "0 20px",
-                height: 52,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  {(form.lightUrl || form.darkUrl) ? (
-                    <img
-                      src={form.lightUrl || form.darkUrl}
-                      alt="logo"
-                      loading="lazy"
-                      style={{ height: 24, width: "auto", objectFit: "contain" }}
-                    />
-                  ) : (
-                    <span style={{ fontFamily: "var(--portfolio-heading-font)", fontWeight: 700, fontSize: 14, color: "#1d1d1f", display: "flex", alignItems: "center", gap: 6 }}>
-                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", display: "inline-block" }} />
-                      {form.fallbackText || "Project Zero"}
-                    </span>
-                  )}
-                </div>
-                <div style={{ display: "flex", gap: 16, fontSize: 12, color: "#6e6e73" }}>
-                  <span>Trabajos</span><span>Sobre Mí</span><span>CV</span>
-                </div>
-                <div style={{ width: 60, height: 24, borderRadius: 12, background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.08)" }} />
+              <div className="a-tab-previews">
+                {tabPreview("light")}
+                {tabPreview("dark")}
+                {!data.faviconUrl && <p className="a-field-hint">Vista previa con el isotipo del logo (respaldo).</p>}
               </div>
             </div>
-            {/* Dark navbar simulation */}
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--txt3)", marginBottom: 6 }}>
-                Modo oscuro
-              </div>
-              <div style={{
-                background: "rgba(0,0,0,0.78)",
-                border: "1px solid rgba(255,255,255,0.07)",
-                borderRadius: 12,
-                padding: "0 20px",
-                height: 52,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  {(form.darkUrl || form.lightUrl) ? (
-                    <img
-                      src={form.darkUrl || form.lightUrl}
-                      alt="logo"
-                      loading="lazy"
-                      style={{ height: 24, width: "auto", objectFit: "contain" }}
-                    />
-                  ) : (
-                    <span style={{ fontFamily: "var(--portfolio-heading-font)", fontWeight: 700, fontSize: 14, color: "#f5f5f7", display: "flex", alignItems: "center", gap: 6 }}>
-                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", display: "inline-block" }} />
-                      {form.fallbackText || "Project Zero"}
-                    </span>
-                  )}
-                </div>
-                <div style={{ display: "flex", gap: 16, fontSize: 12, color: "#86868b" }}>
-                  <span>Trabajos</span><span>Sobre Mí</span><span>CV</span>
-                </div>
-                <div style={{ width: 60, height: 24, borderRadius: 12, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)" }} />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+          </Card>
 
+          <Card title="Texto de respaldo">
+            <Field label="Nombre del sitio" hint="Se muestra cuando no hay ningún SVG subido. Máx. 40 caracteres." aside={`${data.fallbackText.length}/40`}>
+              {(p) => <input {...p} className="admin-input" maxLength={40} placeholder="Project Zero" value={data.fallbackText} onChange={e => set("fallbackText", e.target.value)} />}
+            </Field>
+          </Card>
 
-      {/* ── Estado sin logo ── */}
-      {!activeUrl && !uploadingLight && !uploadingDark && (
-        <div className="admin-card" style={{ textAlign: "center", padding: "32px 24px" }}>
-          <div style={{ fontSize: 32, marginBottom: 10 }}>✦</div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: "var(--txt)", marginBottom: 4 }}>
-            Sin logo SVG subido
-          </div>
-          <div style={{ fontSize: 13, color: "var(--txt3)" }}>
-            La navbar mostrará el texto &quot;{form.fallbackText || "Project Zero"}&quot; como identidad visual.
-          </div>
-        </div>
+          <UnsavedBar dirty={r.dirty} saving={r.saving} onSave={r.save} onDiscard={r.discard} />
+        </>
       )}
     </>
   )

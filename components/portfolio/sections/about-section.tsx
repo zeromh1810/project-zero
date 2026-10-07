@@ -4,9 +4,10 @@ import { useState, useEffect } from "react"
 import { useTheme } from "@/lib/context/theme-context"
 import { SKILLS, STATS } from "@/lib/data/projects"
 import { useSocial } from "@/lib/hooks/use-social"
-import { LinkedInIcon, InstagramIcon } from "@/components/portfolio/icons"
+import { LinkedInIcon, InstagramIcon, ArrowRightIcon } from "@/components/portfolio/icons"
 import { type AboutData } from "@/lib/types/about"
 import { RichText } from "@/components/portfolio/rich-text"
+import { CountUp } from "@/components/portfolio/count-up"
 
 const DEFAULT: AboutData = {
   bio1: "Soy <strong>diseñador de producto y desarrollador frontend</strong> con base en Santiago, Chile. Me especializo en interfaces digitales que no solo se ven bien, sino que <strong>funcionan de manera intuitiva y elegante</strong>.",
@@ -54,7 +55,7 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
               {data.photoUrl && !photoError ? (
                 <img
                   src={data.photoUrl}
-                  alt="Foto de perfil"
+                  alt="Carlos Felipe Rojas Hickmann"
                   className="about-photo-img"
                   loading="lazy"
                   onError={() => setPhotoError(true)}
@@ -69,7 +70,7 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
                     fill={isDark ? "rgba(41,151,255,0.55)" : "rgba(41,151,255,0.45)"} />
                   <text x="70" y="60" textAnchor="middle" fontSize="28"
                     style={{ fontFamily: "var(--portfolio-heading-font)" }} fontWeight="700" fill="white" opacity="0.9">
-                    A
+                    C
                   </text>
                 </svg>
               )}
@@ -101,7 +102,7 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
             <div className="stats-row anim-up">
               {data.stats.map(({ value, label }) => (
                 <div className="stat" key={label}>
-                  <div className="stat-n">{value}</div>
+                  <div className="stat-n"><CountUp text={value} /></div>
                   <div className="stat-l">{label}</div>
                 </div>
               ))}
@@ -114,7 +115,7 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
           <div className="stats-row stats-desktop-only anim-up">
             {data.stats.map(({ value, label }) => (
               <div className="stat" key={label}>
-                <div className="stat-n">{value}</div>
+                <div className="stat-n"><CountUp text={value} /></div>
                 <div className="stat-l">{label}</div>
               </div>
             ))}
@@ -130,10 +131,12 @@ export function AboutSection({ onNavigateContact, onNavigateCV }: AboutSectionPr
             ))}
           </div>
 
-          <div style={{ display: "flex", gap: 12 }} className="anim-up">
-            <button className="btn-p" onClick={onNavigateContact}>Contáctame</button>
+          <div className="about-actions anim-up">
+            <button className="btn-p btn-shine" onClick={onNavigateContact}>
+              Contáctame <ArrowRightIcon className="btn-arrow" />
+            </button>
             {data.cvUrl ? (
-              <a href={data.cvUrl} target="_blank" rel="noopener noreferrer" className="btn-g" style={{ textDecoration: "none" }}>
+              <a href={data.cvUrl} target="_blank" rel="noopener noreferrer" className="btn-g">
                 Ver CV
               </a>
             ) : onNavigateCV ? (

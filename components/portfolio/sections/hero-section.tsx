@@ -1,10 +1,12 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
+import { ArrowRightIcon } from "../icons"
 import { useTheme } from "@/lib/context/theme-context"
 import { buildHeroTerrain } from "@/lib/webgl/hero-terrain"
 import SplitText from "../split-text"
 import { RichText } from "../rich-text"
+import { useMagnetic } from "@/hooks/use-magnetic"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,7 +22,7 @@ const DEFAULT: HeroData = {
   titleLine2: "experiencias",
   titleLine3: "digitales.",
   subtitle:
-    "Product Designer & Frontend Developer. Cinco años creando productos que equilibran estética refinada con funcionalidad real.",
+    "Diseño y construyo productos digitales donde la experiencia del usuario y los objetivos del negocio empujan en la misma dirección.",
 }
 
 interface HeroSectionProps {
@@ -57,6 +59,7 @@ function releaseEntranceAnimation(e: React.AnimationEvent<HTMLElement>) {
 
 export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionProps) {
   const { darkRef } = useTheme()
+  const magnetic = useMagnetic()
   const terrainContainerRef = useRef<HTMLDivElement>(null)
   const terrainCleanupRef   = useRef<(() => void) | null>(null)
   const wrapRef             = useRef<HTMLDivElement>(null)
@@ -133,7 +136,12 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
       const heroLeft = wrap.querySelector<HTMLElement>(".hero-left")
       const pBlur = Math.max(0, Math.min(1, (y - vh * 0.3) / (vh * 0.6)))
       const blur  = `blur(${(pBlur * 18).toFixed(1)}px)`
-      if (heroLeft) heroLeft.style.filter = blur
+      // v2.0.0 — el texto ya no se desenfoca por frame (filter:blur sobre una
+      // capa grande es de lo más caro de pintar): se funde con la MISMA curva
+      // que el terreno, solo con opacity (compositor). Valor explícito, nunca
+      // "" — ver el comentario de arriba sobre la cascada.
+      // El terreno de abajo NO se toca: conserva su blur + fade originales.
+      if (heroLeft) heroLeft.style.opacity = `${(1 - pBlur).toFixed(3)}`
       if (terrain) {
         terrain.style.filter  = blur
         terrain.style.opacity = `${(1 - pBlur).toFixed(3)}`
@@ -164,7 +172,11 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
         const pp = Math.max(0, Math.min(1, (y - vh * 0.15) / (vh * 0.5)))
         portrait.style.transform = `translateY(${(-py).toFixed(1)}px) scale(${(1 - pp * 0.05).toFixed(3)})`
         portrait.style.opacity   = `${Math.max(0, 1 - pp * 1.1).toFixed(3)}`
-        portrait.style.filter    = `blur(${(pp * 14).toFixed(1)}px)`
+        // Sin blur por frame (v2.0.0). "none" explícito, nunca "": con el
+        // inline vacío la cascada caería en el filter:blur(10px) BASE de
+        // .hero-portrait (estado previo a la entrada) — el bug ya documentado
+        // arriba. Escribir el mismo valor cada frame no repinta.
+        portrait.style.filter = "none"
       }
       // Nota: no hace falta un "reset cerca del tope" — los clamps de arriba
       // (Math.max(0, ...)) ya devuelven exactamente p=0 en y=0, así que las
@@ -241,11 +253,11 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
               // puro anima apenas se monta, sin ese riesgo, y de paso saca
               // del bundle ~130KB comprimidos de gsap que solo se usaban acá.
               <>
-                <SplitText tag="span" text={hero.titleLine1} className="hero-title-line" />
+                <SplitText tag="span" index={0} text={hero.titleLine1} className="hero-title-line" />
                 <br />
-                <SplitText tag="span" text={hero.titleLine2} className="hero-title-line hero-title-line--accent" />
+                <SplitText tag="span" index={1} text={hero.titleLine2} className="hero-title-line hero-title-line--accent" />
                 <br />
-                <SplitText tag="span" text={hero.titleLine3} className="hero-title-line" />
+                <SplitText tag="span" index={2} text={hero.titleLine3} className="hero-title-line" />
               </>
             ) : (
               // Placeholder estático (sin animar) mientras /api/admin/hero
@@ -267,10 +279,10 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
           <RichText text={hero.subtitle} className="hero-sub" onAnimationEnd={releaseEntranceAnimation} />
 
           <div className="hero-cta" onAnimationEnd={releaseEntranceAnimation}>
-            <button className="btn-p btn-magnetic" onClick={onNavigateContact}>
-              Trabajemos juntos <span>→</span>
+            <button className="btn-p btn-magnetic btn-shine" onClick={onNavigateContact} {...magnetic}>
+              Trabajemos juntos <ArrowRightIcon className="btn-arrow" />
             </button>
-            <button className="btn-g btn-magnetic" onClick={onNavigateAbout}>
+            <button className="btn-g btn-magnetic" onClick={onNavigateAbout} {...magnetic}>
               Sobre mí
             </button>
           </div>
@@ -289,7 +301,12 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
               alt="Carlos Felipe Rojas Hickmann"
               className="hero-portrait-img"
               draggable={false}
-              loading="lazy"
+              // Above the fold y probable LCP: carga prioritaria, nunca lazy.
+              // width/height reservan la proporción (evita salto de layout).
+              width={1024}
+              height={1024}
+              fetchPriority="high"
+              decoding="async"
             />
           </div>
         </div>
