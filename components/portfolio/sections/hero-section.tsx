@@ -297,7 +297,12 @@ export function HeroSection({ onNavigateContact, onNavigateAbout }: HeroSectionP
         <div className="hero-portrait" ref={portraitRef} onAnimationEnd={releaseEntranceAnimation}>
           <div className="hero-portrait-float">
             <img
-              src="/hero-carlos.png"
+              // WebP con alpha en 3 tamaños (60 KB el mayor; el PNG pesaba
+              // 208 KB): en mobile, donde el retrato mide ≤380px, baja la
+              // versión chica y el LCP no espera una imagen de 1024px.
+              src="/hero-carlos-1024.webp"
+              srcSet="/hero-carlos-512.webp 512w, /hero-carlos-768.webp 768w, /hero-carlos-1024.webp 1024w"
+              sizes="(max-width: 768px) 380px, min(83vh, 853px)"
               alt="Carlos Felipe Rojas Hickmann"
               className="hero-portrait-img"
               draggable={false}

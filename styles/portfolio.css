@@ -5031,6 +5031,14 @@ html {
   to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
+/* LCP en mobile (≤768px): el retrato es el elemento más grande de la
+   pantalla y esperaba 0.5s de delay antes de pintarse (+1.5s de LCP medido
+   contra main). Bajo el texto no compite con la entrada del título: arranca
+   ya. Va después de la regla base para ganarle al shorthand de animation. */
+@media (max-width: 768px) {
+  .hero-portrait { animation-delay: 0s; }
+}
+
 @keyframes heroPortraitFloat {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50%      { transform: translateY(-10px) rotate(-0.6deg); }
