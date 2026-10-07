@@ -1,57 +1,23 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useId, type FormEvent } from "react"
 import { useTheme } from "@/lib/context/theme-context"
 import { useLogo } from "@/lib/hooks/use-logo"
-import dynamic from "next/dynamic"
-import AdminToast, { type ToastType } from "./_components/admin-toast"
-
-const ProjectsTab       = dynamic(() => import("./_components/projects-tab"),  { ssr: false })
-const HeroTab           = dynamic(() => import("./_components/hero-tab"),      { ssr: false })
-const AboutTab          = dynamic(() => import("./_components/about-tab"),     { ssr: false })
-const CVTab             = dynamic(() => import("./_components/cv-tab"),        { ssr: false })
-const LogoTab           = dynamic(() => import("./_components/logo-tab"),      { ssr: false })
-const SocialTab         = dynamic(() => import("./_components/social-tab"),    { ssr: false })
-const BrandsTab         = dynamic(() => import("./_components/brands-tab"),    { ssr: false })
-const BlogTab           = dynamic(() => import("./_components/blog-tab"),      { ssr: false })
-const ProfileTab        = dynamic(() => import("./_components/profile-tab"),   { ssr: false })
-const DesignSystemSection = dynamic(
-  () => import("@/components/portfolio/sections/design-system-section").then(m => ({ default: m.DesignSystemSection })),
-  { ssr: false }
-)
-
-type Tab = "proyectos" | "hero" | "sobre" | "cv" | "logo" | "footer" | "marcas" | "blog" | "perfil" | "ds"
-type ToastState = { title: string; msg?: string; type: ToastType } | null
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: "proyectos", label: "Proyectos" },
-  { id: "hero",      label: "Hero" },
-  { id: "perfil",    label: "Perfil" },
-  { id: "sobre",     label: "Sobre mí" },
-  { id: "cv",        label: "CV" },
-  { id: "logo",      label: "Logo" },
-  { id: "footer",    label: "Footer" },
-  { id: "marcas",    label: "Marcas" },
-  { id: "blog",      label: "Blog" },
-  { id: "ds",        label: "Design System" },
-]
+import { ThemeToggle } from "@/components/portfolio/app-navbar"
+import { ArrowLeftIcon } from "@/components/portfolio/icons"
+import AdminDashboard from "./_components/admin-dashboard"
 
 export default function AdminPage() {
-  const { isDark, toggleTheme } = useTheme()
+  const { isDark } = useTheme()
   const logo = useLogo()
-  const adminLogoUrl = isDark
-    ? (logo.darkUrl || logo.lightUrl)
-    : (logo.lightUrl || logo.darkUrl)
+  const logoUrl = isDark ? (logo.darkUrl || logo.lightUrl) : (logo.lightUrl || logo.darkUrl)
   const [auth, setAuth] = useState(false)
   const [pass, setPass] = useState("")
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [tab, setTab]       = useState<Tab>("proyectos")
-  const [toast, setToast]   = useState<ToastState>(null)
-  const [toastLeaving, setToastLeaving] = useState(false)
-
-  const dismissTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const leavingTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [showPass, setShowPass] = useState(false)
+  const id = useId()
 
   useEffect(() => {
     fetch("/api/admin/auth")
@@ -61,28 +27,13 @@ export default function AdminPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  useEffect(() => {
-    if (isDark) document.documentElement.classList.add("dark")
-    else document.documentElement.classList.remove("dark")
-  }, [isDark])
+  // v2.1.0 — la clase .dark la aplica el ThemeProvider; acá había un segundo
+  // effect que la volvía a escribir (y no tocaba .light).
 
-  function showToast(title: string, type: ToastType, msg?: string) {
-    if (dismissTimer.current)  clearTimeout(dismissTimer.current)
-    if (leavingTimer.current)  clearTimeout(leavingTimer.current)
-    setToast({ title, type, msg })
-    setToastLeaving(false)
-    leavingTimer.current = setTimeout(() => setToastLeaving(true), 3800)
-    dismissTimer.current = setTimeout(() => { setToast(null); setToastLeaving(false) }, 4000)
-  }
-
-  function closeToast() {
-    if (dismissTimer.current) clearTimeout(dismissTimer.current)
-    if (leavingTimer.current) clearTimeout(leavingTimer.current)
-    setToastLeaving(true)
-    dismissTimer.current = setTimeout(() => { setToast(null); setToastLeaving(false) }, 200)
-  }
-
-  async function login() {
+  async function login(e: FormEvent) {
+    e.preventDefault()
+    if (!pass || submitting) return
+    setSubmitting(true)
     try {
       const res = await fetch("/api/admin/auth", {
         method: "POST",
@@ -99,6 +50,8 @@ export default function AdminPage() {
     } catch {
       setError(true)
       setPass("")
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -111,132 +64,77 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div className="admin-login-wrap">
-        <div className="admin-login-card" style={{ textAlign: "center", color: "var(--txt3)" }}>
-          Verificando sesión…
+        <div className="admin-login-card admin-login-card--status" role="status">
+          <span className="admin-spinner" aria-hidden="true" /> Verificando sesión…
         </div>
       </div>
     )
   }
 
-  /* ── LOGIN ── */
+  /* ── LOGIN ──
+     v2.1.0: <form> real (Enter nativo, gestores de contraseñas), label
+     asociado, autocomplete="current-password", error anunciado y conectado
+     al campo, logo real y el mismo toggle de tema del sitio. */
   if (!auth) {
+    const inputId = `${id}-pass`
+    const errorId = `${id}-error`
     return (
       <div className="admin-login-wrap">
-        <div className="admin-login-card">
-          <div className="admin-login-logo">
-            <span className="admin-login-dot" />
-            Project Zero
-          </div>
-          <div className="admin-login-sub">Panel de administración</div>
+        <div className="admin-login-theme"><ThemeToggle /></div>
+        <form className="admin-login-card" onSubmit={login} noValidate>
+          <h1 className="admin-login-logo">
+            {logoUrl
+              ? <img src={logoUrl} alt={logo.fallbackText || "Project Zero"} className="admin-login-logo-img" />
+              : <><span className="admin-login-dot" aria-hidden="true" />{logo.fallbackText || "Project Zero"}</>}
+          </h1>
+          <p className="admin-login-sub">Panel de administración</p>
 
           <div className="admin-login-field">
-            <label className="admin-login-label">Contraseña</label>
-            <input
-              className="admin-login-input"
-              type="password"
-              value={pass}
-              autoFocus
-              onChange={e => { setPass(e.target.value); setError(false) }}
-              onKeyDown={e => e.key === "Enter" && login()}
-              placeholder="••••••••"
-            />
+            <label className="admin-login-label" htmlFor={inputId}>Contraseña</label>
+            <div className="admin-login-input-wrap">
+              <input
+                id={inputId}
+                name="password"
+                className={`admin-login-input${error ? " is-invalid" : ""}`}
+                type={showPass ? "text" : "password"}
+                autoComplete="current-password"
+                value={pass}
+                autoFocus
+                required
+                aria-invalid={error || undefined}
+                aria-describedby={error ? errorId : undefined}
+                onChange={e => { setPass(e.target.value); setError(false) }}
+              />
+              <button
+                type="button"
+                className="admin-login-reveal"
+                onClick={() => setShowPass(v => !v)}
+                aria-pressed={showPass}
+                aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPass ? "Ocultar" : "Mostrar"}
+              </button>
+            </div>
           </div>
 
           {error && (
-            <div className="admin-login-error">Contraseña incorrecta</div>
+            <p id={errorId} className="admin-login-error" role="alert">
+              Contraseña incorrecta. Inténtalo de nuevo.
+            </p>
           )}
 
-          <button className="btn-p" style={{ width: "100%", justifyContent: "center", marginTop: 8 }}
-            onClick={login}>
-            Entrar
+          <button type="submit" className="a-btn a-btn--primary admin-login-submit" disabled={!pass || submitting} aria-busy={submitting || undefined}>
+            {submitting ? <><span className="admin-spinner admin-spinner--on-accent" aria-hidden="true" /> Entrando…</> : "Entrar"}
           </button>
 
-          <a href="/" style={{
-            display: "block", marginTop: 16, fontSize: 13,
-            color: "var(--txt3)", textDecoration: "none", textAlign: "center"
-          }}>
-            ← Volver al portafolio
+          <a href="/" className="admin-login-back link-underline">
+            <ArrowLeftIcon className="btn-arrow-back" /> Volver al portafolio
           </a>
-        </div>
+        </form>
       </div>
     )
   }
 
   /* ── DASHBOARD ── */
-  return (
-    <div className="admin-wrapper">
-      {/* Navbar */}
-      <nav className="navbar">
-        <div className="nav-logo">
-          {adminLogoUrl ? (
-            <img src={adminLogoUrl} alt={logo.fallbackText || "Logo"} className="nav-logo-img" />
-          ) : (
-            <>
-              <span className="nav-logo-dot" />
-              {logo.fallbackText || "Project Zero"}
-            </>
-          )}
-          <span className="admin-nav-badge">Admin</span>
-        </div>
-
-        <div className="nav-right">
-          <button className="theme-btn" onClick={toggleTheme}
-            style={{
-              "--knob-position": isDark ? "18px" : "2px",
-              "--knob-color": isDark ? "#f5f5f7" : "#1d1d1f",
-            } as React.CSSProperties}
-            aria-label="Toggle tema"
-          />
-          <a href="/" target="_blank" rel="noreferrer"
-            className="btn-profile" style={{ textDecoration: "none" }}>
-            <span className="admin-nav-portfolio-label">Ver portafolio</span>
-            <span>↗</span>
-          </a>
-          <button className="btn-profile" onClick={logout}>
-            Salir
-          </button>
-        </div>
-      </nav>
-
-      {/* Tab bar */}
-      <div className="admin-tabbar">
-        {TABS.map(t => (
-          <button
-            key={t.id}
-            className={`admin-tab${tab === t.id ? " active" : ""}`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
-      {tab !== "ds" && (
-        <div className="admin-container">
-          {tab === "proyectos" && <ProjectsTab onToast={showToast} />}
-          {tab === "hero"      && <HeroTab     onToast={showToast} />}
-          {tab === "perfil"    && <ProfileTab  onToast={showToast} />}
-          {tab === "sobre"     && <AboutTab    onToast={showToast} />}
-          {tab === "cv"        && <CVTab       onToast={showToast} />}
-          {tab === "logo"      && <LogoTab     onToast={showToast} />}
-          {tab === "footer"    && <SocialTab   onToast={showToast} />}
-          {tab === "marcas"    && <BrandsTab   onToast={showToast} />}
-          {tab === "blog"      && <BlogTab     onToast={showToast} />}
-        </div>
-      )}
-      {tab === "ds" && <DesignSystemSection adminMode />}
-
-      {/* Toast */}
-      {toast && (
-        <AdminToast
-          type={toast.type}
-          title={toast.title}
-          message={toast.msg}
-          onClose={closeToast}
-          isLeaving={toastLeaving}
-        />
-      )}
-    </div>
-  )
+  return <AdminDashboard onLogout={logout} />
 }

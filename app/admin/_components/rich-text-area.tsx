@@ -16,6 +16,11 @@ interface Props {
    *  "full": editor tipo entrada de WordPress — títulos, subrayado, tachado,
    *  cita, separador, enlaces e imágenes (subir, arrastrar o pegar). */
   variant?: "simple" | "full"
+  /** v2.1.0 — id del label visible (Field): da nombre accesible al editor. */
+  labelledBy?: string
+  /** Ayuda / error del campo (Field) para lectores de pantalla. */
+  describedBy?: string
+  invalid?: boolean
 }
 
 // Editor rico headless — la UI del toolbar es nuestra, no la que trae Tiptap
@@ -63,7 +68,7 @@ function altFromFilename(name: string) {
   return name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim()
 }
 
-export default function RichTextArea({ value, onChange, placeholder, minHeight, variant = "simple" }: Props) {
+export default function RichTextArea({ value, onChange, placeholder, minHeight, variant = "simple", labelledBy, describedBy, invalid }: Props) {
   const [uploading, setUploading] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [linkOpen, setLinkOpen] = useState(false)
@@ -101,7 +106,16 @@ export default function RichTextArea({ value, onChange, placeholder, minHeight, 
     extensions: buildExtensions(variant, placeholder || ""),
     content: value,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
-    editorProps: variant === "full" ? {
+    editorProps: {
+      // El contenteditable no tenía nombre accesible (AM-1).
+      attributes: {
+        role: "textbox",
+        "aria-multiline": "true",
+        ...(labelledBy ? { "aria-labelledby": labelledBy } : {}),
+        ...(describedBy ? { "aria-describedby": describedBy } : {}),
+        ...(invalid ? { "aria-invalid": "true" } : {}),
+      },
+      ...(variant === "full" ? {
       handleDrop: (view, event, _slice, moved) => {
         if (moved) return false
         const files = Array.from(event.dataTransfer?.files ?? []).filter(f => f.type.startsWith("image/"))
@@ -120,7 +134,8 @@ export default function RichTextArea({ value, onChange, placeholder, minHeight, 
       },
     // {} y no undefined: Tiptap mezcla las opciones con spread, así que un
     // undefined explícito pisa su default {} y rompe la creación de la vista.
-    } : {},
+      } : {}),
+    },
   })
   editorRef.current = editor
 
@@ -137,7 +152,7 @@ export default function RichTextArea({ value, onChange, placeholder, minHeight, 
 
   // Tiptap v3 no re-renderiza el componente en cada transacción: los estados
   // activos del toolbar se derivan con useEditorState para que sigan al cursor.
-  const s = useEditorState({
+  const live = useEditorState({
     editor,
     selector: ({ editor: e }) => e ? {
       bold: e.isActive("bold"),
@@ -156,7 +171,18 @@ export default function RichTextArea({ value, onChange, placeholder, minHeight, 
     } : null,
   })
 
-  if (!editor || !s) return null
+  // v2.1.0 — useEditorState solo se recalcula en la primera transacción del
+  // editor. Si el contenido ya viene al montar (editar un proyecto existente)
+  // no hay transacción, `live` quedaba en null para siempre y este componente
+  // devolvía null: el editor era INVISIBLE en "Editar proyecto". El editor se
+  // muestra apenas existe; el toolbar usa el estado por defecto hasta tener
+  // el real (que llega con el primer foco o tecla).
+  if (!editor) return null
+  const s = live ?? {
+    bold: false, italic: false, underline: false, strike: false, bulletList: false,
+    orderedList: false, blockquote: false, link: false, image: false, imageAlt: "",
+    block: "p", canUndo: false, canRedo: false,
+  }
 
   const btn = (active: boolean) => `admin-richtext-btn${active ? " active" : ""}`
 

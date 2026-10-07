@@ -141,3 +141,53 @@ Curvas de easing estilo Apple (spring-like).
 ### Form
 - Floating labels · focus ring accent · 12px radius inputs
 - Submit button: full width · pill · accent fill
+
+---
+
+## v2.0.0 — Refinamiento UI (sitio público)
+
+Fuente de verdad: `assets/design-tokens.json` (v2.0.0). Variables en el bloque v2.0.0 de `assets/design-tokens.css`. `styles/portfolio.css` las consume vía alias (`--bg: var(--color-bg)`…) y las importa él mismo.
+
+### Principios (criterio de aceptación de cada cambio)
+1. **Token o nada** — ningún valor literal nuevo en componentes.
+2. **Piso legible** — ningún texto < 12px; texto ≥ 4.5:1 (≥ 3:1 si es grande) en claro y oscuro.
+3. **Un protagonista** — máximo una entrada protagonista y una animación perpetua por vista (la perpetua es el terreno 3D).
+4. **Feedback inmediato** — hover / focus-visible / active / disabled (+ loading) en todo control.
+5. **Solo compositor** — se anima `transform` y `opacity` (excepciones documentadas: morph card→detalle y píldora del nav).
+
+### Escala tipográfica (`--fs-*`)
+| Token | Valor | Uso |
+|---|---|---|
+| `--fs-micro` | 12px | eyebrow, meta, fechas |
+| `--fs-small` | 13–14px | chips, nav, descripciones de card |
+| `--fs-body` | 16px | texto, inputs |
+| `--fs-lead` | 17–20px | subtítulos |
+| `--fs-h4` | 18–22px | card compacta |
+| `--fs-h3` | 22–28px | card destacada |
+| `--fs-h2` | 32–56px | `.s-title` |
+| `--fs-h1` | 36–64px | detalle, post, CTA de cierre, título de Proyectos |
+| `--fs-display` | 40–96px | hero (el hero conserva sus clamps afinados por breakpoint) |
+
+Pesos: `--fw-regular 400`, `--fw-medium 500`, `--fw-bold 700`, `--fw-display 800`. Familias: `--ff-body` / `--ff-display` (next/font, con fallback de métricas ajustadas).
+
+### Motion (`--dur-*`, `--ease-*`)
+| Token | Valor | Uso |
+|---|---|---|
+| `--dur-press` | 100ms | `:active` |
+| `--dur-hover` / `--dur-exit` | 160ms | hover, salidas |
+| `--dur-enter` | 240ms | modal, crossfade |
+| `--dur-reveal` | 480ms | reveals (`.anim-up` 12px) |
+| `--dur-hero` | 700ms | entrada del título (por línea, 90ms entre líneas) |
+| `--ease-out` / `--ease-in` / `--ease-spring` / `--ease-standard` | | entradas / salidas / píldora y badges / color |
+| `--stagger-step` / `--stagger-max` | 60ms / 360ms | stagger por lote del IntersectionObserver |
+
+Reduced motion: todo reveal, tilt, magnético, brillo, cuenta ascendente y transición de tema se desactivan y muestran su estado final.
+
+### Color — semánticos nuevos
+`--color-on-accent`, `--color-btn-primary-bg(-h)` (fondo del botón primario, separado de `--accent` de links: dark #0071e3 4.75:1), `--color-txt-muted` (labels), `--color-success-text` #146c2e, `--color-success-bg`, `--color-error-text` (#b42318 / #ff8a80), `--color-error-bg`. `--color-highlight` claro pasa a #0062cc.
+
+### Micro-interacciones (catálogo)
+Flecha que avanza (`.btn-arrow`), brillo del primario (`.btn-shine`), pull magnético (`hooks/use-magnetic.ts` + `.btn-magnetic`, ±8px), tilt de cards por variables (`--rx/--ry`), cuenta ascendente (`count-up.tsx`), subrayado que crece (`.link-underline`), cambio de tema con revelado circular (`lib/theme-transition.ts`), copiar email con check dibujado, validación con shake y check, skeleton con shimmer, pop del ícono de bottom nav.
+
+### Layout
+`--container` 1320px · `--container-wide` 1600px (secciones ≥1921px) · `--gutter` · `--section-gap`.

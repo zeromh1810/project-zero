@@ -3,9 +3,9 @@
   "$meta": {
     "project": "Project Zero Portafolio de trabajos Carlos Felipe Rojas Hickmann",
     "author": "Carlos Felipe Rojas Hickmann",
-    "version": "1.9.0",
+    "version": "2.1.0",
     "source": "Extracted from portfolio.css — do not edit CSS directly",
-    "changelog": "v1.9.0: Dark mode — escala de negros neutral.950-700 (--bg/bg2/bg3/bg4) reemplazada por escala navy-tinted (~hue 225-230°, inspirada en betterstack.com), alineada con el matiz que content-sheet/brands-section/blog-preview-section ya usaban. navbar-bg dark deriva del nuevo --bg. Fix: JSON inválido (faltaba la clave \"dark\" envolviendo los overrides de semantic/component en dark — bug preexistente que rompía generate-tokens.cjs). Fix seam: hero-terrain.ts (WebGL shader) tenía uBgColor hardcodeado en #000000 para el relleno opaco de oclusión — desalineado del nuevo --bg, se veía como un parche negro en los bordes del plano 3D; actualizado a #0a0b12. Fix: projects-section.tsx tenía rgba(0,0,0,alpha) hardcodeado en el scroll-driven-alpha del projects-sheet (bypaseaba la CSS var) — actualizado a rgba(10,11,18,alpha). DS viewer sincronizado: PageColors y PageDarkMode (design-system-section.tsx) tenían las tablas de --bg/bg2/bg3/bg4 dark hardcodeadas con los hex viejos; actualizadas. Comparativa visual (contact-form-card) usaba #060c1a para el lado oscuro — no coincidía con el valor real que renderiza --content-sheet (var(--bg3)); corregido a #171926. Limpieza: eliminada la familia primitiva \"blue-tinted\" (950/900/50/100/brands-start/brands-end/blog-dark-start/blog-dark-end) — documentaba una paleta navy propia para content-sheet/brands-section/blog-preview-section que nunca estuvo conectada al CSS real (esas reglas siempre usaron var(--bg)/var(--bg2)/var(--bg3), alias de la escala neutral). content-sheet ahora referencia {primitive.color.neutral.100}/{primitive.color.neutral.800} directamente. Eliminado el token semántico inter-section (light y dark) — no correspondía a ninguna CSS var real (--inter-section no existe en portfolio.css). Sincronizados component.brands-section.bg-light/bg-dark y component.blog-preview-section.bg-light/bg-dark con los gradientes reales. DS viewer: PageBrands (gradientes de fondo) y comparativa visual del lado claro también corregidos. v1.8.0: Audit completo post code-review. CSS vars completas: --space-1..24 (14 steps), --r-sm..full (6 radios), --glass-blur-xs..xl (5 niveles glassmorphism). Fix accesibilidad: .theme-toggle-btn::before extiende hit area a 44×44px (WCAG 2.5.5) sin modificar visual 32px. Fix auto-fill (revertido de auto-fit) en brands-gallery. Fix prefers-color-scheme: getInitialTheme() ahora detecta OS preference cuando no hay localStorage. DS viewer v1.8.0: 15 páginas (añadidas Animaciones y Blog), isColor fix (solo hex → swatches), stale spec fix (32px/4px), PagePrimitivos expandida con spacing/radius/glassmorphism como tokens CSS reales, PageBrands CodeBlock actualizado a auto-fill. v1.7.0: CSS custom properties completas — --shadow-* (9 niveles) y --z-* (9 capas) ahora definidos en :root y .dark de portfolio.css. Dark mode override shadows (×3–4 opacidad). Hero-title fijado a 85px en breakpoint 1440-1920px. Theme toggle proporcionado: btn-size 32px, pill-padding 4px, icon 15px. DS viewer: darkmode conectado al PAGE_MAP (bug fix), nueva página Tokens Primitivos (shadow/z-index/radius/blur/duration/easing), ds-dm-* clases CSS para tabla comparativa light/dark. DS v1.7.0. v1.6.0: DS Audit completo — escala z-index semántica (9 capas), escala shadows (9 niveles), focus-ring tokens, section-heading patrón universal, bottom-nav componente, modal/overlay, related-posts-slider, about-photo-card, btn-ghost + btn-magnetic, floating-label form, blog-filter-pill + blog-tag + blog-post-layout. Consolidación fadeInUp→fadeUp. Docs: docs/ds-audit-2026.md. v1.5.0: BrandsSection rediseño completo — grid auto-fill (6→12 logos sin cambios), eyebrow label editorial con líneas decorativas, stagger entrance via IntersectionObserver, hover scale(1.06)+grayscale lift. Nuevos tokens: section-eyebrow-label, stagger-entrance, blog-preview-section. brand-item y brands-section actualizados. Primitivos brands-dark (#03070e, #060b16) y blog-dark (#0c1325, #07090e) añadidos. Dark mode blog-preview-section homologado. DS viewer: página Brands añadida al grupo Patrones. Docs: docs/brands-section.md. v1.4.0: Blog system completo (BlogCard, BlogPreviewSection, BlogNavbar, AppNavbar unificado), BrandsSection inter-sección, ThemeToggle dual-icon sun/moon, tokens bg4 + content-sheet + inter-section (superficies blue-tinted), scroll-driven alpha en projects-sheet y footer, auto-ripple idle 2s en WebGL, modo light como default, partículas dust deshabilitadas en light mode, sección .page--solid-bg para About y Contact, CV link en About admin. Docs: docs/components.md, docs/blog.md. v1.3.0: AdminToast tokens completados — border/shadow-dark tokenizados, title-size corregido a 14px, close-radius 6px, anim-enter/anim-exit como tokens CSS, admin.css refactorizado a 100% token-first, documentación docs/toast.md. v1.2.0: AdminToast component (4 estados: success/error/warning/info), token --warning #f59e0b amber, glassmorphism toast con progress bar y animación exit. v1.1.0: hero-title line-height 1.05, anim-enter-translate 16px, scroll-indicator opacity 0.65, card hover shadow + thumb scale, nav-item hover glass bg, theme-toggle 44px touch target, DS layout navbar offset, hardcoded colors → tokens"
+    "changelog": "v2.1.0: Panel admin y Design System. Admin: componentes base (Field, Dropzone, ConfirmAction, ConfirmDialog, Sheet, TagInput, ListItem, StatusBadge, EmptyState, UnsavedBar) en app/admin/_components/ui con CSS 100% tokens (admin-ui.css); login accesible; borrado con confirmación; aviso de cambios sin guardar; navegación agrupada con deep link; toast con pausa real. Design System: nuevo viewer en components/design-system orientado a diseñadores (Uso, Estilo, Contenido, Accesibilidad, Código), cada regla con ejemplo correcto e incorrecto renderizado con el componente real, estados forzados vía data-pseudo, medidas y contraste leídos en vivo, capturas PNG del sitio (scripts/qa/capture-ds.mjs) y búsqueda con deep link; publicado como «Zero design system» en /design-system y enlazado desde la navegación. Favicon editable desde Admin → Logo (servido en /brand-icon; sin archivo, el isotipo del logo). Navbar: compactación por breakpoint para que entren las seis secciones. Sin cambios de valores en los tokens. v2.0.0: Refinamiento UI del sitio público (rama refinamiento-ui). Tokens aditivos — no se renombró ni borró nada que use admin.css. Nueva escala tipográfica fluida de 9 pasos con piso de 12px (fontScale.*, CSS --fs-*), pesos semánticos (fontWeight.*, --fw-*), roles tipográficos (semantic.type.*: --ff-*, --ls-*, --lh-*), medidas de lectura (--measure-*), familias vía next/font (fallback con métricas ajustadas). Motion semántico (semantic.motion.*: --dur-*, --ease-*, ease-in nuevo para salidas, stagger por lote). Layout: contenedor único (--container 1320px / --container-wide 1600px, --gutter, --section-gap). Color: on-accent, txt-muted (labels de formulario), success-text (texto verde AA), btn-primary-bg/-h (fondo del botón primario separado del --accent de links: el hover anterior fallaba AA en ambos modos, 4.2:1 claro y ~1.8:1 dark). Fuente: docs/plan-implementacion-refinamiento-ui.md. v1.9.0: Dark mode — escala de negros neutral.950-700 (--bg/bg2/bg3/bg4) reemplazada por escala navy-tinted (~hue 225-230°, inspirada en betterstack.com), alineada con el matiz que content-sheet/brands-section/blog-preview-section ya usaban. navbar-bg dark deriva del nuevo --bg. Fix: JSON inválido (faltaba la clave \"dark\" envolviendo los overrides de semantic/component en dark — bug preexistente que rompía generate-tokens.cjs). Fix seam: hero-terrain.ts (WebGL shader) tenía uBgColor hardcodeado en #000000 para el relleno opaco de oclusión — desalineado del nuevo --bg, se veía como un parche negro en los bordes del plano 3D; actualizado a #0a0b12. Fix: projects-section.tsx tenía rgba(0,0,0,alpha) hardcodeado en el scroll-driven-alpha del projects-sheet (bypaseaba la CSS var) — actualizado a rgba(10,11,18,alpha). DS viewer sincronizado: PageColors y PageDarkMode (design-system-section.tsx) tenían las tablas de --bg/bg2/bg3/bg4 dark hardcodeadas con los hex viejos; actualizadas. Comparativa visual (contact-form-card) usaba #060c1a para el lado oscuro — no coincidía con el valor real que renderiza --content-sheet (var(--bg3)); corregido a #171926. Limpieza: eliminada la familia primitiva \"blue-tinted\" (950/900/50/100/brands-start/brands-end/blog-dark-start/blog-dark-end) — documentaba una paleta navy propia para content-sheet/brands-section/blog-preview-section que nunca estuvo conectada al CSS real (esas reglas siempre usaron var(--bg)/var(--bg2)/var(--bg3), alias de la escala neutral). content-sheet ahora referencia {primitive.color.neutral.100}/{primitive.color.neutral.800} directamente. Eliminado el token semántico inter-section (light y dark) — no correspondía a ninguna CSS var real (--inter-section no existe en portfolio.css). Sincronizados component.brands-section.bg-light/bg-dark y component.blog-preview-section.bg-light/bg-dark con los gradientes reales. DS viewer: PageBrands (gradientes de fondo) y comparativa visual del lado claro también corregidos. v1.8.0: Audit completo post code-review. CSS vars completas: --space-1..24 (14 steps), --r-sm..full (6 radios), --glass-blur-xs..xl (5 niveles glassmorphism). Fix accesibilidad: .theme-toggle-btn::before extiende hit area a 44×44px (WCAG 2.5.5) sin modificar visual 32px. Fix auto-fill (revertido de auto-fit) en brands-gallery. Fix prefers-color-scheme: getInitialTheme() ahora detecta OS preference cuando no hay localStorage. DS viewer v1.8.0: 15 páginas (añadidas Animaciones y Blog), isColor fix (solo hex → swatches), stale spec fix (32px/4px), PagePrimitivos expandida con spacing/radius/glassmorphism como tokens CSS reales, PageBrands CodeBlock actualizado a auto-fill. v1.7.0: CSS custom properties completas — --shadow-* (9 niveles) y --z-* (9 capas) ahora definidos en :root y .dark de portfolio.css. Dark mode override shadows (×3–4 opacidad). Hero-title fijado a 85px en breakpoint 1440-1920px. Theme toggle proporcionado: btn-size 32px, pill-padding 4px, icon 15px. DS viewer: darkmode conectado al PAGE_MAP (bug fix), nueva página Tokens Primitivos (shadow/z-index/radius/blur/duration/easing), ds-dm-* clases CSS para tabla comparativa light/dark. DS v1.7.0. v1.6.0: DS Audit completo — escala z-index semántica (9 capas), escala shadows (9 niveles), focus-ring tokens, section-heading patrón universal, bottom-nav componente, modal/overlay, related-posts-slider, about-photo-card, btn-ghost + btn-magnetic, floating-label form, blog-filter-pill + blog-tag + blog-post-layout. Consolidación fadeInUp→fadeUp. Docs: docs/ds-audit-2026.md. v1.5.0: BrandsSection rediseño completo — grid auto-fill (6→12 logos sin cambios), eyebrow label editorial con líneas decorativas, stagger entrance via IntersectionObserver, hover scale(1.06)+grayscale lift. Nuevos tokens: section-eyebrow-label, stagger-entrance, blog-preview-section. brand-item y brands-section actualizados. Primitivos brands-dark (#03070e, #060b16) y blog-dark (#0c1325, #07090e) añadidos. Dark mode blog-preview-section homologado. DS viewer: página Brands añadida al grupo Patrones. Docs: docs/brands-section.md. v1.4.0: Blog system completo (BlogCard, BlogPreviewSection, BlogNavbar, AppNavbar unificado), BrandsSection inter-sección, ThemeToggle dual-icon sun/moon, tokens bg4 + content-sheet + inter-section (superficies blue-tinted), scroll-driven alpha en projects-sheet y footer, auto-ripple idle 2s en WebGL, modo light como default, partículas dust deshabilitadas en light mode, sección .page--solid-bg para About y Contact, CV link en About admin. Docs: docs/components.md, docs/blog.md. v1.3.0: AdminToast tokens completados — border/shadow-dark tokenizados, title-size corregido a 14px, close-radius 6px, anim-enter/anim-exit como tokens CSS, admin.css refactorizado a 100% token-first, documentación docs/toast.md. v1.2.0: AdminToast component (4 estados: success/error/warning/info), token --warning #f59e0b amber, glassmorphism toast con progress bar y animación exit. v1.1.0: hero-title line-height 1.05, anim-enter-translate 16px, scroll-indicator opacity 0.65, card hover shadow + thumb scale, nav-item hover glass bg, theme-toggle 44px touch target, DS layout navbar offset, hardcoded colors → tokens"
   },
 
   "primitive": {
@@ -76,6 +76,27 @@
       "3xl":  { "$value": "28px", "$type": "dimension", "$description": "Stat numbers" }
     },
 
+    "fontScale": {
+      "$description": "v2.0.0 — Escala fluida de 9 pasos (ratio ~1.25). Reemplaza progresivamente a fontSize.* en el sitio público; fontSize.* se conserva porque lo usa el admin. CSS: --fs-<paso>. Piso absoluto: 12px.",
+      "micro":   { "$value": "12px", "$type": "dimension", "$description": "Eyebrow, meta, fechas, stat-label — piso de legibilidad" },
+      "small":   { "$value": "clamp(13px, 0.2vw + 12.5px, 14px)", "$type": "dimension", "$description": "Chips, botones sm, nav" },
+      "body":    { "$value": "16px", "$type": "dimension", "$description": "Texto, inputs, botones" },
+      "lead":    { "$value": "clamp(17px, 0.4vw + 15.5px, 20px)", "$type": "dimension", "$description": "Subtítulos, hero-sub, bio" },
+      "h4":      { "$value": "clamp(18px, 0.5vw + 16px, 22px)", "$type": "dimension", "$description": "Título de card compacta" },
+      "h3":      { "$value": "clamp(22px, 1vw + 18px, 28px)", "$type": "dimension", "$description": "Título de card destacada, tagline de contacto" },
+      "h2":      { "$value": "clamp(32px, 2.6vw + 20px, 56px)", "$type": "dimension", "$description": ".s-title" },
+      "h1":      { "$value": "clamp(36px, 3vw + 24px, 64px)", "$type": "dimension", "$description": "Título de detalle y de post" },
+      "display": { "$value": "clamp(40px, 5.2vw + 16px, 96px)", "$type": "dimension", "$description": "Hero" }
+    },
+
+    "fontWeight": {
+      "$description": "v2.0.0 — Pesos semánticos. El 600 sale del sitio público (casi indistinguible de 700 en DM Sans). CSS: --fw-*.",
+      "regular": { "$value": "400", "$type": "number" },
+      "medium":  { "$value": "500", "$type": "number" },
+      "bold":    { "$value": "700", "$type": "number" },
+      "display": { "$value": "800", "$type": "number", "$description": "Solo display (Plus Jakarta Sans)" }
+    },
+
     "lineHeight": {
       "tight":      { "$value": "1.05", "$type": "number", "$description": "Hero display title — Plus Jakarta Sans 800" },
       "snug":       { "$value": "1.1",  "$type": "number" },
@@ -118,7 +139,8 @@
       "spring":  { "$value": "cubic-bezier(0.16, 1, 0.3, 1)",      "$type": "cubicBezier", "$description": "Spring — entradas y expansiones" },
       "out":     { "$value": "cubic-bezier(0.25, 0.46, 0.45, 0.94)", "$type": "cubicBezier", "$description": "Out — botones hover" },
       "snap":    { "$value": "cubic-bezier(0.34, 1.56, 0.64, 1)",  "$type": "cubicBezier", "$description": "Snap — pop animations" },
-      "linear":  { "$value": "linear",                              "$type": "cubicBezier" }
+      "linear":  { "$value": "linear",                              "$type": "cubicBezier" },
+      "in":      { "$value": "cubic-bezier(0.7, 0, 0.84, 0)",        "$type": "cubicBezier", "$description": "v2.0.0 — In — salidas (acelera al irse)" }
     },
 
     "blur": {
@@ -167,7 +189,7 @@
       "txt3":         { "$value": "{primitive.color.text.dark-500}", "$type": "color", "$description": "Muted text" },
       "accent":       { "$value": "{primitive.color.blue.700}",      "$type": "color", "$description": "Primary interactive" },
       "accent-h":     { "$value": "{primitive.color.blue.500}",      "$type": "color", "$description": "Accent hover" },
-      "highlight":    { "$value": "{primitive.color.blue.highlight}", "$type": "color", "$description": "Detail page accent" },
+      "highlight":    { "$value": "{primitive.color.blue.700}", "$type": "color", "$description": "Detail page accent. v2.0.0: antes blue.highlight #3b82f6 = 3.5:1 sobre blanco (falla AA en labels e impacto)" },
       "success":      { "$value": "{primitive.color.green.400}",     "$type": "color", "$description": "Success feedback — Apple green" },
       "warning":      { "$value": "{primitive.color.amber.500}",     "$type": "color", "$description": "Warning / alert feedback — Amber 500" },
       "error":        { "$value": "{primitive.color.red.500}",       "$type": "color", "$description": "Error / destructive feedback" },
@@ -178,7 +200,15 @@
       "card":         { "$value": "rgba(0, 0, 0, 0.03)",            "$type": "color" },
       "card-hover":   { "$value": "rgba(0, 0, 0, 0.06)",            "$type": "color" },
       "navbar-bg":    { "$value": "rgba(248, 248, 248, 0.82)",      "$type": "color" },
-      "shadow":       { "$value": "rgba(0, 0, 0, 0.12)",            "$type": "color" }
+      "shadow":       { "$value": "rgba(0, 0, 0, 0.12)",            "$type": "color" },
+      "on-accent":    { "$value": "{primitive.color.neutral.0}",    "$type": "color", "$description": "v2.0.0 — Texto sobre fondos de acento" },
+      "txt-muted":    { "$value": "{primitive.color.text.dark-500}", "$type": "color", "$description": "v2.0.0 — Labels de formulario y placeholders (≥4.5:1). Reemplaza rgba(0,0,0,.38)" },
+      "success-text": { "$value": "#146c2e",                        "$type": "color", "$description": "v2.0.0 — Texto verde AA sobre fondos claros, incluso sobre el tinte verde del badge (≥5.4:1); el punto de estado sigue usando success" },
+      "error-text":   { "$value": "#b42318",                        "$type": "color", "$description": "v2.0.0 — Texto de error AA (6.6:1). error #ef4444 = 3.8:1 como texto" },
+      "error-bg":     { "$value": "#b42318",                        "$type": "color", "$description": "v2.0.0 — Fondo de estado de error con texto blanco" },
+      "success-bg":   { "$value": "#146c2e",                        "$type": "color", "$description": "v2.0.0 — Fondo de estado de éxito con texto blanco (6.5:1). success #30d158 = 2.0:1" },
+      "btn-primary-bg":   { "$value": "{primitive.color.blue.700}", "$type": "color", "$description": "v2.0.0 — Fondo del botón primario (5.8:1 con blanco)" },
+      "btn-primary-bg-h": { "$value": "#0058b8",                    "$type": "color", "$description": "v2.0.0 — Hover del botón primario (6.8:1). Antes accent-h #1a7fd4 = 4.2:1" }
     },
     "spacing": {
       "component":  { "$value": "{primitive.spacing.4}", "$type": "dimension" },
@@ -188,7 +218,44 @@
     },
     "layout": {
       "max-width":   { "$value": "1160px", "$type": "dimension" },
-      "navbar-height": { "$value": "64px", "$type": "dimension" }
+      "navbar-height": { "$value": "64px", "$type": "dimension" },
+      "container":      { "$value": "1320px", "$type": "dimension", "$description": "v2.0.0 — Contenedor único de secciones. CSS: --container" },
+      "container-wide": { "$value": "1600px", "$type": "dimension", "$description": "v2.0.0 — Hero y bento ≥1920px. CSS: --container-wide" },
+      "gutter":         { "$value": "clamp(16px, 4vw, 48px)", "$type": "dimension", "$description": "v2.0.0 — CSS: --gutter" },
+      "section-gap":    { "$value": "clamp(80px, 10vw, 160px)", "$type": "dimension", "$description": "v2.0.0 — CSS: --section-gap" },
+      "measure-prose":  { "$value": "62ch", "$type": "dimension", "$description": "v2.0.0 — Ancho de lectura de párrafos largos" },
+      "measure-lead":   { "$value": "46ch", "$type": "dimension", "$description": "v2.0.0 — Ancho de leads y taglines" }
+    },
+
+    "type": {
+      "$description": "v2.0.0 — Roles tipográficos. CSS: --ff-*, --ls-*, --lh-*.",
+      "family-body":    { "$value": "var(--font-dm-sans), 'Helvetica Neue', system-ui, sans-serif", "$type": "fontFamily", "$description": "next/font: incluye 'DM Sans Fallback' con métricas ajustadas (evita CLS)" },
+      "family-display": { "$value": "var(--font-plus-jakarta), system-ui, sans-serif", "$type": "fontFamily" },
+      "tracking-display":    { "$value": "-0.04em",  "$type": "number" },
+      "tracking-display-sm": { "$value": "-0.025em", "$type": "number", "$description": "Display bajo 600px" },
+      "tracking-heading":    { "$value": "-0.025em", "$type": "number" },
+      "tracking-eyebrow":    { "$value": "0.08em",   "$type": "number" },
+      "leading-display": { "$value": "1.05", "$type": "number" },
+      "leading-heading": { "$value": "1.15", "$type": "number" },
+      "leading-body":    { "$value": "1.6",  "$type": "number" },
+      "leading-prose":   { "$value": "1.75", "$type": "number" }
+    },
+
+    "motion": {
+      "$description": "v2.0.0 — Motion semántico. Regla: salidas = dur-exit + ease-in (más rápidas que las entradas); entradas = ease-out. Solo transform/opacity. CSS: --dur-*, --ease-*.",
+      "dur-press":   { "$value": "100ms", "$type": "duration", "$description": ":active, toggles" },
+      "dur-hover":   { "$value": "160ms", "$type": "duration", "$description": "Hover, color, borde" },
+      "dur-exit":    { "$value": "160ms", "$type": "duration", "$description": "Salidas, cierre de modal" },
+      "dur-enter":   { "$value": "240ms", "$type": "duration", "$description": "Crossfade de sección, modal" },
+      "dur-reveal":  { "$value": "480ms", "$type": "duration", "$description": "anim-up, cards, morph" },
+      "dur-hero":    { "$value": "700ms", "$type": "duration", "$description": "Entrada única del hero" },
+      "ease-out":      { "$value": "{primitive.easing.spring}", "$type": "cubicBezier", "$description": "Entradas — cubic-bezier(0.16, 1, 0.3, 1)" },
+      "ease-in":       { "$value": "{primitive.easing.in}",     "$type": "cubicBezier", "$description": "Salidas" },
+      "ease-standard": { "$value": "{primitive.easing.out}",    "$type": "cubicBezier", "$description": "Cambios de color/fondo" },
+      "ease-spring":   { "$value": "{primitive.easing.snap}",   "$type": "cubicBezier", "$description": "Solo píldora del nav y badges" },
+      "reveal-distance": { "$value": "12px",  "$type": "dimension" },
+      "stagger-step":    { "$value": "60ms",  "$type": "duration", "$description": "Paso de stagger dentro de un lote del IntersectionObserver" },
+      "stagger-max":     { "$value": "360ms", "$type": "duration", "$description": "Tope del stagger — nada espera más que esto al entrar al viewport" }
     },
     "font": {
       "body":    { "$value": "'DM Sans', 'Helvetica Neue', sans-serif",       "$type": "fontFamily" },
@@ -604,7 +671,12 @@
         "card":        { "$value": "rgba(255, 255, 255, 0.04)",      "$type": "color" },
         "card-hover":  { "$value": "rgba(255, 255, 255, 0.08)",      "$type": "color" },
         "navbar-bg":   { "$value": "rgba(10, 11, 18, 0.75)",        "$type": "color" },
-        "shadow":      { "$value": "rgba(0, 0, 0, 0.60)",           "$type": "color" }
+        "shadow":      { "$value": "rgba(0, 0, 0, 0.60)",           "$type": "color" },
+        "txt-muted":   { "$value": "{primitive.color.text.light-300}", "$type": "color", "$description": "v2.0.0 — Labels de formulario dark" },
+        "success-text":{ "$value": "{primitive.color.green.400}",    "$type": "color" },
+        "error-text":  { "$value": "#ff8a80",                       "$type": "color", "$description": "v2.0.0 — Texto de error dark (7.6:1)" },
+        "btn-primary-bg":   { "$value": "#0071e3",                  "$type": "color", "$description": "v2.0.0 — 4.75:1 con blanco. Antes accent #2997ff = 3.02:1" },
+        "btn-primary-bg-h": { "$value": "{primitive.color.blue.700}", "$type": "color", "$description": "v2.0.0 — 5.8:1. Antes accent-h #5ac8fa ≈ 1.8:1" }
       }
     },
     "component": {

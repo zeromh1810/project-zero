@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react"
 import ProjectForm, { type ProjectData } from "./project-form"
+import { ConfirmAction } from "./ui/confirm-action"
+import { ListItem, EmptyState, ListSkeleton, SectionHeader } from "./ui/display"
+import { PlusIcon, EditIcon, ImageIcon, FolderIcon, ExternalIcon } from "@/components/portfolio/icons"
 
 import type { ToastType } from "./admin-toast"
 
@@ -14,7 +17,6 @@ export default function ProjectsTab({ onToast }: Props) {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<ProjectData | null | undefined>(undefined)
   const [saving, setSaving] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState<number | null>(null)
 
   async function load() {
     try {
@@ -42,7 +44,10 @@ export default function ProjectsTab({ onToast }: Props) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         })
-        const saved = await res.json()
+        const saved = await res.json().catch(() => ({}))
+        // Antes no se miraba res.ok: un 401 (sesión vencida) o un 500 mostraba
+        // "Proyecto actualizado" y cerraba el panel sin haber guardado nada.
+        if (!res.ok) throw new Error(saved.error || (res.status === 401 ? "Tu sesión expiró. Vuelve a entrar." : "No se pudo guardar"))
         saved._githubWarning
           ? onToast("Proyecto guardado localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
           : onToast("Proyecto actualizado", "success")
@@ -52,15 +57,17 @@ export default function ProjectsTab({ onToast }: Props) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         })
-        const saved = await res.json()
+        const saved = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(saved.error || (res.status === 401 ? "Tu sesión expiró. Vuelve a entrar." : "No se pudo guardar"))
         saved._githubWarning
           ? onToast("Proyecto guardado localmente", "warning", "No se pudo sincronizar con GitHub. Los cambios se perderán en el próximo deploy.")
           : onToast("Proyecto creado", "success")
       }
       setEditing(undefined)
       load()
-    } catch {
-      onToast("Error al guardar", "error")
+    } catch (e) {
+      // El panel queda abierto con los cambios: no se pierde lo editado.
+      onToast("Error al guardar", "error", e instanceof Error ? e.message : undefined)
     } finally {
       setSaving(false)
     }
@@ -69,80 +76,55 @@ export default function ProjectsTab({ onToast }: Props) {
   async function handleDelete(id: number) {
     try {
       const res = await fetch(`/api/admin/projects/${id}`, { method: "DELETE" })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error()
       data._githubWarning
         ? onToast("Proyecto eliminado localmente", "warning", "No se pudo sincronizar con GitHub. El proyecto podría reaparecer en el próximo deploy.")
         : onToast("Proyecto eliminado", "success")
-      setConfirmDelete(null)
       load()
     } catch {
       onToast("Error al eliminar", "error")
     }
   }
 
-  if (loading) {
-    return (
-      <div className="admin-loading">
-        <div className="admin-spinner" />
-        Cargando proyectos…
-      </div>
-    )
-  }
-
+  // v2.1.0 — lista con los componentes del DS (ListItem + ConfirmAction):
+  // misma confirmación destructiva que Blog y Marcas, thumbnail en vez de
+  // emoji, acceso directo al proyecto publicado, skeleton y vacío con acción.
   return (
     <>
-      <div className="admin-section-header">
-        <div>
-          <div className="admin-section-title">Proyectos</div>
-          <div className="admin-section-sub">{projects.length} proyecto{projects.length !== 1 ? "s" : ""} en el portafolio</div>
-        </div>
-        <button className="btn-p" onClick={() => setEditing(null)}>
-          + Nuevo proyecto
-        </button>
-      </div>
+      <SectionHeader
+        title="Proyectos"
+        description={loading ? "Cargando proyectos…" : `${projects.length} proyecto${projects.length !== 1 ? "s" : ""} en el portafolio`}
+        action={<button type="button" className="a-btn a-btn--primary" onClick={() => setEditing(null)}><PlusIcon /> Nuevo proyecto</button>}
+      />
 
-      {projects.length === 0 ? (
-        <div className="admin-empty">
-          <div className="admin-empty-icon">📂</div>
-          <div className="admin-empty-text">No hay proyectos aún. Crea el primero.</div>
-        </div>
+      {loading ? (
+        <ListSkeleton rows={4} label="Cargando proyectos" />
+      ) : projects.length === 0 ? (
+        <EmptyState icon={<FolderIcon />} title="Aún no hay proyectos"
+          description="Crea el primero: aparecerá en la grilla del portafolio."
+          action={<button type="button" className="a-btn a-btn--primary" onClick={() => setEditing(null)}><PlusIcon /> Nuevo proyecto</button>} />
       ) : (
-        <div className="admin-project-list">
+        <ul className="a-list">
           {projects.map(p => (
-            <div key={p.id} className="admin-project-item">
-              <div className="admin-project-emoji">{p.emoji}</div>
-              <div className="admin-project-info">
-                <div className="admin-project-title">{p.title}</div>
-                <div className="admin-project-meta">{p.category} · {p.year}</div>
-              </div>
-              <div className="admin-project-actions">
-                {confirmDelete === p.id ? (
-                  <>
-                    <button className="admin-btn-sm admin-btn-danger"
-                      onClick={() => handleDelete(p.id!)}>
-                      Confirmar
-                    </button>
-                    <button className="admin-btn-sm"
-                      onClick={() => setConfirmDelete(null)}>
-                      Cancelar
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button className="admin-btn-sm"
-                      onClick={() => setEditing(p)}>
-                      Editar
-                    </button>
-                    <button className="admin-btn-sm admin-btn-danger"
-                      onClick={() => setConfirmDelete(p.id!)}>
-                      Eliminar
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
+            <ListItem
+              key={p.id}
+              active={editing?.id === p.id}
+              media={p.thumbnail ? <img src={p.thumbnail} alt="" loading="lazy" /> : <ImageIcon />}
+              title={p.title}
+              meta={<><span>{p.category}</span><span>{p.year}</span>{p.stat && <span>{p.stat}</span>}</>}
+              actions={<>
+                <a className="a-icon-btn" href={`/projects/${p.id}`} target="_blank" rel="noreferrer" aria-label={`Ver «${p.title}» en el sitio`}>
+                  <ExternalIcon />
+                </a>
+                <button type="button" className="a-btn a-btn--ghost a-btn--sm" onClick={() => setEditing(p)} aria-label={`Editar «${p.title}»`}>
+                  <EditIcon /> Editar
+                </button>
+                <ConfirmAction itemName={p.title} question="¿Eliminar el proyecto?" onConfirm={() => handleDelete(p.id!)} />
+              </>}
+            />
           ))}
-        </div>
+        </ul>
       )}
 
       {editing !== undefined && (

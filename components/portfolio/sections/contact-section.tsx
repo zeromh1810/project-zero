@@ -1,16 +1,30 @@
 "use client"
 
-import { useState, useCallback } from "react"
-import { EmailIcon, LinkedInIcon, GitHubIcon, InstagramIcon } from "../icons"
+import { useState, useCallback, useRef } from "react"
+import { EmailIcon, LinkedInIcon, GitHubIcon, InstagramIcon, ArrowRightIcon } from "../icons"
 import { sendContactEmail } from "@/app/actions/contact"
 import { useSocial } from "@/lib/hooks/use-social"
 
 type FormStatus = "idle" | "loading" | "success" | "error"
+type Field = "name" | "email" | "msg"
 
 interface FormState {
   name: string
   email: string
   msg: string
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
+// Validación por campo (MI-5): antes, con noValidate y un `return` silencioso,
+// enviar el formulario vacío no hacía nada — ni un mensaje. Ahora cada campo
+// se valida al salir de él y al enviar, con el error bajo el campo
+// (aria-describedby + aria-invalid) y foco al primero inválido.
+function validate(field: Field, value: string): string {
+  const v = value.trim()
+  if (field === "name")  return v ? "" : "Escribe tu nombre."
+  if (field === "email") return !v ? "Escribe tu email." : EMAIL_RE.test(v) ? "" : "Revisa el email: parece incompleto."
+  return v.length >= 10 ? "" : v ? "Cuéntame un poco más (mínimo 10 caracteres)." : "Cuéntame sobre tu proyecto."
 }
 
 function displayUrl(url: string): string {
@@ -20,8 +34,23 @@ function displayUrl(url: string): string {
 export function ContactSection() {
   const social = useSocial()
   const [formState, setFormState] = useState<FormState>({ name: "", email: "", msg: "" })
+  const [errors, setErrors] = useState<Record<Field, string>>({ name: "", email: "", msg: "" })
   const [formStatus, setFormStatus] = useState<FormStatus>("idle")
   const [errorMessage, setErrorMessage] = useState<string>("")
+  // Sacude el formulario (N-13). Se reinicia la animación quitando y
+  // poniendo la clase (no con `key`: re-montar el form le quitaba el foco
+  // al primer campo inválido).
+  const formRef = useRef<HTMLFormElement>(null)
+  const shake = () => {
+    const el = formRef.current
+    if (!el) return
+    el.classList.remove("is-shaking")
+    void el.offsetWidth // fuerza reflow para reiniciar la animación
+    el.classList.add("is-shaking")
+  }
+  const nameRef  = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
+  const msgRef   = useRef<HTMLTextAreaElement>(null)
 
   const contactLinks = [
     social.email    && { Icon: EmailIcon,     label: "Email",     value: social.email,    href: `mailto:${social.email}` },
@@ -30,9 +59,34 @@ export function ContactSection() {
     social.github   && { Icon: GitHubIcon,    label: "GitHub",    value: displayUrl(social.github),   href: social.github },
   ].filter(Boolean) as { Icon: React.ComponentType<{className?: string}>; label: string; value: string; href: string }[]
 
+  const setField = (field: Field, value: string) => {
+    setFormState((s) => ({ ...s, [field]: value }))
+    // Si el campo ya mostraba un error, se re-valida mientras escribe (el
+    // mensaje desaparece apenas queda bien); si no, se espera al blur.
+    if (errors[field]) setErrors((e) => ({ ...e, [field]: validate(field, value) }))
+    if (formStatus === "error") setFormStatus("idle")
+  }
+
+  const onBlur = (field: Field) => () => {
+    const value = formState[field]
+    if (value) setErrors((e) => ({ ...e, [field]: validate(field, value) }))
+  }
+
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formState.name || !formState.email || !formState.msg) return
+    const next = {
+      name:  validate("name", formState.name),
+      email: validate("email", formState.email),
+      msg:   validate("msg", formState.msg),
+    }
+    setErrors(next)
+    const firstInvalid = (["name", "email", "msg"] as Field[]).find((f) => next[f])
+    if (firstInvalid) {
+      const target = { name: nameRef, email: emailRef, msg: msgRef }[firstInvalid]
+      target.current?.focus()
+      shake()
+      return
+    }
 
     setFormStatus("loading")
     setErrorMessage("")
@@ -50,16 +104,26 @@ export function ContactSection() {
         setFormStatus("idle")
       }, 3000)
     } else {
+      // El error se queda hasta el próximo intento (antes se borraba solo a los 3s).
       setFormStatus("error")
       setErrorMessage(result.error || "Error al enviar el mensaje")
-      setTimeout(() => {
-        setFormStatus("idle")
-      }, 3000)
     }
   }, [formState])
 
+  const fieldProps = (field: Field) => ({
+    "aria-invalid": errors[field] ? true : undefined,
+    "aria-describedby": errors[field] ? `contact-${field}-error` : undefined,
+    onBlur: onBlur(field),
+  })
+
+  // Función, no componente: un componente declarado dentro del render es un
+  // tipo nuevo en cada render y re-montaría (y re-animaría) el mensaje en
+  // cada tecla.
+  const fieldError = (field: Field) =>
+    errors[field] ? <p id={`contact-${field}-error`} className="fld-error">{errors[field]}</p> : null
+
   return (
-    <div className="section section--contact anim-up">
+    <div className="section section--contact">
       <div className="s-head anim-up">
         <div className="s-label">Hablemos</div>
         <h2 className="s-title">Contacto</h2>
@@ -107,9 +171,16 @@ export function ContactSection() {
         </div>
 
         {/* RIGHT: form card */}
-        <form className="contact-form-card anim-up" onSubmit={handleSubmit} noValidate>
-          <div className="fld">
+        <form
+          ref={formRef}
+          className="contact-form-card anim-up"
+          onAnimationEnd={(e) => { if (e.animationName === "form-shake") e.currentTarget.classList.remove("is-shaking") }}
+          onSubmit={handleSubmit}
+          noValidate
+        >
+          <div className={`fld${errors.name ? " has-error" : ""}`}>
             <input
+              ref={nameRef}
               id="contact-name"
               className="fi"
               type="text"
@@ -117,51 +188,71 @@ export function ContactSection() {
               placeholder=" "
               autoComplete="name"
               value={formState.name}
-              onChange={(e) => setFormState((s) => ({ ...s, name: e.target.value }))}
+              onChange={(e) => setField("name", e.target.value)}
               required
+              {...fieldProps("name")}
             />
             <label className="fl" htmlFor="contact-name">Nombre completo *</label>
           </div>
-          <div className="fld">
+          {fieldError("name")}
+          <div className={`fld${errors.email ? " has-error" : ""}`}>
             <input
+              ref={emailRef}
               id="contact-email"
               className="fi"
               type="email"
               name="email"
               placeholder=" "
               autoComplete="email"
+              inputMode="email"
               value={formState.email}
-              onChange={(e) => setFormState((s) => ({ ...s, email: e.target.value }))}
+              onChange={(e) => setField("email", e.target.value)}
               required
+              {...fieldProps("email")}
             />
             <label className="fl" htmlFor="contact-email">Email *</label>
           </div>
-          <div className="fld">
+          {fieldError("email")}
+          <div className={`fld${errors.msg ? " has-error" : ""}`}>
             <textarea
+              ref={msgRef}
               id="contact-msg"
               className="ft"
               name="message"
               placeholder=" "
               rows={5}
               value={formState.msg}
-              onChange={(e) => setFormState((s) => ({ ...s, msg: e.target.value }))}
+              onChange={(e) => setField("msg", e.target.value)}
               required
+              {...fieldProps("msg")}
             />
-            <label className="fl" htmlFor="contact-msg">Cuéntame sobre tu proyecto…</label>
+            <label className="fl" htmlFor="contact-msg">Cuéntame sobre tu proyecto… *</label>
           </div>
+          {fieldError("msg")}
           <button
             type="submit"
             className={`fsub${formStatus === "success" ? " ok" : ""}${formStatus === "error" ? " err" : ""}`}
             disabled={formStatus === "loading"}
             aria-busy={formStatus === "loading"}
           >
-            {formStatus === "idle" && "Enviar mensaje →"}
-            {formStatus === "loading" && "Enviando…"}
-            {formStatus === "success" && "Mensaje enviado ✓"}
-            {formStatus === "error" && "Error al enviar — intenta de nuevo"}
+            {formStatus === "idle" && <>Enviar mensaje <ArrowRightIcon className="btn-arrow" /></>}
+            {formStatus === "loading" && <><span className="fsub-spinner" aria-hidden="true" />Enviando…</>}
+            {formStatus === "success" && (
+              <>
+                <svg className="fsub-check" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12.5l4.5 4.5L19 7.5" />
+                </svg>
+                Mensaje enviado
+              </>
+            )}
+            {formStatus === "error" && "Reintentar envío"}
           </button>
+          {/* Estado para lectores de pantalla: éxito (polite) y error (alert). */}
+          <p className="sr-only" aria-live="polite">
+            {formStatus === "success" ? "Mensaje enviado. Te respondo en menos de 24 horas." : ""}
+          </p>
           {formStatus === "error" && (
-            <p className="form-error-msg" role="alert" aria-live="assertive">
+            <p className="form-error-msg" role="alert">
               {errorMessage || "No se pudo enviar el mensaje. Intenta de nuevo."}
             </p>
           )}

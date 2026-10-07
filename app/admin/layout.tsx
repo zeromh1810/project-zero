@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/lib/context/theme-context"
 import "@/styles/portfolio.css"
 import "@/assets/design-tokens.css"
 import "./admin.css"
+import "./admin-ui.css"
 
 export const metadata: Metadata = {
   title: "Admin - Project Zero",

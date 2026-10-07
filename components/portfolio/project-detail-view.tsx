@@ -5,6 +5,7 @@ import type { Project } from "@/lib/data/projects"
 import { GalleryModal, PlaceholderThumb, type GalleryItem } from "./gallery-modal"
 import { useLogo } from "@/lib/hooks/use-logo"
 import { RichText } from "./rich-text"
+import { ThemeToggle } from "./app-navbar"
 
 // Resalta coincidencias solo en los nodos de texto del HTML — nunca dentro de
 // una etiqueta, para no inyectar <strong> en un src/href (p. ej. "%20" en una URL).
@@ -115,6 +116,7 @@ export function ProjectDetailView({
   }, [exiting, onBack])
 
   const galleryItems = buildGalleryItems(project)
+  const duration = project.kpis.find((k) => k.lbl === "Duración")?.val
 
   return (
     <div className={`detail-wrapper ${mounted ? "mounted" : ""}${exiting ? " exiting" : ""}`}>
@@ -134,11 +136,8 @@ export function ProjectDetailView({
           <span className="detail-breadcrumb-current">{project.title}</span>
         </div>
         <div className="detail-navbar-right">
-          <button className="theme-toggle-btn" onClick={onToggleTheme} aria-label="Toggle theme">
-            <span className={`toggle-track ${isDark ? "dark" : "light"}`}>
-              <span className="toggle-thumb" />
-            </span>
-          </button>
+          {/* Mismo toggle que el navbar principal (antes un switch distinto). */}
+          <ThemeToggle />
         </div>
       </header>
 
@@ -168,7 +167,7 @@ export function ProjectDetailView({
           )}
 
           <section className="detail-section">
-            <h3 className="detail-section-label">EL DESAFÍO</h3>
+            <h2 className="detail-section-label">EL DESAFÍO</h2>
             <RichText
               text={highlightText(project.intro, /(\d+%)/g)}
               variant="full"
@@ -177,7 +176,7 @@ export function ProjectDetailView({
           </section>
 
           <section className="detail-section">
-            <h3 className="detail-section-label">PROCESO</h3>
+            <h2 className="detail-section-label">PROCESO</h2>
             <RichText
               text={highlightText(project.process, /(confianza|insight clave)/gi)}
               variant="full"
@@ -186,7 +185,7 @@ export function ProjectDetailView({
           </section>
 
           <section className="detail-section">
-            <h3 className="detail-section-label">EL RESULTADO</h3>
+            <h2 className="detail-section-label">EL RESULTADO</h2>
             <RichText
               text={highlightText(project.result, /(\+?\d+%|\$[\d.]+[MK]?)/g)}
               variant="full"
@@ -208,7 +207,7 @@ export function ProjectDetailView({
 
           {/* Gallery */}
           <section className="detail-gallery-section">
-            <h3 className="detail-section-label">GALERÍA DE RESULTADOS</h3>
+            <h2 className="detail-section-label">GALERÍA DE RESULTADOS</h2>
             <div className="detail-gallery-grid">
               {galleryItems.map((item, index) => (
                 <button
@@ -221,7 +220,7 @@ export function ProjectDetailView({
                   {item.src ? (
                     <img
                       src={item.src}
-                      alt={item.label}
+                      alt=""
                       loading="lazy"
                       style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }}
                     />
@@ -229,13 +228,7 @@ export function ProjectDetailView({
                     <PlaceholderThumb item={item} />
                   )}
                   {/* Hover label */}
-                  <div style={{
-                    position: "absolute", bottom: 0, left: 0, right: 0,
-                    padding: "8px 10px", background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
-                    fontSize: 10, color: "rgba(255,255,255,0.8)", textAlign: "left",
-                    opacity: 0, transition: "opacity 0.2s ease",
-                    fontWeight: 600, letterSpacing: "0.04em",
-                  }} className="gallery-item-label">
+                  <div className="gallery-item-label">
                     {item.label}
                   </div>
                 </button>
@@ -253,21 +246,22 @@ export function ProjectDetailView({
         {/* RIGHT — Sidebar */}
         <aside className="detail-sidebar">
           <div className="detail-sidebar-section">
-            <h4 className="detail-sidebar-label">DETALLES</h4>
+            <h2 className="detail-sidebar-label">DETALLES</h2>
             <div className="detail-sidebar-item">
               <span className="detail-sidebar-key">Rol</span>
-              <span className="detail-sidebar-value">Lead Designer</span>
+              <span className="detail-sidebar-value">{project.role || "Lead Designer"}</span>
             </div>
             <div className="detail-sidebar-item">
               <span className="detail-sidebar-key">Año</span>
               <span className="detail-sidebar-value">{project.year}</span>
             </div>
-            <div className="detail-sidebar-item">
-              <span className="detail-sidebar-key">Duración</span>
-              <span className="detail-sidebar-value">
-                {project.kpis.find((k) => k.lbl === "Duración")?.val ?? "4 meses"}
-              </span>
-            </div>
+            {/* Sin dato real no se muestra (antes caía en "4 meses" inventado). */}
+            {duration && (
+              <div className="detail-sidebar-item">
+                <span className="detail-sidebar-key">Duración</span>
+                <span className="detail-sidebar-value">{duration}</span>
+              </div>
+            )}
             <div className="detail-sidebar-item">
               <span className="detail-sidebar-key">Impacto</span>
               <span className="detail-sidebar-value detail-sidebar-highlight">{project.stat}</span>
@@ -275,12 +269,15 @@ export function ProjectDetailView({
           </div>
 
           <div className="detail-sidebar-actions">
-            <a href="#" className="detail-btn-primary">
-              Ver proyecto live
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </a>
+            {/* Antes apuntaba a href="#" en todos los proyectos: un CTA muerto. */}
+            {project.liveUrl && (
+              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="detail-btn-primary">
+                Ver proyecto live
+                <svg className="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
+            )}
             <button className="detail-btn-secondary" onClick={() => handleBack("projects")}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

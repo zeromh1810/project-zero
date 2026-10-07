@@ -1,35 +1,22 @@
 "use client"
 
-import { useState, useEffect, useRef, ChangeEvent } from "react"
+import { useState, useEffect } from "react"
 import type { ToastType } from "./admin-toast"
+import { Dropzone } from "./ui/dropzone"
+import { ConfirmAction } from "./ui/confirm-action"
+import { Card, EmptyState, SectionHeader } from "./ui/display"
+import { PlusIcon, ImageIcon, CloseIcon } from "@/components/portfolio/icons"
 
-interface Brand {
-  id: string
-  lightLogo: string
-  darkLogo: string
-}
-
-interface Slot {
-  key: string
-  light: string
-  dark: string
-  upL: boolean
-  upD: boolean
-}
-
-interface Props {
-  onToast: (title: string, type: ToastType, msg?: string) => void
-}
-
-function makeSlot(): Slot {
-  return { key: String(Date.now() + Math.random()), light: "", dark: "", upL: false, upD: false }
-}
+interface Brand { id: string; lightLogo: string; darkLogo: string }
+interface Slot { key: string; light: string; dark: string }
+interface Props { onToast: (title: string, type: ToastType, msg?: string) => void }
 
 const MAX_FILE_SIZE = 600 * 1024 // 600 KB
+const makeSlot = (): Slot => ({ key: String(Date.now() + Math.random()), light: "", dark: "" })
 
 function fileToDataUrl(file: File): Promise<string> {
   if (file.size > MAX_FILE_SIZE) {
-    return Promise.reject(new Error(`El archivo supera el límite de 600 KB (${(file.size / 1024).toFixed(0)} KB)`))
+    return Promise.reject(new Error(`El archivo supera 600 KB (${(file.size / 1024).toFixed(0)} KB)`))
   }
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
@@ -39,90 +26,16 @@ function fileToDataUrl(file: File): Promise<string> {
   })
 }
 
-function UploadZone({
-  label,
-  bg,
-  url,
-  uploading,
-  onFile,
-  onRemove,
-}: {
-  label: string
-  bg: React.CSSProperties
-  url: string
-  uploading: boolean
-  onFile: (f: File) => void
-  onRemove: () => void
-}) {
-  const [drag, setDrag] = useState(false)
-  const ref = useRef<HTMLInputElement>(null)
-
-  return (
-    <div>
-      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--txt3)", marginBottom: 8 }}>
-        {label}
-      </div>
-      <input
-        ref={ref}
-        type="file"
-        accept=".svg,.png,.webp,.jpg,.jpeg,image/svg+xml,image/png,image/webp,image/jpeg"
-        style={{ display: "none" }}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ""
-        }}
-      />
-      {url ? (
-        <div style={{ ...bg, borderRadius: 12, padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, minHeight: 72 }}>
-          <img src={url} alt="" loading="lazy" style={{ height: 32, width: "auto", maxWidth: 130, objectFit: "contain" }} />
-          <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={() => ref.current?.click()}
-              style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: "#2997ff", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
-              Cambiar
-            </button>
-            <button onClick={onRemove}
-              style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
-              Quitar
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div
-          onClick={() => !uploading && ref.current?.click()}
-          onDragOver={e => { e.preventDefault(); setDrag(true) }}
-          onDragLeave={() => setDrag(false)}
-          onDrop={e => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) onFile(f) }}
-          style={{
-            border: `2px dashed ${drag ? "var(--accent)" : "var(--border)"}`,
-            borderRadius: 12, minHeight: 72, display: "flex", alignItems: "center",
-            justifyContent: "center", cursor: uploading ? "default" : "pointer",
-            background: drag ? "rgba(41,151,255,0.05)" : "var(--bg3)",
-            transition: "all 0.18s ease",
-          }}
-        >
-          {uploading ? (
-            <div style={{ display: "flex", gap: 8, alignItems: "center", color: "var(--txt2)", fontSize: 13 }}>
-              <div className="admin-spinner" /> Subiendo…
-            </div>
-          ) : (
-            <div style={{ textAlign: "center", color: "var(--txt3)" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ margin: "0 auto 4px", display: "block" }}>
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
-              </svg>
-              <div style={{ fontSize: 12 }}>SVG · PNG · WebP · JPG</div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
+// Marcas (DS v2.1.0). Antes: borrar SIN confirmación, 35 estilos inline,
+// botones a 11px con #2997ff/#ef4444 (3.02–3.3:1) y un dropzone propio.
+// Ahora: confirmación destructiva, Dropzone del DS con el fondo de cada modo
+// y el título alineado con lo que muestra el sitio ("Han confiado en mí").
+// Las llamadas a /api/admin/brands no cambiaron.
 export default function BrandsTab({ onToast }: Props) {
-  const [brands,   setBrands]  = useState<Brand[]>([])
-  const [slots,    setSlots]   = useState<Slot[]>([makeSlot()])
-  const [adding,   setAdding]  = useState(false)
-  const [loading,  setLoading] = useState(true)
-  const [deleting, setDeleting] = useState<string | null>(null)
+  const [brands, setBrands]   = useState<Brand[]>([])
+  const [slots, setSlots]     = useState<Slot[]>([makeSlot()])
+  const [adding, setAdding]   = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetch("/api/admin/brands", { cache: "no-store" })
@@ -130,33 +43,13 @@ export default function BrandsTab({ onToast }: Props) {
       .then(d => setBrands(Array.isArray(d.brands) ? d.brands : []))
       .catch(() => onToast("Error cargando marcas", "error"))
       .finally(() => setLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- carga única
   }, [])
 
-  function patchSlot(key: string, patch: Partial<Slot>) {
-    setSlots(prev => prev.map(s => s.key === key ? { ...s, ...patch } : s))
-  }
+  const patch = (key: string, p: Partial<Slot>) => setSlots(prev => prev.map(s => s.key === key ? { ...s, ...p } : s))
+  const filled = slots.filter(s => s.light || s.dark)
 
-  async function handleUpload(key: string, file: File, v: "light" | "dark") {
-    patchSlot(key, v === "light" ? { upL: true } : { upD: true })
-    try {
-      const url = await fileToDataUrl(file)
-      patchSlot(key, v === "light" ? { light: url } : { dark: url })
-    } catch (e) {
-      onToast(e instanceof Error ? e.message : "Error al subir", "error")
-    } finally {
-      patchSlot(key, v === "light" ? { upL: false } : { upD: false })
-    }
-  }
-
-  function removeSlot(key: string) {
-    setSlots(prev => prev.length > 1 ? prev.filter(s => s.key !== key) : prev)
-  }
-
-  const anyBusy = slots.some(s => s.upL || s.upD)
-  const anyFilled = slots.some(s => s.light || s.dark)
-
-  async function handleAdd() {
-    const filled = slots.filter(s => s.light || s.dark)
+  async function add() {
     if (!filled.length) { onToast("Sube al menos un logo", "warning"); return }
     setAdding(true)
     try {
@@ -167,163 +60,85 @@ export default function BrandsTab({ onToast }: Props) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ lightLogo: s.light, darkLogo: s.dark }),
         })
-        if (!res.ok) { const d = await res.json(); throw new Error(d.error) }
+        if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "No se pudo agregar") }
         added.push(await res.json())
       }
       setBrands(prev => [...prev, ...added])
       setSlots([makeSlot()])
       onToast(added.length === 1 ? "Marca agregada" : `${added.length} marcas agregadas`, "success")
     } catch (e) {
-      onToast(e instanceof Error ? e.message : "Error al guardar", "error")
-    } finally {
-      setAdding(false)
-    }
+      onToast("Error al guardar", "error", e instanceof Error ? e.message : undefined)
+    } finally { setAdding(false) }
   }
 
-  async function handleDelete(id: string) {
-    setDeleting(id)
+  async function remove(id: string) {
     try {
       const res = await fetch(`/api/admin/brands?id=${id}`, { method: "DELETE" })
       if (!res.ok) throw new Error()
       setBrands(prev => prev.filter(b => b.id !== id))
       onToast("Marca eliminada", "success")
-    } catch {
-      onToast("Error al eliminar", "error")
-    } finally {
-      setDeleting(null)
-    }
+    } catch { onToast("Error al eliminar", "error") }
   }
 
   return (
     <>
-      <div className="admin-section-header">
-        <div>
-          <div className="admin-section-title">He trabajado con</div>
-          <div className="admin-section-sub">Logos que aparecen en el slider del portafolio</div>
-        </div>
-      </div>
+      <SectionHeader title="Marcas" description="Logos de la sección «Han confiado en mí» del portafolio." />
 
-      {/* ── Agregar ── */}
-      <div className="admin-card" style={{ marginBottom: 16 }}>
-        <div className="admin-card-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          <span>Agregar logos</span>
-          <button
-            onClick={() => setSlots(prev => [...prev, makeSlot()])}
-            style={{
-              display: "flex", alignItems: "center", gap: 5,
-              padding: "5px 12px", borderRadius: 7, border: "none",
-              background: "rgba(41,151,255,0.12)", color: "#2997ff",
-              fontSize: 12, fontWeight: 600, cursor: "pointer",
-            }}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Agregar otro logo
+      <Card title="Agregar marcas" description="Sube cada logo en su versión para fondo claro y oscuro. Si solo subes una, se usa en ambos modos.">
+        <ul className="a-brand-slots">
+          {slots.map((s, i) => (
+            <li key={s.key} className="a-brand-slot">
+              <div className="a-brand-slot-head">
+                <span className="a-field-label">Marca {i + 1}</span>
+                {slots.length > 1 && (
+                  <button type="button" className="a-icon-btn" onClick={() => setSlots(prev => prev.filter(x => x.key !== s.key))} aria-label={`Quitar marca ${i + 1} de la lista`}>
+                    <CloseIcon />
+                  </button>
+                )}
+              </div>
+              <div className="a-row-2">
+                <Dropzone label="Fondo claro" hint="SVG, PNG, WebP o JPG · máx. 600 KB" accept=".svg,.png,.webp,.jpg,.jpeg,image/*" aspect="3 / 1"
+                  previewBg="#ffffff" value={s.light || undefined}
+                  onUpload={async f => patch(s.key, { light: await fileToDataUrl(f) })} onRemove={() => patch(s.key, { light: "" })} />
+                <Dropzone label="Fondo oscuro" hint="SVG, PNG, WebP o JPG · máx. 600 KB" accept=".svg,.png,.webp,.jpg,.jpeg,image/*" aspect="3 / 1"
+                  previewBg="#0a0b12" value={s.dark || undefined}
+                  onUpload={async f => patch(s.key, { dark: await fileToDataUrl(f) })} onRemove={() => patch(s.key, { dark: "" })} />
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="a-actions-row">
+          <button type="button" className="a-btn a-btn--ghost" onClick={() => setSlots(prev => [...prev, makeSlot()])}>
+            <PlusIcon /> Otra marca
+          </button>
+          <button type="button" className="a-btn a-btn--primary" onClick={add} disabled={adding || filled.length === 0} aria-busy={adding || undefined}>
+            {adding ? "Agregando…" : filled.length > 1 ? `Agregar ${filled.length} marcas` : "Agregar al portafolio"}
           </button>
         </div>
+      </Card>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {slots.map((slot, idx) => (
-            <div key={slot.key}>
-              {slots.length > 1 && (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--txt3)" }}>Logo #{idx + 1}</span>
-                  <button
-                    onClick={() => removeSlot(slot.key)}
-                    style={{ padding: "3px 10px", borderRadius: 6, border: "none", background: "rgba(239,68,68,0.1)", color: "#ef4444", fontSize: 11, fontWeight: 600, cursor: "pointer" }}
-                  >
-                    Quitar
-                  </button>
-                </div>
-              )}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <UploadZone
-                  label="Versión modo claro"
-                  bg={{ background: "rgba(248,248,248,0.95)", border: "1.5px solid rgba(0,0,0,0.08)" }}
-                  url={slot.light} uploading={slot.upL}
-                  onFile={f => handleUpload(slot.key, f, "light")}
-                  onRemove={() => patchSlot(slot.key, { light: "" })}
-                />
-                <UploadZone
-                  label="Versión modo oscuro"
-                  bg={{ background: "rgba(10,10,10,0.92)", border: "1.5px solid rgba(255,255,255,0.08)" }}
-                  url={slot.dark} uploading={slot.upD}
-                  onFile={f => handleUpload(slot.key, f, "dark")}
-                  onRemove={() => patchSlot(slot.key, { dark: "" })}
-                />
-              </div>
-              {idx < slots.length - 1 && (
-                <div style={{ height: 1, background: "var(--border)", marginTop: 16 }} />
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="admin-input-hint" style={{ marginTop: 14, marginBottom: 14 }}>
-          Si subes solo una versión se usará para ambos modos. SVG recomendado · máx. 600 KB por archivo.
-        </div>
-        <button
-          className="btn-p"
-          onClick={handleAdd}
-          disabled={adding || anyBusy || !anyFilled}
-        >
-          {adding ? "Guardando…" : slots.filter(s => s.light || s.dark).length > 1 ? `Agregar ${slots.filter(s => s.light || s.dark).length} logos al slider` : "Agregar al slider"}
-        </button>
-      </div>
-
-      {/* ── Lista ── */}
-      <div className="admin-card">
-        <div className="admin-card-title">
-          Logos en el slider
-          <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 500, color: "var(--txt3)" }}>
-            ({brands.length})
-          </span>
-        </div>
-
+      <Card title={`En el portafolio${brands.length ? ` · ${brands.length}` : ""}`}>
         {loading ? (
-          <div style={{ padding: "24px 0", display: "flex", gap: 10, alignItems: "center", color: "var(--txt3)", fontSize: 14 }}>
-            <div className="admin-spinner" /> Cargando…
-          </div>
+          <div className="a-brand-grid" aria-busy="true">{[0, 1, 2].map(i => <div key={i} className="a-brand-card skeleton" style={{ height: 120 }} />)}</div>
         ) : brands.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "32px 0", color: "var(--txt3)", fontSize: 14 }}>
-            Aún no hay logos. Agrega el primero arriba.
-          </div>
+          <EmptyState icon={<ImageIcon />} title="Aún no hay marcas" description="Agrega la primera arriba: aparecerá en la sección «Han confiado en mí»." />
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {brands.map((b, idx) => (
-              <div key={b.id} style={{
-                display: "grid", gridTemplateColumns: "90px 90px 1fr auto",
-                gap: 10, alignItems: "center", padding: "10px 12px",
-                background: "var(--bg3)", borderRadius: 10, border: "1px solid var(--border)",
-              }}>
-                <div style={{ background: "#f5f5f5", borderRadius: 8, padding: "8px 10px", display: "flex", alignItems: "center", justifyContent: "center", height: 48 }}>
-                  {b.lightLogo
-                    ? <img src={b.lightLogo} alt="" loading="lazy" style={{ maxHeight: 30, maxWidth: 80, objectFit: "contain" }} />
-                    : <span style={{ fontSize: 10, color: "#aaa" }}>—</span>}
+          <ul className="a-brand-grid">
+            {brands.map((b, i) => (
+              <li key={b.id} className="a-brand-card">
+                <div className="a-brand-logos">
+                  <span className="a-brand-logo a-brand-logo--light">{(b.lightLogo || b.darkLogo) && <img src={b.lightLogo || b.darkLogo} alt="" />}</span>
+                  <span className="a-brand-logo a-brand-logo--dark">{(b.darkLogo || b.lightLogo) && <img src={b.darkLogo || b.lightLogo} alt="" />}</span>
                 </div>
-                <div style={{ background: "#0a0a0a", borderRadius: 8, padding: "8px 10px", display: "flex", alignItems: "center", justifyContent: "center", height: 48 }}>
-                  {b.darkLogo
-                    ? <img src={b.darkLogo} alt="" loading="lazy" style={{ maxHeight: 30, maxWidth: 80, objectFit: "contain" }} />
-                    : <span style={{ fontSize: 10, color: "#555" }}>—</span>}
+                <div className="a-brand-card-foot">
+                  <span className="a-item-meta">Marca {i + 1}</span>
+                  <ConfirmAction itemName={`marca ${i + 1}`} question="¿Eliminar?" onConfirm={() => remove(b.id)} />
                 </div>
-                <div style={{ fontSize: 12, color: "var(--txt3)" }}>Logo #{idx + 1}</div>
-                <button
-                  onClick={() => handleDelete(b.id)}
-                  disabled={deleting === b.id}
-                  style={{
-                    padding: "5px 12px", borderRadius: 7, border: "none",
-                    background: "rgba(239,68,68,0.12)", color: "#ef4444",
-                    fontSize: 12, fontWeight: 600, cursor: "pointer",
-                  }}
-                >
-                  {deleting === b.id ? "…" : "Eliminar"}
-                </button>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
-      </div>
+      </Card>
     </>
   )
 }

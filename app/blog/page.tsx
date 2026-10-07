@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, Fragment, Suspense } from "re
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { AppNavbar } from "@/components/portfolio/app-navbar"
+import { ArrowLeftIcon, ArrowRightIcon } from "@/components/portfolio/icons"
 import { useIntersection } from "@/hooks/use-intersection"
 import { type BlogPost, formatDate, excerpt } from "@/lib/types/blog"
 
@@ -24,7 +25,7 @@ function Paginator({ page, total, onChange }: { page: number; total: number; onC
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
         aria-label="Página anterior"
-      >←</button>
+      ><ArrowLeftIcon /></button>
 
       {visible.map((p, i) => {
         const prev = visible[i - 1]
@@ -45,7 +46,7 @@ function Paginator({ page, total, onChange }: { page: number; total: number; onC
         onClick={() => onChange(page + 1)}
         disabled={page === total}
         aria-label="Página siguiente"
-      >→</button>
+      ><ArrowRightIcon /></button>
     </nav>
   )
 }
@@ -81,7 +82,7 @@ function BlogCard({ post, onTagClick }: { post: BlogPost; onTagClick: (tag: stri
       <Link href={`/blog/${post.slug}`} style={{ textDecoration: "none" }}>
         <div className="blog-card-meta" style={{ margin: "0 22px 22px", paddingTop: 14, borderTop: "1px solid var(--border)" }}>
           <span className="blog-card-date">{formatDate(post.publishedAt)}</span>
-          <span className="blog-card-read">Leer entrada →</span>
+          <span className="blog-card-read">Leer entrada <ArrowRightIcon className="btn-arrow" /></span>
         </div>
       </Link>
     </article>
@@ -222,9 +223,19 @@ function BlogPageInner() {
         {/* Grid */}
         <div ref={gridRef}>
           {loading ? (
-            <div className="blog-empty">
-              <span className="blog-spinner" aria-hidden="true" />
-              Cargando…
+            // N-17: esqueleto con la forma de la grilla real en vez de un spinner.
+            <div className="blog-grid" aria-busy="true" aria-label="Cargando entradas">
+              {Array.from({ length: 6 }, (_, i) => (
+                <div key={i} className="blog-card skeleton-card" aria-hidden="true">
+                  <div className="blog-card-img skeleton" />
+                  <div className="blog-card-body">
+                    <div className="skeleton skeleton-line" style={{ width: "30%" }} />
+                    <div className="skeleton skeleton-line skeleton-line--lg" style={{ width: "80%" }} />
+                    <div className="skeleton skeleton-line" style={{ width: "95%" }} />
+                    <div className="skeleton skeleton-line" style={{ width: "55%" }} />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : filtered.length === 0 ? (
             <div className="blog-empty anim-up">

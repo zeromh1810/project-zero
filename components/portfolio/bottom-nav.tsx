@@ -1,7 +1,8 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
-import { MonitorIcon, UserIcon, EmailIcon, BlogIcon } from "./icons"
+import { MonitorIcon, UserIcon, EmailIcon, BlogIcon, LayersIcon } from "./icons"
 
 type Section = "trabajos" | "sobre" | "contacto"
 
@@ -17,13 +18,15 @@ const TABS: { key: Section; label: string; Icon: typeof MonitorIcon }[] = [
 ]
 
 export function BottomNav({ currentSection, onNavigate }: BottomNavProps) {
+  // Habilita el pop del ícono activo solo tras un toque real (ver CSS).
+  const [touched, setTouched] = useState(false)
   return (
-    <nav className="bottom-nav" aria-label="Navegación principal">
+    <nav className={`bottom-nav${touched ? " bottom-nav--touched" : ""}`} aria-label="Navegación principal">
       {TABS.map(({ key, label, Icon }) => (
         <button
           key={key}
           className={`bottom-tab${currentSection === key ? " active" : ""}`}
-          onClick={() => onNavigate(key)}
+          onClick={() => { setTouched(true); onNavigate(key) }}
           aria-label={label}
           aria-current={currentSection === key ? "page" : undefined}
         >
@@ -34,6 +37,10 @@ export function BottomNav({ currentSection, onNavigate }: BottomNavProps) {
       <Link href="/blog" className="bottom-tab" style={{ textDecoration: "none" }} aria-label="Blog">
         <BlogIcon />
         Blog
+      </Link>
+      <Link href="/design-system" className="bottom-tab" style={{ textDecoration: "none" }} aria-label="Zero DS: Zero design system">
+        <LayersIcon />
+        Zero DS
       </Link>
     </nav>
   )
