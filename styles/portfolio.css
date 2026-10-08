@@ -13,6 +13,7 @@
    importar design-tokens.css antes (/projects/[id] no lo hacía y quedaba sin
    colores ni fuentes). Las rutas que ya lo importan no se ven afectadas. */
 @import "../assets/design-tokens.css";
+@import "./lightbox.css";
 
 /* ── CSS VARIABLES ── */
 :root {

@@ -1,5 +1,6 @@
 "use client"
 
+import { useCallback, useRef, useState } from "react"
 import projectsJson from "@/data/projects.json"
 import socialJson from "@/data/social.json"
 import type { Project } from "@/lib/data/projects"
@@ -8,8 +9,10 @@ import { CountUp } from "@/components/portfolio/count-up"
 import { ThemeToggle } from "@/components/portfolio/app-navbar"
 import { ClosingCta } from "@/components/portfolio/sections/closing-cta"
 import { AlertIcon, ArrowRightIcon } from "@/components/portfolio/icons"
+import { Lightbox } from "@/components/portfolio/lightbox"
+import { GalleryPlaceholder, type GalleryItem } from "@/components/portfolio/gallery-placeholder"
 import {
-  A11yChecklist, Anatomy, Capture, DocPage, Example, Prose, Redline, Rules, Section, StateMatrix, TokenTable,
+  A11yChecklist, Anatomy, Capture, ContrastTable, DocPage, Example, Prose, Redline, Rules, Section, StateMatrix, TokenTable,
   UsageRule, Variants, WhenToUse,
 } from "../ui/doc"
 import { Live } from "../ui/live"
@@ -661,6 +664,212 @@ export function PageSkeleton() {
               built={["Los bloques son aria-hidden; el contenedor anuncia aria-busy.", "El brillo se detiene con movimiento reducido."]}
               designer={["Si la carga tarda más de 10 segundos, explica qué pasa."]}
             />
+          </Section>
+        ) },
+      ]}
+    />
+  )
+}
+
+/* ═══════════════════════════════ Lightbox ═══════════════════════════════ */
+
+const LB_ITEMS: GalleryItem[] = (() => {
+  const p = PROJECTS.find((x) => (x.gallery ?? []).some(Boolean)) ?? PROJECTS[0]
+  const labels = ["Vista general", "Vista móvil", "Sistema de componentes"]
+  const types: GalleryItem["placeholderType"][] = ["desktop", "mobile", "components"]
+  return labels.map((label, i) => ({
+    id: i + 1,
+    src: p.gallery?.[i] || undefined,
+    label: p.gallery?.[i] ? `Imagen ${i + 1}` : label,
+    gradient: p.gradient,
+    accent: p.accentColor,
+    placeholderType: types[i],
+  }))
+})()
+
+/** El componente real, con tres miniaturas como origen del morph. */
+function LightboxDemo() {
+  const [open, setOpen] = useState<number | null>(null)
+  const refs = useRef<(HTMLButtonElement | null)[]>([])
+  const getOrigin = useCallback((i: number) => refs.current[i] ?? null, [])
+  const onClose = useCallback(() => setOpen(null), [])
+  return (
+    <>
+      <div className="detail-gallery-grid doc-x-lb-grid">
+        {LB_ITEMS.map((item, i) => (
+          <button
+            key={item.id}
+            ref={(n) => { refs.current[i] = n }}
+            type="button"
+            className="detail-gallery-item"
+            style={{ position: "relative", overflow: "hidden" }}
+            aria-haspopup="dialog"
+            aria-label={`Ver ${item.label}`}
+            onClick={() => setOpen(i)}
+          >
+            {item.src
+              ? <img src={item.src} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+              : <GalleryPlaceholder item={item} />}
+          </button>
+        ))}
+      </div>
+      {open !== null && (
+        <Lightbox items={LB_ITEMS} startIndex={open} title="Proyecto de ejemplo" getOrigin={getOrigin} onClose={onClose} />
+      )}
+    </>
+  )
+}
+
+export function PageLightbox() {
+  return (
+    <DocPage
+      eyebrow="Componentes del sitio"
+      title="Lightbox"
+      status="nuevo"
+      summary={<p>Muestra las imágenes de la galería de un proyecto a pantalla completa. La imagen crece desde su miniatura y, al cerrar, vuelve a la miniatura de la imagen que estabas viendo. Siempre es oscuro, en los dos temas: la imagen manda.</p>}
+      tabs={[
+        { id: "uso", label: "Uso", content: <>
+          <Section title="Pruébalo" intro={<p>Toca una miniatura. Usa las flechas, la tira, el teclado (← → Inicio Fin Esc) o arrastra: de lado para cambiar, hacia abajo para cerrar.</p>}>
+            <Example align="stretch"><LightboxDemo /></Example>
+          </Section>
+          <Section title="Cuándo usarlo">
+            <WhenToUse
+              use={["Para ver en grande las imágenes de una galería sin salir de la página.", "Cuando hay varias imágenes que recorrer en orden o comparar."]}
+              avoid={[
+                { text: "Para mostrar texto, formularios o confirmaciones", instead: <PageLink to="confirmacion">un diálogo de confirmación</PageLink> },
+                { text: "Para la imagen principal de un caso", instead: "la imagen 16:10 del detalle, que ya se ve grande" },
+              ]}
+            />
+          </Section>
+          <Section title="Reglas">
+            <Rules>
+              <UsageRule
+                title="Las flechas, donde se buscan"
+                doText="Con mouse: a los costados de la imagen, a media altura, siempre visibles y con un canal entero clickeable."
+                doDemo={<div className="doc-x-lb-chrome doc-x-lb-chrome--sides"><span className="doc-x-lb-side" aria-hidden="true">‹</span><span className="doc-x-lb-frame" /><span className="doc-x-lb-side" aria-hidden="true">›</span></div>}
+                dontText="Juntarlas abajo con la tira: quedan lejos de la imagen y el ojo no las encuentra (así fue la primera versión)."
+                dontDemo={<div className="doc-x-lb-chrome doc-x-lb-chrome--col"><span className="doc-x-lb-frame" /><span className="doc-x-lb-row"><span className="doc-x-lb-mini" aria-hidden="true">‹</span><span className="doc-x-lb-strip"><i /><i data-on="" /><i /></span><span className="doc-x-lb-mini" aria-hidden="true">›</span></span></div>}
+              />
+              <UsageRule
+                title="El gesto se insinúa, no se esconde"
+                doText="En táctil: flechas abajo, al alcance del pulgar, y la primera vez la imagen se asoma hacia la siguiente."
+                doDemo={<div className="doc-x-lb-chrome"><span className="doc-x-lb-frame doc-x-lb-frame--peek" /><span className="doc-x-lb-frame doc-x-lb-frame--next" /></div>}
+                dontText="Solo deslizar, sin flechas ni pista: nadie sabe que existe, y los puntos de 8 px no se pueden tocar."
+                dontDemo={<div className="doc-x-lb-chrome"><span className="doc-x-lb-dots"><i /><i data-on="" /><i /></span></div>}
+              />
+              <UsageRule
+                title="Lado a lado, nunca encima"
+                doText="Al cambiar, las dos imágenes viajan juntas en una pista, con un hueco entre ellas: se entiende de dónde viene la siguiente."
+                doDemo={<div className="doc-x-lb-chrome"><span className="doc-x-lb-frame doc-x-lb-frame--out" /><span className="doc-x-lb-frame doc-x-lb-frame--next doc-x-lb-frame--in" /></div>}
+                dontText="Fundir las dos encima: por un instante se ven dos imágenes mezcladas."
+                dontDemo={<div className="doc-x-lb-chrome"><span className="doc-x-lb-frame" /><span className="doc-x-lb-frame doc-x-lb-frame--ghost" /></div>}
+              />
+            </Rules>
+          </Section>
+        </> },
+        { id: "estilo", label: "Estilo", content: <>
+          <Section title="Estructura">
+            <Prose>
+              <ul>
+                <li><strong>Barra superior:</strong> contador «02 / 06» con números tabulares, proyecto · nombre de la imagen y el botón cerrar.</li>
+                <li><strong>Escenario:</strong> la imagen a su proporción real, del mayor tamaño que entre. Tocar arriba o abajo de ella cierra.</li>
+                <li><strong>Flechas laterales (mouse):</strong> círculos de 56 px a media altura, cada uno en un canal de 96 px que es entero clickeable. La imagen nunca queda debajo.</li>
+                <li><strong>Barra inferior:</strong> tira de miniaturas (la actual con anillo blanco). En táctil, además, las flechas de anterior y siguiente a los lados de la tira, al alcance del pulgar.</li>
+              </ul>
+            </Prose>
+          </Section>
+          <Section title="Tokens">
+            <TokenTable rows={[
+              { token: "--lightbox-scrim", role: "Fondo: casi negro, con el matiz navy del modo oscuro", swatch: true },
+              { token: "--lightbox-scrim-blur", role: "Desenfoque del fondo: el texto de la página no se lee a través" },
+              { token: "--lightbox-fg", role: "Texto e íconos", swatch: true },
+              { token: "--lightbox-fg-2", role: "Texto secundario (total del contador, proyecto)", swatch: true },
+              { token: "--lightbox-control-bg", role: "Fondo de los botones", swatch: true },
+              { token: "--lightbox-control-bg-h", role: "Fondo de los botones con el cursor encima", swatch: true },
+              { token: "--lightbox-control-size", role: "Botones y alto del área táctil de las miniaturas" },
+              { token: "--lightbox-focus", role: "Anillo de foco", swatch: true },
+              { token: "--lightbox-frame-radius", role: "Radio de la imagen (igual al de la miniatura)" },
+              { token: "--lightbox-frame-shadow", role: "Sombra de la imagen" },
+              { token: "--lightbox-thumb-w", role: "Ancho de la miniatura en la tira (tope en móvil)" },
+              { token: "--lightbox-thumb-radius", role: "Radio de la miniatura en la tira" },
+              { token: "--lightbox-nav-size", role: "Flechas laterales (mouse)" },
+              { token: "--lightbox-nav-gutter", role: "Canal clickeable a cada lado de la imagen" },
+              { token: "--lightbox-nav-bg", role: "Fondo de las flechas laterales: más presente que los demás controles", swatch: true },
+              { token: "--lightbox-nav-border", role: "Borde de las flechas laterales", swatch: true },
+            ]} />
+          </Section>
+          <Section title="Contraste" intro={<p>Medido sobre el fondo ya compuesto (#06070c).</p>}>
+            <ContrastTable pairs={[
+              { label: "Texto", fg: "#ebebec", bg: "#06070c" },
+              { label: "Texto secundario", fg: "#a5a6a7", bg: "#06070c" },
+              { label: "Anillo de foco", fg: "--lightbox-focus", bg: "#06070c", large: true },
+            ]} />
+          </Section>
+        </> },
+        { id: "movimiento", label: "Movimiento", content: <>
+          <Section title="Coreografía" intro={<p>Todo sale de los tokens de movimiento. El frame lo anima JS (Web Animations) y el estado nunca depende de que una animación termine.</p>}>
+            <TokenTable rows={[
+              { token: "--dur-reveal", role: "Abrir: la imagen crece desde la miniatura (ease-out)" },
+              { token: "--dur-exit-lg", role: "Cerrar: vuelve a la miniatura actual, ~65% de abrir (ease-out: llega a un lugar)" },
+              { token: "--lightbox-slide-duration", role: "Cambiar: la pista recorre una pantalla (ease-out, arranca al instante del clic)" },
+              { token: "--lightbox-slide-gap", role: "Cambiar: hueco entre la imagen que sale y la que entra" },
+              { token: "--dur-exit", role: "Cambiar con movimiento reducido: se apaga la actual (ease-in)" },
+              { token: "--dur-enter", role: "Cambiar con movimiento reducido: aparece la siguiente, después (ease-out)" },
+              { token: "--lightbox-chrome-delay", role: "Las barras entran cuando la imagen ya va en camino" },
+              { token: "--lightbox-swipe-distance", role: "Arrastre horizontal que cambia de imagen" },
+              { token: "--lightbox-dismiss-distance", role: "Arrastre hacia abajo que cierra" },
+              { token: "--lightbox-flick-velocity", role: "Velocidad (px/ms) que cuenta como gesto aunque sea corto" },
+              { token: "--lightbox-peek-distance", role: "Pista de deslizar: cuánto se asoma la imagen (táctil, 1.ª vez por sesión)" },
+              { token: "--lightbox-peek-duration", role: "Pista de deslizar: ida y vuelta" },
+              { token: "--lightbox-peek-delay", role: "Pista de deslizar: espera después de abrir" },
+            ]} />
+          </Section>
+          <Section title="Reglas">
+            <Prose>
+              <ul>
+                <li><strong>Desde el origen:</strong> el morph usa transform + clip-path, así el recorte de la miniatura se abre hasta la imagen completa sin deformarla.</li>
+                <li><strong>Una pista para todo:</strong> flechas, teclado, tira y arrastre mueven la misma pista. Al arrastrar, la vecina asoma desde el borde y sigue al dedo; al soltar, la pista termina el recorrido desde ahí.</li>
+                <li><strong>Interrumpible:</strong> un clic o tecla durante un cambio lo lleva al final al instante y sigue con el nuevo.</li>
+                <li><strong>El gesto sigue al dedo</strong> en tiempo real; si no pasa el umbral, todo vuelve a su lugar.</li>
+                <li><strong>Pista de deslizar:</strong> en táctil, la primera vez por sesión, la imagen se asoma hacia la siguiente y vuelve. Cualquier toque la corta.</li>
+                <li><strong>Movimiento reducido:</strong> sin morph, pista ni pista de deslizar; solo fundidos, uno después del otro.</li>
+              </ul>
+            </Prose>
+          </Section>
+        </> },
+        { id: "a11y", label: "Accesibilidad", content: (
+          <Section title="Lista de chequeo">
+            <A11yChecklist
+              built={[
+                "Diálogo modal (Radix): foco atrapado, scroll bloqueado, Esc cierra.",
+                "Al cerrar, el foco vuelve a la miniatura de la imagen que estabas viendo.",
+                "← → cambian de imagen; Inicio y Fin van a la primera y a la última.",
+                "Cada cambio se anuncia: «Imagen 3 de 6: Vista móvil» (role=status).",
+                "Todo gesto tiene alternativa visible: flechas, tira y cerrar.",
+                "Controles de 44 px de alto con anillo de foco de ~6.7:1.",
+                "El zoom con dos dedos del navegador no se bloquea.",
+              ]}
+              designer={["Las imágenes se ven a su proporción real y sin agrandarse: súbelas con al menos 1600 px de ancho."]}
+            />
+          </Section>
+        ) },
+        { id: "codigo", label: "Código", content: (
+          <Section title="Uso">
+            <Example code={`import { Lightbox } from "@/components/portfolio/lightbox"
+
+// Las miniaturas son el origen y el destino del morph.
+const thumbs = useRef<(HTMLButtonElement | null)[]>([])
+const [open, setOpen] = useState<number | null>(null)
+
+{open !== null && (
+  <Lightbox
+    items={galleryItems}
+    startIndex={open}
+    title={project.title}
+    getOrigin={(i) => thumbs.current[i] ?? null}
+    onClose={() => setOpen(null)}
+  />
+)}`}><LightboxDemo /></Example>
           </Section>
         ) },
       ]}

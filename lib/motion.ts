@@ -12,14 +12,21 @@ import { createElement, useEffect, useRef, useState, type ReactNode } from "reac
 // movimiento reducido), la UI igual llega a su estado final. Un cambio nuevo
 // en plena salida la reemplaza (interrumpible).
 
+/** Un token de tiempo en ms, sin importar la unidad. El CSS minificado
+ *  reescribe `420ms` como `.42s`: leerlo con parseFloat a secas da 0.42ms. */
+export function tokenMs(token: string, fallback = 0): number {
+  if (typeof window === "undefined") return fallback
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(token).trim()
+  const n = parseFloat(raw)
+  if (Number.isNaN(n)) return fallback
+  return raw.endsWith("ms") ? n : raw.endsWith("s") ? n * 1000 : n
+}
+
 /** Duración de un token de motion en ms (0 con movimiento reducido). */
 export function motionMs(token = "--dur-exit"): number {
   if (typeof window === "undefined") return 0
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return 0
-  const raw = getComputedStyle(document.documentElement).getPropertyValue(token).trim()
-  const n = parseFloat(raw)
-  if (Number.isNaN(n)) return 0
-  return raw.endsWith("ms") ? n : n * 1000
+  return tokenMs(token)
 }
 
 /**

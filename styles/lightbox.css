@@ -1,0 +1,299 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Lightbox — visor de la galería del detalle (Zero design system v2.2.0)
+   Componente: components/portfolio/lightbox.tsx · Tokens: --lightbox-*
+
+   Siempre oscuro, en los dos temas: un fondo neutro y casi negro deja que
+   los colores de la imagen se lean tal cual (mismo criterio que un visor de
+   fotos). El movimiento del frame lo hace JS (WAAPI); aquí solo la barra
+   superior, la tira y los estados de los controles.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.lb-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: var(--lightbox-scrim);
+  /* -webkit- primero: lightningcss fusiona el par y se queda con el último */
+  -webkit-backdrop-filter: blur(var(--lightbox-scrim-blur));
+  backdrop-filter: blur(var(--lightbox-scrim-blur));
+}
+
+.lb {
+  --lb-chrome: 1; /* lo baja el gesto de cerrar: los controles se apagan con el scrim */
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  color: var(--lightbox-fg);
+  font-family: var(--ff-body);
+  outline: none;
+  overflow: hidden; /* la imagen que sale se corta en el borde de la pantalla */
+}
+
+/* ── Barras ── */
+.lb-bar {
+  padding: var(--space-3) var(--space-4);
+  opacity: var(--lb-chrome);
+  /* backwards (no both): al terminar, manda la opacidad de --lb-chrome */
+  animation: lb-chrome-in var(--dur-enter) var(--ease-out) var(--lightbox-chrome-delay) backwards;
+}
+.lb[data-closing] .lb-bar {
+  animation: lb-chrome-out var(--dur-exit) var(--ease-in) forwards;
+}
+@keyframes lb-chrome-in  { from { opacity: 0; } }
+@keyframes lb-chrome-out { to { opacity: 0; } }
+
+.lb-bar--top {
+  display: grid;
+  grid-template-columns: minmax(var(--lightbox-control-size), 1fr) minmax(0, auto) minmax(var(--lightbox-control-size), 1fr);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.lb-count {
+  margin: 0;
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--lightbox-fg-2);
+}
+.lb-count-now { color: var(--lightbox-fg); font-weight: var(--fw-medium); }
+.lb-count-sep { margin: 0 0.35em; }
+
+.lb-caption {
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: var(--fs-small);
+  white-space: nowrap;
+}
+.lb-caption-project {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--lightbox-fg-2);
+}
+.lb-caption-label {
+  flex-shrink: 0;
+  color: var(--lightbox-fg);
+  font-weight: var(--fw-medium);
+}
+.lb-caption-label::before {
+  content: "·";
+  margin-right: var(--space-2);
+  color: var(--lightbox-fg-2);
+}
+
+.lb-close { justify-self: end; }
+
+/* ── Escenario ── */
+.lb-stage {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-4);
+  container-type: size;
+  /* un dedo = gestos propios; dos dedos = zoom del navegador (no se bloquea) */
+  touch-action: pinch-zoom;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: zoom-out; /* tocar fuera de la imagen cierra */
+}
+
+/* Cada imagen vive en su carril: durante un cambio hay dos (la que sale y la
+   que entra), lado a lado en la misma pista. pointer-events: los toques en el
+   espacio vacío llegan al escenario (tocar fuera de la imagen cierra). */
+.lb-slide {
+  position: absolute;
+  inset: 0;
+  padding: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.lb-slide .lb-frame { pointer-events: auto; }
+
+.lb-frame {
+  position: relative;
+  display: block;
+  max-width: 100cqw;
+  max-height: 100cqh;
+  width: auto;
+  height: auto;
+  border-radius: var(--lightbox-frame-radius);
+  box-shadow: var(--lightbox-frame-shadow);
+  cursor: grab;
+  -webkit-user-drag: none;
+  will-change: transform, opacity;
+}
+.lb-frame:active { cursor: grabbing; }
+
+/* Sin imagen subida: arte de relleno en 16:10, del mayor tamaño que entre */
+.lb-frame--placeholder {
+  width: min(100cqw, 160cqh);
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
+/* ── Controles ── */
+.lb-btn {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  width: var(--lightbox-control-size);
+  height: var(--lightbox-control-size);
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--lightbox-control-bg);
+  color: var(--lightbox-fg);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-hover) var(--ease-standard),
+    scale var(--dur-press) var(--ease-out);
+}
+@media (hover: hover) {
+  .lb-btn:hover { background: var(--lightbox-control-bg-h); }
+}
+.lb-btn:active { scale: 0.95; }
+.lb-btn:focus-visible,
+.lb-thumb:focus-visible {
+  outline: 2px solid var(--lightbox-focus);
+  outline-offset: 3px;
+}
+
+.lb-bar--bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+/* ── Tira de miniaturas: navegación directa + dónde estás ── */
+.lb-strip {
+  display: flex;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lb-strip-item { display: flex; }
+
+.lb-thumb {
+  display: grid;
+  place-items: center;
+  /* el botón da el área táctil (44px de alto); la miniatura es más chica */
+  height: var(--lightbox-control-size);
+  padding: 0;
+  border: 0;
+  border-radius: var(--lightbox-thumb-radius);
+  background: none;
+  cursor: pointer;
+}
+.lb-thumb-img {
+  position: relative;
+  display: block;
+  width: var(--lightbox-thumb-w);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--lightbox-thumb-radius);
+  background: var(--lightbox-control-bg);
+  opacity: 0.45;
+  transition:
+    opacity var(--dur-hover) var(--ease-standard),
+    box-shadow var(--dur-hover) var(--ease-standard);
+}
+.lb-thumb-img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@media (hover: hover) {
+  .lb-thumb:hover .lb-thumb-img { opacity: 0.8; }
+}
+.lb-thumb[aria-current="true"] .lb-thumb-img {
+  opacity: 1;
+  box-shadow: 0 0 0 2px var(--lightbox-fg);
+}
+
+/* ── Flechas laterales (mouse) ──
+   Donde las busca el ojo: a los costados de la imagen, a media altura. El
+   escenario reserva un canal a cada lado para que nunca tapen la imagen, y
+   todo el canal es clickeable; el círculo es la parte visible. Siempre a la
+   vista (no aparecen recién con hover). En táctil no existen: mandan las
+   flechas de abajo, al alcance del pulgar, más la pista de deslizar. */
+.lb-side { display: none; }
+
+@media (hover: hover) and (pointer: fine) {
+  .lb-stage { padding-inline: var(--lightbox-nav-gutter); }
+  .lb-btn--touch { display: none; }
+
+  .lb-side {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: var(--lightbox-nav-gutter);
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--lightbox-fg);
+    cursor: pointer;
+  }
+  .lb-side--prev { left: 0; }
+  .lb-side--next { right: 0; }
+
+  .lb-side-btn {
+    display: grid;
+    place-items: center;
+    width: var(--lightbox-nav-size);
+    height: var(--lightbox-nav-size);
+    border-radius: 9999px;
+    background: var(--lightbox-nav-bg);
+    box-shadow: inset 0 0 0 1px var(--lightbox-nav-border);
+    transition:
+      background-color var(--dur-hover) var(--ease-standard),
+      translate var(--dur-hover) var(--ease-out),
+      scale var(--dur-press) var(--ease-out);
+  }
+  .lb-side:hover .lb-side-btn { background: var(--lightbox-control-bg-h); }
+  /* el chevrón se adelanta un poco hacia donde va: confirma la dirección */
+  .lb-side--prev:hover .lb-side-btn { translate: calc(var(--shift-sm, 4px) * -1) 0; }
+  .lb-side--next:hover .lb-side-btn { translate: var(--shift-sm, 4px) 0; }
+  .lb-side:active .lb-side-btn { scale: 0.95; }
+  .lb-side:focus-visible { outline: none; }
+  .lb-side:focus-visible .lb-side-btn {
+    outline: 2px solid var(--lightbox-focus);
+    outline-offset: 3px;
+  }
+}
+
+/* ── Móvil: la tira se reparte el ancho que dejan las flechas ── */
+@media (max-width: 640px) {
+  .lb-bar { padding: var(--space-2) var(--space-3); }
+  .lb-stage { padding: var(--space-2) var(--space-3); }
+  .lb-caption-project { display: none; }
+  .lb-caption-label::before { content: none; }
+  .lb-bar--bottom { gap: var(--space-2); }
+  .lb-strip { flex: 1; justify-content: center; gap: var(--space-1); }
+  .lb-strip-item { flex: 1 1 0; min-width: 0; max-width: var(--lightbox-thumb-w); }
+  .lb-thumb { width: 100%; }
+  .lb-thumb-img { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lb-bar,
+  .lb[data-closing] .lb-bar { animation-duration: 1ms; animation-delay: 0ms; }
+}

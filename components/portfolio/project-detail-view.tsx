@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import type { Project } from "@/lib/data/projects"
-import { GalleryModal, PlaceholderThumb, type GalleryItem } from "./gallery-modal"
+import { GalleryPlaceholder, type GalleryItem } from "./gallery-placeholder"
+import { Lightbox } from "./lightbox"
 import { useLogo } from "@/lib/hooks/use-logo"
 import { RichText } from "./rich-text"
 import { ThemeToggle } from "./app-navbar"
@@ -56,8 +57,12 @@ export function ProjectDetailView({
 }: ProjectDetailViewProps) {
   const [mounted, setMounted] = useState(false)
   const [exiting, setExiting] = useState(false)
-  const [modalOpen, setModalOpen] = useState(false)
-  const [modalIndex, setModalIndex] = useState(0)
+  // Índice abierto en el lightbox (null = cerrado). Las miniaturas son el
+  // origen y el destino del morph del lightbox.
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const thumbRefs = useRef<(HTMLButtonElement | null)[]>([])
+  const getThumb = useCallback((i: number) => thumbRefs.current[i] ?? null, [])
+  const closeLightbox = useCallback(() => setLightboxIndex(null), [])
   const logo = useLogo()
   const logoUrl = isDark
     ? (logo.darkUrl || logo.lightUrl)
@@ -212,8 +217,10 @@ export function ProjectDetailView({
               {galleryItems.map((item, index) => (
                 <button
                   key={item.id}
+                  ref={(node) => { thumbRefs.current[index] = node }}
                   className="detail-gallery-item"
-                  onClick={() => { setModalIndex(index); setModalOpen(true) }}
+                  onClick={() => setLightboxIndex(index)}
+                  aria-haspopup="dialog"
                   aria-label={`Ver ${item.label}`}
                   style={{ position: "relative", overflow: "hidden" }}
                 >
@@ -225,7 +232,7 @@ export function ProjectDetailView({
                       style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }}
                     />
                   ) : (
-                    <PlaceholderThumb item={item} />
+                    <GalleryPlaceholder item={item} />
                   )}
                   {/* Hover label */}
                   <div className="gallery-item-label">
@@ -288,13 +295,15 @@ export function ProjectDetailView({
         </aside>
       </main>
 
-      <GalleryModal
-        items={galleryItems}
-        currentIndex={modalIndex}
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        onNavigate={setModalIndex}
-      />
+      {lightboxIndex !== null && (
+        <Lightbox
+          items={galleryItems}
+          startIndex={lightboxIndex}
+          title={project.title}
+          getOrigin={getThumb}
+          onClose={closeLightbox}
+        />
+      )}
     </div>
   )
 }

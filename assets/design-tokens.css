@@ -224,6 +224,35 @@
   /* Design System layout */
   --ds-layout-navbar-offset: 64px;
 
+  /* Lightbox — visor de la galería del detalle (v2.2.0) — styles/lightbox.css.
+     Siempre oscuro en los dos temas: la imagen manda. */
+  --lightbox-scrim: rgba(6, 7, 12, 0.96);
+  --lightbox-scrim-blur: var(--glass-blur-sm, 12px); /* el texto de la página no se lee a través */
+  --lightbox-fg: rgba(255, 255, 255, 0.92);
+  --lightbox-fg-2: rgba(255, 255, 255, 0.64); /* ~8:1 sobre el scrim */
+  --lightbox-control-bg: rgba(255, 255, 255, 0.08);
+  --lightbox-control-bg-h: rgba(255, 255, 255, 0.16);
+  --lightbox-control-size: 44px; /* área táctil mínima */
+  --lightbox-focus: var(--primitive-color-blue-400); /* ~6.7:1 sobre el scrim */
+  --lightbox-frame-radius: 12px;
+  --lightbox-frame-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  --lightbox-thumb-w: 64px;
+  --lightbox-thumb-radius: 8px;
+  --lightbox-chrome-delay: 120ms; /* las barras entran cuando la imagen ya va en camino */
+  --lightbox-slide-duration: 420ms; /* cambio de imagen: la pista recorre una pantalla (ui-ux-pro-max duration-timing: por distancia) */
+  --lightbox-slide-gap: 48px;       /* hueco entre la imagen que sale y la que entra */
+  --lightbox-swipe-distance: 60px;   /* arrastre horizontal que cambia de imagen */
+  --lightbox-dismiss-distance: 120px; /* arrastre hacia abajo que cierra */
+  --lightbox-flick-velocity: 0.45;    /* px/ms: un gesto rápido cuenta aunque sea corto */
+  /* Descubribilidad de la navegación */
+  --lightbox-nav-size: 56px;    /* flechas laterales (mouse): más grandes que los controles de 44 */
+  --lightbox-nav-gutter: 96px;  /* canal clickeable a cada lado del escenario */
+  --lightbox-nav-bg: rgba(255, 255, 255, 0.12);
+  --lightbox-nav-border: rgba(255, 255, 255, 0.14);
+  --lightbox-peek-distance: 28px;  /* pista de deslizar (táctil, 1.ª vez por sesión) */
+  --lightbox-peek-duration: 640ms;
+  --lightbox-peek-delay: 240ms;
+
   /* AdminToast — Feedback / Notification component — docs/toast.md */
   --admin-toast-radius: 16px;
   --admin-toast-min-width: 320px;

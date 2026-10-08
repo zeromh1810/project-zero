@@ -35,6 +35,7 @@ const RAW: { key: string; label: string; items: DsPage[] }[] = [
     { id: "cta-cierre", label: "CTA de cierre", status: "nuevo", keywords: "closing contacto email", Component: S.PageCtaCierre },
     { id: "contador", label: "Contador animado", status: "nuevo", keywords: "countup metrica numero", Component: S.PageContador },
     { id: "skeleton", label: "Esqueleto de carga", keywords: "loading skeleton carga", Component: S.PageSkeleton },
+    { id: "lightbox", label: "Lightbox", status: "nuevo", keywords: "galeria visor imagenes modal fotos", Component: S.PageLightbox },
   ] },
   { key: "admin", label: "Componentes del admin", items: [
     { id: "campo", label: "Campo", status: "nuevo", keywords: "field input label error tag", Component: A.PageCampo },

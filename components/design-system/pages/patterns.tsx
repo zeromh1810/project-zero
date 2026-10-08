@@ -131,7 +131,7 @@ export function PageDetalle() {
           { name: "Imagen principal", desc: "16:10, recibe el morph desde la tarjeta" },
           { name: "El desafío · El proceso · El resultado", desc: "texto enriquecido editable en el admin" },
           { name: "Barra lateral", desc: "rol, métricas de impacto, habilidades, «Ver proyecto live» si hay URL" },
-          { name: "Galería", desc: "imágenes adicionales con visor" },
+          { name: "Galería", desc: "seis miniaturas 4:3; cada una abre el lightbox" },
         ]} />
       </Section>
     </DocPage>
