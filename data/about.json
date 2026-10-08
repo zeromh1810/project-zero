@@ -6,14 +6,13 @@
     "Prototyping",
     "User Research",
     "Design Systems",
-    "React",
-    "TypeScript",
     "Motion Design",
     "Framer",
-    "Three.js",
-    "GSAP",
     "Brand Identity",
-    "UI/UX"
+    "UI/UX",
+    "Product Designer",
+    "Liderazgo de equipos",
+    "Fullstory"
   ],
   "stats": [
     {
@@ -30,7 +29,7 @@
     }
   ],
   "badge": "Disponible para freelance",
-  "available": true,
+  "available": false,
   "cvUrl": "",
   "photoUrl": "https://raw.githubusercontent.com/zeromh1810/project-zero/main/public/uploads/1780592012119-z39l7f.png"
 }
