@@ -1,0 +1,97 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Motion — entradas y salidas (Zero design system v2.1.0)
+   Vocabulario compartido por el admin y el DS. Reglas:
+   - Solo opacity y propiedades de transformación individuales (translate,
+     scale): componen con el `transform` que ya tenga el elemento (el
+     diálogo usa transform para centrarse) y no causan reflow.
+   - Entrar: --dur-enter + --ease-out (llega rápido y se asienta).
+     Salir: --dur-exit + --ease-in, ~65% de la entrada y con menos recorrido.
+   - Grupos: stagger de --stagger-step-sm (40ms), con tope --stagger-max-sm.
+   - El estado nunca depende de animationend (lib/motion.ts usa timers con
+     la misma duración del token), así una animación cortada no deja la UI
+     a medio camino.
+   - prefers-reduced-motion: todo se apaga al final de este archivo.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes m-rise    { from { opacity: 0; translate: 0 var(--reveal-distance, 12px); } }
+@keyframes m-rise-sm { from { opacity: 0; translate: 0 var(--shift-sm, 4px); } }
+@keyframes m-fade    { from { opacity: 0; } }
+@keyframes m-pop     { from { opacity: 0; scale: 0.96; } }
+@keyframes m-chip    { from { opacity: 0; scale: 0.88; } }
+@keyframes m-slide-l { from { opacity: 0; translate: calc(var(--shift-sm, 4px) * -2) 0; } }
+@keyframes m-slide-r { from { opacity: 0; translate: calc(var(--shift-sm, 4px) * 2) 0; } }
+@keyframes m-dot     { from { scale: 0; } 70% { scale: 1.25; } to { scale: 1; } }
+
+@keyframes m-fall    { to { opacity: 0; translate: 0 var(--shift-sm, 4px); } }
+@keyframes m-fade-o  { to { opacity: 0; } }
+@keyframes m-shrink  { to { opacity: 0; scale: 0.96; } }
+@keyframes m-chip-o  { to { opacity: 0; scale: 0.88; } }
+@keyframes m-drop    { to { opacity: 0; translate: 0 calc(var(--shift-sm, 4px) * 3); } }
+
+/* ── Utilidades ─────────────────────────────────────────────────────────── */
+/* Entrada genérica. `--m-i` (índice) escalona dentro de un grupo. */
+.m-enter {
+  animation: m-rise var(--dur-enter) var(--ease-out) both;
+  animation-delay: min(calc(var(--m-i, 0) * var(--stagger-step-sm)), var(--stagger-max-sm));
+}
+.m-enter-sm { animation: m-rise-sm var(--dur-enter) var(--ease-out) both; }
+.m-enter-fade { animation: m-fade var(--dur-enter) var(--ease-out) both; }
+
+/* Salida genérica: lib/motion.ts la aplica y retira el nodo al terminar. */
+.m-exit { animation: m-fall var(--dur-exit) var(--ease-in) forwards; pointer-events: none; }
+.m-exit-fade { animation: m-fade-o var(--dur-exit) var(--ease-in) forwards; pointer-events: none; }
+
+/* Grupo escalonado: los hijos directos entran uno tras otro. */
+.m-stagger > * {
+  animation: m-rise var(--dur-enter) var(--ease-out) both;
+  animation-delay: min(calc(var(--m-i, 0) * var(--stagger-step-sm)), var(--stagger-max-sm));
+}
+.m-stagger > :nth-child(2) { --m-i: 1; }
+.m-stagger > :nth-child(3) { --m-i: 2; }
+.m-stagger > :nth-child(4) { --m-i: 3; }
+.m-stagger > :nth-child(5) { --m-i: 4; }
+.m-stagger > :nth-child(6) { --m-i: 5; }
+.m-stagger > :nth-child(n + 7) { --m-i: 6; }
+
+/* Cambio de vista (tab del admin, página del DS): <Switch> de lib/motion. */
+.m-view[data-phase="enter"] { animation: m-rise var(--dur-enter) var(--ease-out) both; }
+.m-view[data-phase="exit"]  { animation: m-fall var(--dur-exit) var(--ease-in) forwards; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .m-enter, .m-enter-sm, .m-enter-fade, .m-exit, .m-exit-fade,
+  .m-stagger > *, .m-view[data-phase] {
+    animation: none !important;
+  }
+}
+
+/* Ítem que sale antes de eliminarse (lib/motion → leaveThen). */
+.m-leaving { animation: m-shrink var(--dur-exit) var(--ease-in) forwards; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .m-leaving { animation: none !important; opacity: 0.4; } }
+
+/* ── Transición entre vistas: "fade through" (lib/motion → Crossfade) ─────
+   v2.1.0 — corregido tras revisión del usuario: un crossfade con las dos
+   vistas visibles a la vez superponía dos páginas de texto ilegibles. Para
+   contenido DISTINTO (otra página, otra pestaña) Material usa fade through:
+   la saliente se va rápido (--dur-hover / --dur-press) y recién entonces la
+   nueva aparece con dirección. Nunca hay dos textos visibles a la vez.
+   La nueva se monta al instante (no-blocking-animation): solo su opacidad
+   espera a que la anterior termine de irse. */
+.m-xfade { position: relative; }
+.m-xfade > .m-xfade-out { position: absolute; inset: 0 0 auto 0; pointer-events: none; }
+.m-xfade--lg { --m-out: var(--dur-hover); --m-in: var(--dur-reveal); }
+.m-xfade--sm { --m-out: var(--dur-press); --m-in: var(--dur-enter); }
+.m-xfade > .m-xfade-out { animation: m-xf-out var(--m-out) var(--ease-in) forwards; }
+.m-xfade > .m-xfade-in  { animation: m-xf-in var(--m-in) var(--ease-out) both; }
+/* Solo cuando hay una saliente, la nueva espera a que termine de irse */
+.m-xfade > .m-xfade-in.is-after { animation-delay: var(--m-out); }
+.m-xfade[data-dir="up"]    { --m-dx: 0px; --m-dy: var(--reveal-distance, 12px); }
+.m-xfade[data-dir="down"]  { --m-dx: 0px; --m-dy: calc(var(--reveal-distance, 12px) * -1); }
+.m-xfade[data-dir="left"]  { --m-dx: var(--reveal-distance, 12px); --m-dy: 0px; }
+.m-xfade[data-dir="right"] { --m-dx: calc(var(--reveal-distance, 12px) * -1); --m-dy: 0px; }
+.m-xfade[data-dir="none"]  { --m-dx: 0px; --m-dy: 0px; }
+@keyframes m-xf-in  { from { opacity: 0; translate: var(--m-dx, 0px) var(--m-dy, 0px); } }
+@keyframes m-xf-out { to   { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .m-xfade > .m-xfade-in { animation: none !important; }
+  .m-xfade > .m-xfade-out { display: none !important; }
+}

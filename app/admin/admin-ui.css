@@ -1039,3 +1039,88 @@
 .a-tab-preview--dark .a-tab-preview-tab { background: var(--primitive-color-neutral-700); color: var(--primitive-color-text-light-50); }
 .a-favicon-drop { max-width: 260px; }
 .a-favicon-drop .a-drop-preview img { object-fit: contain; padding: var(--space-6); }
+
+/* ═══ Motion — entradas y salidas del panel (Zero design system v2.1.0) ═══
+   Vocabulario en styles/motion.css; estados de presencia en lib/motion.ts.
+   Coreografía: el shell entra una vez (barra → navegación → contenido); al
+   cambiar de sección la anterior sale (--dur-exit) y la nueva entra en
+   cascada (.m-stagger); dentro, listas y tarjetas escalonadas a 40ms. */
+
+/* Shell */
+.a-topbar { animation: m-fade var(--dur-enter) var(--ease-out) both; }
+.a-sidenav { animation: m-slide-l var(--dur-reveal) var(--ease-out) both; animation-delay: var(--stagger-step-sm); }
+.a-shell.is-leaving { animation: m-fade-o var(--dur-exit) var(--ease-in) forwards; pointer-events: none; }
+.a-sidenav-item { transition: background-color var(--dur-hover) var(--ease-standard), color var(--dur-hover) var(--ease-standard); }
+
+/* Punto de cambios sin guardar: aparece con un pequeño rebote, se va encogiéndose */
+.a-dirty-dot { animation: m-dot var(--dur-enter) var(--ease-spring) both; }
+.a-dirty-dot.is-exiting { animation: m-chip-o var(--dur-exit) var(--ease-in) forwards; }
+
+/* Listas, grillas y galerías: cascada al montarse (y cada ítem nuevo entra) */
+.a-list > *, .a-brand-grid > *, .a-gallery > * {
+  animation: m-rise-sm var(--dur-enter) var(--ease-out) both;
+  animation-delay: min(calc(var(--m-i, 0) * var(--stagger-step-sm)), var(--stagger-max-sm));
+}
+.a-list > :nth-child(2), .a-brand-grid > :nth-child(2), .a-gallery > :nth-child(2) { --m-i: 1; }
+.a-list > :nth-child(3), .a-brand-grid > :nth-child(3), .a-gallery > :nth-child(3) { --m-i: 2; }
+.a-list > :nth-child(4), .a-brand-grid > :nth-child(4), .a-gallery > :nth-child(4) { --m-i: 3; }
+.a-list > :nth-child(5), .a-brand-grid > :nth-child(5), .a-gallery > :nth-child(5) { --m-i: 4; }
+.a-list > :nth-child(n + 6), .a-brand-grid > :nth-child(n + 6), .a-gallery > :nth-child(n + 6) { --m-i: 5; }
+/* Un ítem que se elimina sale encogiéndose (ConfirmAction → leaveThen) */
+.a-list > .m-leaving, .a-brand-grid > .m-leaving { animation: m-shrink var(--dur-exit) var(--ease-in) forwards; }
+
+/* Estados vacíos y de carga */
+.a-empty { animation: m-rise var(--dur-enter) var(--ease-out) both; }
+.a-list[aria-busy="true"] { animation: m-fade var(--dur-enter) var(--ease-out) both; }
+
+/* Panel lateral: el contenido entra después del panel */
+.a-sheet[data-state="open"] .a-sheet-body > * {
+  animation: m-rise-sm var(--dur-enter) var(--ease-out) both;
+  animation-delay: calc(var(--dur-exit) + min(calc(var(--m-i, 0) * var(--stagger-step-sm)), var(--stagger-max-sm)));
+}
+.a-sheet-body > :nth-child(2) { --m-i: 1; }
+.a-sheet-body > :nth-child(3) { --m-i: 2; }
+.a-sheet-body > :nth-child(n + 4) { --m-i: 3; }
+.a-sheet-foot { animation: m-fade var(--dur-enter) var(--ease-out) both; animation-delay: var(--dur-exit); }
+
+/* Diálogo: aparece desde 96% y sale encogiéndose (scale compone con el
+   transform que lo centra) */
+.a-dialog[data-state="open"] { animation: m-pop var(--dur-enter) var(--ease-out) both; }
+.a-dialog[data-state="closed"] { animation: m-shrink var(--dur-exit) var(--ease-in) forwards; }
+
+/* Confirmación en línea: la pregunta entra desde la derecha del botón */
+.a-confirm { animation: m-slide-r var(--dur-enter) var(--ease-out) both; }
+
+/* Error de campo: sube 4px al aparecer, baja y se desvanece al corregirse */
+.a-field-error { animation: m-rise-sm var(--dur-enter) var(--ease-out) both; }
+.a-field-error.is-exiting { animation: m-fall var(--dur-exit) var(--ease-in) forwards; }
+
+/* Etiquetas (TagInput): entran creciendo, salen encogiéndose */
+.admin-chip { animation: m-chip var(--dur-enter) var(--ease-out) both; }
+.admin-chip.is-exiting { animation: m-chip-o var(--dur-exit) var(--ease-in) forwards; pointer-events: none; }
+
+/* Dropzone: la vista previa aparece al subir; el estado "subiendo" se funde */
+.a-drop-preview { animation: m-pop var(--dur-enter) var(--ease-out) both; }
+.a-drop-zone { animation: m-fade var(--dur-enter) var(--ease-out) both; }
+.a-drop-busy { animation: m-fade var(--dur-hover) var(--ease-out) both; }
+
+/* Barra de cambios sin guardar: sube al primer cambio, baja al guardar */
+.a-unsaved { animation: m-rise var(--dur-enter) var(--ease-out) both; }
+.a-unsaved.is-exiting, .m-stagger > .a-unsaved.is-exiting { animation: m-drop var(--dur-exit) var(--ease-in) forwards; pointer-events: none; }
+
+/* Login: el error del formulario sube 4px */
+.admin-login-error { animation: m-rise-sm var(--dur-enter) var(--ease-out) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .a-topbar, .a-sidenav, .a-shell.is-leaving, .a-dirty-dot,
+  .a-list > *, .a-brand-grid > *, .a-gallery > *, .a-empty, .a-list[aria-busy="true"],
+  .a-sheet-body > *, .a-sheet-foot, .a-dialog[data-state], .a-confirm,
+  .a-field-error, .admin-chip, .a-drop-preview, .a-drop-zone, .a-drop-busy,
+  .a-unsaved, .admin-login-error {
+    animation: none !important;
+  }
+}
+.m-stagger > .a-unsaved { animation-delay: 0s; } /* aparece al editar, no en la cascada */
+@media (prefers-reduced-motion: reduce) {
+  .a-sheet[data-state], .a-sheet-overlay[data-state] { animation: none !important; }
+}

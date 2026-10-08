@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef, useState, useId, type DragEvent } from "react"
+import { useLatest, usePresence } from "@/lib/motion"
 import { UploadIcon, ImageIcon } from "@/components/portfolio/icons"
 
 interface DropzoneProps {
@@ -37,6 +38,8 @@ export function Dropzone({
   const id = useId()
   const errorId = `${id}-error`
   const hintId = `${id}-hint`
+  const err = usePresence(!!error)
+  const errText = useLatest(error, err.exiting)
 
   const handle = async (file?: File | null) => {
     if (!file) return
@@ -113,7 +116,9 @@ export function Dropzone({
         </button>
       )}
 
-      {error && <p id={errorId} className="a-field-error" role="alert">{error}</p>}
+      {err.mounted && (
+        <p id={err.exiting ? undefined : errorId} className={`a-field-error${err.exiting ? " is-exiting" : ""}`} role={err.exiting ? undefined : "alert"}>{errText}</p>
+      )}
       {hint && <p id={hintId} className="a-field-hint">{hint}</p>}
     </div>
   )

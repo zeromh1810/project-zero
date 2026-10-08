@@ -9,6 +9,7 @@ import { ExternalIcon } from "@/components/portfolio/icons"
 import AdminToast, { type ToastType } from "./admin-toast"
 import { DirtyProvider, useDirtyContext, useAnyDirty } from "./ui/dirty"
 import { ConfirmDialog } from "./ui/confirm-dialog"
+import { Switch, motionMs, usePresence } from "@/lib/motion"
 
 const ProjectsTab       = dynamic(() => import("./projects-tab"),  { ssr: false })
 const HeroTab           = dynamic(() => import("./hero-tab"),      { ssr: false })
@@ -133,9 +134,35 @@ function Dashboard({ onLogout, initialTab = "proyectos", preview = false }: Prop
   }
 
   const dirtyNow = useAnyDirty()
+  const dirtyDot = usePresence(dirtyNow)
+
+  // Salir: el panel se desvanece (--dur-exit) antes de volver al login.
+  const [leaving, setLeaving] = useState(false)
+  function logout() {
+    setLeaving(true)
+    window.setTimeout(onLogout, motionMs("--dur-exit"))
+  }
+
+  function panel(key: string) {
+    const t = key as AdminTab
+    if (t === "ds") return <DesignSystemSection adminMode />
+    return (
+      // m-stagger: encabezado, tarjetas y lista de cada sección entran en cascada.
+      <div className="admin-container m-stagger">
+        {t === "proyectos" && <ProjectsTab onToast={showToast} />}
+        {t === "hero"      && <HeroTab     onToast={showToast} />}
+        {t === "perfil"    && <ProfileTab  onToast={showToast} />}
+        {t === "sobre"     && <AboutTab    onToast={showToast} />}
+        {t === "logo"      && <LogoTab     onToast={showToast} />}
+        {t === "footer"    && <SocialTab   onToast={showToast} />}
+        {t === "marcas"    && <BrandsTab   onToast={showToast} />}
+        {t === "blog"      && <BlogTab     onToast={showToast} />}
+      </div>
+    )
+  }
 
   return (
-    <div className={`admin-wrapper a-shell${tab === "ds" ? " a-shell--ds" : ""}`}>
+    <div className={`admin-wrapper a-shell${tab === "ds" ? " a-shell--ds" : ""}${leaving ? " is-leaving" : ""}`}>
       <header className="navbar a-topbar">
         <div className="nav-logo a-topbar-brand">
           {adminLogoUrl
@@ -149,7 +176,7 @@ function Dashboard({ onLogout, initialTab = "proyectos", preview = false }: Prop
             <span className="admin-nav-portfolio-label">Ver portafolio</span>
             <ExternalIcon />
           </a>
-          <button type="button" className="a-btn a-btn--ghost a-btn--sm" onClick={onLogout}>Salir</button>
+          <button type="button" className="a-btn a-btn--ghost a-btn--sm" onClick={logout} disabled={leaving}>Salir</button>
         </div>
       </header>
 
@@ -188,7 +215,9 @@ function Dashboard({ onLogout, initialTab = "proyectos", preview = false }: Prop
                     onKeyDown={e => onTabKey(e, i.id)}
                   >
                     {i.label}
-                    {active && dirtyNow && <span className="a-dirty-dot" aria-label="Cambios sin guardar" />}
+                    {active && dirtyDot.mounted && (
+                      <span className={`a-dirty-dot${dirtyDot.exiting ? " is-exiting" : ""}`} aria-label={dirtyDot.exiting ? undefined : "Cambios sin guardar"} />
+                    )}
                   </button>
                 )
               })}
@@ -200,18 +229,8 @@ function Dashboard({ onLogout, initialTab = "proyectos", preview = false }: Prop
       {/* role="tabpanel" no está permitido en <main>: va en un div interno. */}
       <main className={tab === "ds" ? "a-main a-main--ds" : "a-main"}>
         <div id="admin-panel" role="tabpanel" aria-labelledby={`tab-${tab}`}>
-        {tab === "ds" ? <DesignSystemSection adminMode /> : (
-          <div className="admin-container">
-            {tab === "proyectos" && <ProjectsTab onToast={showToast} />}
-            {tab === "hero"      && <HeroTab     onToast={showToast} />}
-            {tab === "perfil"    && <ProfileTab  onToast={showToast} />}
-            {tab === "sobre"     && <AboutTab    onToast={showToast} />}
-            {tab === "logo"      && <LogoTab     onToast={showToast} />}
-            {tab === "footer"    && <SocialTab   onToast={showToast} />}
-            {tab === "marcas"    && <BrandsTab   onToast={showToast} />}
-            {tab === "blog"      && <BlogTab     onToast={showToast} />}
-          </div>
-        )}
+        {/* Cambio de sección: la anterior sale y la nueva entra (lib/motion). */}
+        <Switch k={tab} render={panel} />
         </div>
       </main>
 

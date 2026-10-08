@@ -70,3 +70,34 @@ Documentación para diseñadores al estilo de Material / Carbon. Reemplaza a `de
 - Vistas previas del logo: los hex sueltos pasaron a tokens primitivos.
 - Lighthouse `/design-system` y `/`: a11y 100 · best practices 100 (solo quedan los source maps de dev). Un error de hidratación del DS público (`?page=` leído en el cliente) se corrigió cargando el viewer solo en el cliente, como en el admin.
 - tsc OK · lint 28 (los mismos 2 errores previos del editor y 26 warnings, igual que antes) · fondo 3D intacto.
+
+## ✅ Motion — entradas y salidas del admin y del DS (ui-ux-pro-max)
+Criterios de la skill: stagger de 30–50ms, salidas al ~65% de la entrada, interrumpibles (el estado nunca depende de `animationend`), solo transform/opacity y movimiento reducido. Siguiendo la regla del DS, primero se agregó al sistema y después se aplicó.
+- **Sistema:** `styles/motion.css` (vocabulario `m-*`, solo `opacity` + `translate`/`scale`, que componen con transforms existentes) y `lib/motion.ts` (`usePresence`, `useLatest`, `Switch`, `leaveThen`, `motionMs`). Tokens nuevos: `--stagger-step-sm` 40ms, `--stagger-max-sm` 240ms, `--shift-sm` 4px. Toast pasado a tokens de motion (antes 300/200ms fijos).
+- **Admin:**
+  - El shell entra una vez: barra, navegación y contenido.
+  - Al cambiar de sección, la anterior sale y la nueva entra en cascada.
+  - Listas, marcas y galería entran escalonadas, y cada ítem sale antes de eliminarse (vuelve si la acción falla).
+  - Panel lateral con su contenido en cascada; diálogo que crece y se encoge.
+  - Barra de cambios y punto de "sin guardar" con entrada y salida; errores de campo y del dropzone que entran y salen.
+  - Etiquetas, confirmación en línea, vista previa del dropzone y salida al cerrar sesión.
+- **DS:**
+  - Navegación que entra una vez.
+  - Cambio de página y de pestaña con salida y entrada; encabezado en cascada.
+  - Resultados de búsqueda en cascada.
+  - Secciones y reglas que se revelan con el scroll (CSS ligado al scroll, sin JS); feedback de "Copiado" y capturas con fundido.
+- **Documentado** en DS → Movimiento → **Coreografía**: tabla de entradas y salidas por elemento, demos en vivo (presencia y lista), 3 reglas ✓/✗ y código.
+- **Bugs encontrados en el loop y corregidos:**
+  1. Cerrar el panel lateral o el diálogo dejaba el foco en `<body>`. Radix lo devuelve a su `Dialog.Trigger` y estos se abren por estado. Ahora `useReturnFocus` lo devuelve al botón que los abrió (era previo, de la Fase 2).
+  2. El panel lateral seguía animando con movimiento reducido.
+  3. Dos borrados seguidos de etiquetas revivían la primera.
+  4. Con movimiento reducido, el foco no llegaba al título de la página nueva del DS.
+- **Validación:** 22 pruebas de comportamiento por CDP (fases de salida y entrada, cambios rápidos interrumpibles, retiro final, foco, ARIA de pestañas, movimiento reducido): 22/22 · Lighthouse a11y 100 / best practices 100 en admin y DS · CLS 0 · tsc OK · lint 28 (sin cambios) · fondo 3D intacto.
+
+## ✅ Motion del Zero design system — rehecho con ui-ux-pro-max
+A pedido: cada decisión sale de la skill. Trazabilidad completa en `docs/motion-ds-ui-ux-pro-max.md` (fuentes, qué cambió y por qué, qué NO se aplicó y por qué).
+- Crossfade direccional que no bloquea (páginas y pestañas), historial real con scroll restaurado, indicadores deslizantes, revelado al entrar en pantalla (con fallback sin JS), hover < 2px y presionar 0.98, copia con respaldo y aviso de error, esqueleto de capturas, sugerencias en "sin resultados", `touch-action`.
+- Eliminado por `excessive-motion` / `motion-meaning`: cascada del encabezado, barra lateral al cargar, pop de insignias, revelado ligado al scroll.
+- Tokens nuevos: `--dur-exit-lg` 320ms, `--dur-reveal-sm` 360ms.
+- 41/41 pruebas etiquetadas por regla · checklist de la skill a 375/768/1024/1440 · Lighthouse a11y 100 / bp 100 / CLS 0 · tsc OK · lint 28 (sin cambios) · fondo 3D intacto.
+- Pendiente de decisión: llevar el crossfade al cambio de sección del admin (hoy secuencial).

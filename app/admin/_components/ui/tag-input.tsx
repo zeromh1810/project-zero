@@ -1,6 +1,7 @@
 "use client"
 
-import { useRef, type KeyboardEvent } from "react"
+import { useEffect, useRef, useState, type KeyboardEvent } from "react"
+import { motionMs } from "@/lib/motion"
 import { CloseIcon } from "@/components/portfolio/icons"
 import type { FieldControlProps } from "./field"
 
@@ -22,6 +23,24 @@ interface TagInputProps {
 export function TagInput({ value, onChange, control, max = 10, placeholder = "Escribe y presiona Enter", normalize = (s) => s.trim() }: TagInputProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const full = value.length >= max
+  // Etiquetas saliendo: se ven achicándose --dur-exit antes de quitarse.
+  const [leaving, setLeaving] = useState<string[]>([])
+  // El timer de salida usa siempre la lista actual (dos borrados seguidos no
+  // deben revivir el primero).
+  const valueRef = useRef(value)
+  useEffect(() => { valueRef.current = value })
+  const remove = (tag: string) => {
+    if (leaving.includes(tag)) return
+    setLeaving((l) => [...l, tag])
+    window.setTimeout(() => {
+      setLeaving((l) => l.filter((t) => t !== tag))
+      // Se actualiza la referencia en el acto: si otro borrado vence antes del
+      // próximo render, parte de esta lista y no de la anterior.
+      const next = valueRef.current.filter((t) => t !== tag)
+      valueRef.current = next
+      onChange(next)
+    }, motionMs("--dur-exit"))
+  }
 
   const add = (raw: string) => {
     const tag = normalize(raw.replace(/,+$/, ""))
@@ -35,19 +54,19 @@ export function TagInput({ value, onChange, control, max = 10, placeholder = "Es
       add(e.currentTarget.value)
       e.currentTarget.value = ""
     } else if (e.key === "Backspace" && !e.currentTarget.value && value.length) {
-      onChange(value.slice(0, -1))
+      remove(value[value.length - 1])
     }
   }
 
   return (
     <div className="admin-chips-wrap" onClick={() => inputRef.current?.focus()}>
       {value.map((tag) => (
-        <span key={tag} className="admin-chip">
+        <span key={tag} className={`admin-chip${leaving.includes(tag) ? " is-exiting" : ""}`}>
           {tag}
           <button
             type="button"
             className="admin-chip-x"
-            onClick={(e) => { e.stopPropagation(); onChange(value.filter((t) => t !== tag)) }}
+            onClick={(e) => { e.stopPropagation(); remove(tag) }}
             aria-label={`Quitar etiqueta ${tag}`}
           >
             <CloseIcon size={12} />

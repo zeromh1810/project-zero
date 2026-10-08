@@ -4,6 +4,7 @@
    miniaturas que el admin ya muestra con <img>; next/image no aporta aquí. */
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react"
+import { Crossfade, motionMs, type MotionDir } from "@/lib/motion"
 import { useTheme } from "@/lib/context/theme-context"
 import { CheckIcon, CloseIcon } from "@/components/portfolio/icons"
 import { contrastRatio, readVar, wcagLevel } from "../lib/tokens"
@@ -30,8 +31,43 @@ export function DocPage({ eyebrow, title, summary, status, tabs, children }: {
   children?: ReactNode
 }) {
   const [active, setActive] = useState(tabs?.[0]?.id ?? "")
+  const [dir, setDir] = useState<MotionDir>("left")
   const id = useId()
   const refs = useRef<(HTMLButtonElement | null)[]>([])
+  const listRef = useRef<HTMLDivElement>(null)
+  const inkRef = useRef<HTMLSpanElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  // Cambiar de pestaña (ui-ux-pro-max): el contenido hace crossfade en el
+  // mismo panel con dirección (siguiente entra desde la derecha, anterior
+  // desde la izquierda — navigation-direction) y, si el panel quedó arriba
+  // del viewport, se lleva suavemente bajo las pestañas (Smooth Scroll).
+  const select = (next: string) => {
+    if (!tabs || next === active) return
+    const from = tabs.findIndex((t) => t.id === active)
+    const to = tabs.findIndex((t) => t.id === next)
+    setDir(to > from ? "left" : "right")
+    setActive(next)
+    const panel = panelRef.current, list = listRef.current
+    if (panel && list) {
+      const offset = list.getBoundingClientRect().bottom
+      const top = panel.getBoundingClientRect().top
+      if (top < offset - 1) {
+        const scroller = (panel.closest(".a-main") as HTMLElement | null) ?? document.scrollingElement
+        scroller?.scrollBy({ top: top - offset, behavior: motionMs("--dur-enter") ? "smooth" : "auto" })
+      }
+    }
+  }
+
+  // Subrayado de la pestaña activa: un solo elemento que se desliza
+  // (continuity) con transform (translateX + scaleX).
+  useLayoutEffect(() => {
+    const ink = inkRef.current, list = listRef.current
+    const btn = tabs ? refs.current[tabs.findIndex((t) => t.id === active)] : null
+    if (!ink || !list || !btn) return
+    ink.style.setProperty("--ink-x", `${btn.offsetLeft}px`)
+    ink.style.setProperty("--ink-w", `${btn.offsetWidth}`)
+  }, [active, tabs])
 
   const onKey = (e: React.KeyboardEvent, i: number) => {
     if (!tabs) return
@@ -40,7 +76,7 @@ export function DocPage({ eyebrow, title, summary, status, tabs, children }: {
     if (e.key === "ArrowLeft") n = (i - 1 + tabs.length) % tabs.length
     if (n === null) return
     e.preventDefault()
-    setActive(tabs[n].id)
+    select(tabs[n].id)
     refs.current[n]?.focus()
   }
 
@@ -57,7 +93,8 @@ export function DocPage({ eyebrow, title, summary, status, tabs, children }: {
 
       {tabs && (
         <>
-          <div role="tablist" aria-label={`Secciones de ${title}`} className="doc-tabs">
+          <div role="tablist" aria-label={`Secciones de ${title}`} className="doc-tabs" ref={listRef}>
+            <span ref={inkRef} className="doc-tab-ink" aria-hidden="true" />
             {tabs.map((t, i) => (
               <button
                 key={t.id}
@@ -66,21 +103,21 @@ export function DocPage({ eyebrow, title, summary, status, tabs, children }: {
                 type="button"
                 id={`${id}-${t.id}-tab`}
                 aria-selected={active === t.id}
-                aria-controls={`${id}-${t.id}-panel`}
+                aria-controls={`${id}-panel`}
                 tabIndex={active === t.id ? 0 : -1}
                 className={`doc-tab${active === t.id ? " is-active" : ""}`}
-                onClick={() => setActive(t.id)}
+                onClick={() => select(t.id)}
                 onKeyDown={(e) => onKey(e, i)}
               >
                 {t.label}
               </button>
             ))}
           </div>
-          {tabs.map((t) => (
-            <div key={t.id} role="tabpanel" id={`${id}-${t.id}-panel`} aria-labelledby={`${id}-${t.id}-tab`} hidden={active !== t.id} className="doc-panel">
-              {active === t.id && t.content}
-            </div>
-          ))}
+          {/* Un panel con crossfade: la pestaña nueva es interactiva al instante
+              y la anterior se desvanece encima, inerte (lib/motion → Crossfade). */}
+          <div role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${active}-tab`} className="doc-panel" ref={panelRef}>
+            <Crossfade k={active} dir={dir} size="sm" appear={false} render={(k) => tabs.find((t) => t.id === k)?.content} />
+          </div>
         </>
       )}
       {children}
@@ -320,16 +357,42 @@ export function ContrastTable({ pairs }: { pairs: { label: string; fg: string; b
 }
 
 /** Bloque de código con copiar. */
+/** Copia con respaldo: la API del portapapeles falla sin permiso o sin foco. */
+async function copyText(text: string): Promise<boolean> {
+  try { await navigator.clipboard.writeText(text); return true } catch { /* respaldo abajo */ }
+  try {
+    const ta = document.createElement("textarea")
+    ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0"
+    document.body.appendChild(ta); ta.select()
+    const ok = document.execCommand("copy")
+    ta.remove()
+    return ok
+  } catch { return false }
+}
+
 export function CodeBlock({ code, lang = "tsx" }: { code: string; lang?: string }) {
-  const [copied, setCopied] = useState(false)
+  const [state, setState] = useState<"idle" | "ok" | "error">("idle")
+  const copy = async () => {
+    const ok = await copyText(code)
+    // Confirmación en el mismo botón; en móviles que lo soportan, un pulso
+    // háptico corto solo al confirmar (ui-ux-pro-max: Haptic Feedback).
+    // Si falla, se dice ahí mismo (error-feedback).
+    if (ok) navigator.vibrate?.(10)
+    setState(ok ? "ok" : "error")
+    window.setTimeout(() => setState("idle"), ok ? 1500 : 2500)
+  }
   return (
     <div className="doc-code">
       <div className="doc-code-bar">
         <span>{lang}</span>
-        <button type="button" className="doc-code-copy" onClick={() => navigator.clipboard?.writeText(code).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500) })}
-          aria-label={copied ? "Código copiado" : "Copiar código"}>
-          {copied ? <><CheckIcon /> Copiado</> : "Copiar"}
+        <button type="button" className="doc-code-copy" onClick={copy}
+          aria-label={state === "ok" ? "Código copiado" : state === "error" ? "No se pudo copiar el código" : "Copiar código"}>
+          {/* La clave reinicia la entrada en cada cambio de estado */}
+          <span key={state} className={`doc-copy-state${state === "error" ? " is-error" : ""}`}>
+            {state === "ok" ? <><CheckIcon /> Copiado</> : state === "error" ? "No se pudo copiar" : "Copiar"}
+          </span>
         </button>
+        <span className="sr-only" aria-live="polite">{state === "ok" ? "Código copiado" : state === "error" ? "No se pudo copiar el código" : ""}</span>
       </div>
       <pre><code>{code}</code></pre>
     </div>
@@ -341,12 +404,19 @@ export function Capture({ id, alt, caption, ratio = "16 / 10" }: { id: string; a
   const { isDark } = useTheme()
   const [failed, setFailed] = useState(false)
   const src = `/ds/captures/${id}-${isDark ? "dark" : "light"}.png`
+  const [loaded, setLoaded] = useState<string | null>(null)
+  const ready = loaded === src
+  // Carga: esqueleto estable con aria-busy hasta que la imagen llega y
+  // entonces se funde (ui-ux-pro-max: Loading Indicators). Si ya estaba en
+  // caché (complete antes del onLoad), se marca en el ref.
   return (
     <figure className="doc-capture">
-      <div className="doc-capture-frame" style={{ aspectRatio: ratio }}>
+      <div className={`doc-capture-frame${ready || failed ? "" : " is-loading"}`} style={{ aspectRatio: ratio }} aria-busy={!ready && !failed ? true : undefined}>
         {failed
           ? <p className="doc-capture-missing">Captura pendiente: <code>node scripts/qa/capture-ds.mjs</code></p>
-          : <img src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} key={src} />}
+          : <img src={src} alt={alt} loading="lazy" key={src} className={ready ? "is-loaded" : undefined}
+              ref={(img) => { if (img?.complete && img.naturalWidth && loaded !== src) setLoaded(src) }}
+              onLoad={() => setLoaded(src)} onError={() => setFailed(true)} />}
       </div>
       {caption && <figcaption className="doc-caption">{caption}</figcaption>}
     </figure>

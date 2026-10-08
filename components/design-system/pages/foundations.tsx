@@ -11,6 +11,7 @@ import {
 import { PageCard, PageLink } from "../ui/nav"
 import { DS_VERSION } from "../lib/tokens"
 import { useLiveTokens } from "../lib/use-live-tokens"
+import { leaveThen, usePresence } from "@/lib/motion"
 
 /* ═══════════════════════════════ Inicio ═══════════════════════════════ */
 
@@ -546,6 +547,74 @@ function Timeline({ rows }: { rows: { label: string; ms: number; bad?: boolean }
   )
 }
 
+/** Presencia en vivo: el mismo hook que usan la barra de cambios y los errores. */
+function PresenceDemo() {
+  const [show, setShow] = useState(true)
+  const p = usePresence(show)
+  return (
+    <div className="doc-demo-col doc-x-center">
+      <div className="doc-x-presence">
+        {p.mounted && (
+          <div className={`doc-demo-card ${p.exiting ? "m-exit" : "m-enter"}`}>
+            <h4>Proyecto guardado</h4>
+            <p>{p.exiting ? "Saliendo · --dur-exit · --ease-in" : "Entrando · --dur-enter · --ease-out"}</p>
+          </div>
+        )}
+      </div>
+      <button type="button" className="doc-btn" onClick={() => setShow((x) => !x)} aria-pressed={show}>{show ? "Ocultar" : "Mostrar"}</button>
+    </div>
+  )
+}
+
+const LIST_SEED = ["Amelia", "App Finanzas Personales", "Branding Startup Biotech"]
+
+/** Lista en vivo: los ítems nuevos entran y los quitados salen antes de irse. */
+function ListDemo() {
+  const [items, setItems] = useState(LIST_SEED)
+  const [n, setN] = useState(1)
+  return (
+    <div className="doc-demo-col doc-w-md">
+      <ul className="a-list">
+        {items.map((it) => (
+          <li key={it} className="a-item">
+            <div className="a-item-body"><span className="a-item-title">{it}</span></div>
+            <div className="a-item-actions">
+              <button type="button" className="a-btn a-btn--danger-ghost a-btn--sm" aria-label={`Quitar «${it}»`}
+                onClick={(e) => leaveThen(e.currentTarget.closest(".a-item"), () => setItems((l) => l.filter((x) => x !== it)))}>
+                <TrashIcon /> Quitar
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <div className="doc-toolbar">
+        <button type="button" className="doc-btn" onClick={() => { setItems((l) => [...l, `Proyecto nuevo ${n}`]); setN((x) => x + 1) }}>Agregar</button>
+        <button type="button" className="doc-btn" onClick={() => setItems(LIST_SEED)}>Restablecer</button>
+      </div>
+    </div>
+  )
+}
+
+const CHOREO: { el: string; enter: string; exit: string }[] = [
+  { el: "Página del DS", enter: "Fade through: aparece desde abajo (adelante) o desde arriba (atrás) cuando la anterior ya se fue · --dur-reveal", exit: "Se desvanece rápido, sin superponerse · --dur-hover; Atrás del navegador vuelve y restaura el scroll" },
+  { el: "Pestaña del DS", enter: "Fade through desde la derecha (siguiente) o la izquierda (anterior) · --dur-enter; el subrayado se desliza", exit: "Se desvanece rápido · --dur-press" },
+  { el: "Página activa en la navegación del DS", enter: "El indicador se desliza al ítem nuevo (--ease-spring)", exit: "—" },
+  { el: "Cambio de sección del admin", enter: "Sube 12px · --dur-enter", exit: "Baja 4px y se desvanece · --dur-exit" },
+  { el: "Contenido de una sección", enter: "Cascada: encabezado → tarjetas → lista, 40ms por bloque (máx. 240ms)", exit: "Sale con su sección" },
+  { el: "Ítems de lista, marcas, galería", enter: "Suben 4px en cascada; un ítem nuevo entra solo", exit: "Se encoge a 96% antes de eliminarse; si falla, vuelve" },
+  { el: "Panel lateral", enter: "Desde la derecha · --dur-reveal; su contenido entra después", exit: "Hacia la derecha · --dur-exit; el foco vuelve al botón" },
+  { el: "Diálogo", enter: "Crece desde 96% · --dur-enter", exit: "Se encoge a 96% · --dur-exit; el foco vuelve" },
+  { el: "Barra de cambios sin guardar", enter: "Sube con el primer cambio", exit: "Baja 12px al guardar o descartar" },
+  { el: "Error de campo", enter: "Sube 4px al validar", exit: "Baja y se desvanece al corregir" },
+  { el: "Etiquetas", enter: "Crecen desde 88%", exit: "Se encogen a 88% antes de quitarse" },
+  { el: "Toast", enter: "Sube desde abajo · --dur-enter", exit: "Baja · --dur-exit (o al cerrarlo)" },
+  { el: "Punto de cambios sin guardar", enter: "Aparece con un leve rebote (--ease-spring)", exit: "Se encoge" },
+  { el: "Bloques y reglas del DS al hacer scroll", enter: "Suben 12px al cruzar el 90% del viewport · --dur-reveal-sm; las grillas, en cascada (máx. 8)", exit: "Se revierten al quedar de nuevo debajo" },
+  { el: "Tarjetas y botones del DS", enter: "Hover: −1.5px · --dur-hover; presionar: 98% y vuelta con resorte", exit: "—" },
+  { el: "Capturas del sitio", enter: "Esqueleto con aria-busy y fundido al cargar · --dur-reveal", exit: "—" },
+  { el: "Navegación del admin", enter: "Desde la izquierda, una sola vez", exit: "El admin se desvanece al cerrar la sesión" },
+]
+
 export function PageMovimiento() {
   return (
     <DocPage
@@ -580,6 +649,47 @@ export function PageMovimiento() {
             </Rules>
           </Section>
         </> },
+        { id: "coreografia", label: "Coreografía", content: <>
+          <Section title="Entradas y salidas" intro={<p>Todo lo que aparece o desaparece en el admin y en esta documentación sigue esta tabla. Entrar: <code>--dur-enter</code> con <code>--ease-out</code>. Salir: <code>--dur-exit</code> con <code>--ease-in</code>, más corto y con menos recorrido.</p>}>
+            <div className="doc-table-wrap"><table className="doc-table">
+              <thead><tr><th scope="col">Elemento</th><th scope="col">Entrada</th><th scope="col">Salida</th></tr></thead>
+              <tbody>{CHOREO.map((c) => <tr key={c.el}><td>{c.el}</td><td>{c.enter}</td><td>{c.exit}</td></tr>)}</tbody>
+            </table></div>
+          </Section>
+          <Section title="En vivo" intro={<p>Los mismos utilitarios que usa el admin (<code>lib/motion.ts</code>). Prueba cortar una animación a la mitad: el estado final siempre es correcto.</p>}>
+            <div className="doc-variants">
+              <div className="doc-variant"><div className="doc-stage doc-stage--md doc-stage--center doc-stage--page"><PresenceDemo /></div>
+                <div className="doc-variant-body"><div className="doc-variant-name">Presencia</div><div className="doc-variant-desc">usePresence: el elemento sigue montado durante su salida.</div></div></div>
+              <div className="doc-variant"><div className="doc-stage doc-stage--md doc-stage--center doc-stage--page"><ListDemo /></div>
+                <div className="doc-variant-body"><div className="doc-variant-name">Lista</div><div className="doc-variant-desc">Los nuevos entran; los quitados salen antes de irse (leaveThen).</div></div></div>
+            </div>
+          </Section>
+          <Section title="Reglas">
+            <Rules>
+              <UsageRule
+                title="Lo que se va, sale antes de quitarse"
+                doText="El ítem se encoge 160ms y recién ahí deja la lista: se entiende qué se borró."
+                doDemo={<Timeline rows={[{ label: "Salida", ms: 160 }, { label: "Se quita", ms: 4 }]} />}
+                dontText="Desaparecer de golpe: la lista salta y no queda claro qué cambió."
+                dontDemo={<Timeline rows={[{ label: "Salida", ms: 0, bad: true }, { label: "Se quita", ms: 4, bad: true }]} />}
+              />
+              <UsageRule
+                title="Escalona el grupo, no cada pieza"
+                doText="40ms entre bloques y un tope de 240ms: la cascada se percibe sin hacer esperar."
+                doDemo={<Timeline rows={[0, 1, 2, 3, 4].map((i) => ({ label: `Ítem ${i + 1}`, ms: 240 + i * 40 }))} />}
+                dontText="150ms por ítem: el quinto llega casi un segundo después."
+                dontDemo={<Timeline rows={[0, 1, 2, 3, 4].map((i) => ({ label: `Ítem ${i + 1}`, ms: 240 + i * 150, bad: i > 1 }))} />}
+              />
+              <UsageRule
+                title="Un cambio nuevo interrumpe al anterior"
+                doText="Si la persona cambia de sección a mitad de una salida, la UI va directo a la última que eligió."
+                doDemo={<Timeline rows={[{ label: "Hero", ms: 60 }, { label: "Logo", ms: 60 }, { label: "Marcas", ms: 400 }]} />}
+                dontText="Encolar las tres transiciones: la UI responde un segundo tarde."
+                dontDemo={<Timeline rows={[{ label: "Hero", ms: 400, bad: true }, { label: "Logo", ms: 400, bad: true }, { label: "Marcas", ms: 400, bad: true }]} />}
+              />
+            </Rules>
+          </Section>
+        </> },
         { id: "a11y", label: "Accesibilidad", content: (
           <Section title="Movimiento reducido">
             <A11yChecklist
@@ -588,13 +698,18 @@ export function PageMovimiento() {
             />
           </Section>
         ) },
-        { id: "codigo", label: "Código", content: (
-          <Section title="Uso en CSS">
-            <Example code={`.panel {\n  transition: opacity var(--dur-enter) var(--ease-out),\n              translate var(--dur-enter) var(--ease-out);\n}\n.panel[data-state="closed"] { transition-duration: var(--dur-exit); }\n\n@media (prefers-reduced-motion: reduce) {\n  .panel { transition-duration: 0.01ms; }\n}`}>
-              <MotionCard name="Entrada" token="--dur-enter" dur="--dur-enter" use="opacity + translate" />
+        { id: "codigo", label: "Código", content: <>
+          <Section title="CSS">
+            <Example code={`/* styles/motion.css */\n.mi-panel { animation: m-rise var(--dur-enter) var(--ease-out) both; }\n.mi-panel.is-exiting { animation: m-fall var(--dur-exit) var(--ease-in) forwards; }\n\n/* Grupo en cascada (40ms por hijo, máx. 240ms) */\n<div className="m-stagger">…</div>`}>
+              <PresenceDemo />
             </Example>
           </Section>
-        ) },
+          <Section title="React (lib/motion.ts)">
+            <Example code={`import { usePresence, Switch, leaveThen } from "@/lib/motion"\n\n// Salida de algo condicional\nconst p = usePresence(open)\n{p.mounted && <div className={p.exiting ? "m-exit" : "m-enter"} />}\n\n// Cambio de vista: la anterior sale y la nueva entra\n<Switch k={tab} render={(k) => <Seccion id={k} />} />\n\n// Eliminar con salida (vuelve si la acción falla)\nleaveThen(item, () => borrar(id))`}>
+              <ListDemo />
+            </Example>
+          </Section>
+        </> },
       ]}
     />
   )
