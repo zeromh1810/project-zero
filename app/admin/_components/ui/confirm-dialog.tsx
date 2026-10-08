@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react"
 import * as Dialog from "@radix-ui/react-dialog"
+import { useReturnFocus } from "./return-focus"
 
 interface ConfirmDialogProps {
   open: boolean
@@ -17,11 +18,12 @@ interface ConfirmDialogProps {
 // tab con cambios sin guardar); para confirmar una acción sobre un elemento
 // de una lista se prefiere ConfirmAction en línea.
 export function ConfirmDialog({ open, title, description, actions, onCancel }: ConfirmDialogProps) {
+  const returnFocus = useReturnFocus(open)
   return (
     <Dialog.Root open={open} onOpenChange={(o) => { if (!o) onCancel() }}>
       <Dialog.Portal>
         <Dialog.Overlay className="a-sheet-overlay" />
-        <Dialog.Content className="a-dialog" role="alertdialog">
+        <Dialog.Content onCloseAutoFocus={returnFocus} className="a-dialog" role="alertdialog">
           <Dialog.Title className="a-dialog-title">{title}</Dialog.Title>
           {description
             ? <Dialog.Description className="a-dialog-desc">{description}</Dialog.Description>

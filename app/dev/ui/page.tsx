@@ -6,6 +6,7 @@ import "@/styles/portfolio.css"
 import "@/assets/design-tokens.css"
 import "../../admin/admin.css"
 import "../../admin/admin-ui.css"
+import "@/styles/motion.css"
 
 export const metadata: Metadata = {
   title: "Dev UI — Project Zero",

@@ -5,6 +5,7 @@ import "@/styles/portfolio.css"
 // Las páginas de componentes del admin renderizan los componentes reales.
 import "../admin/admin.css"
 import "../admin/admin-ui.css"
+import "@/styles/motion.css"
 
 export const metadata: Metadata = {
   title: "Zero design system — Project Zero",

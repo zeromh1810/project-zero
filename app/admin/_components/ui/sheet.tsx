@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react"
 import * as Dialog from "@radix-ui/react-dialog"
+import { useReturnFocus } from "./return-focus"
 import { CloseIcon } from "@/components/portfolio/icons"
 
 interface SheetProps {
@@ -20,11 +21,12 @@ interface SheetProps {
 // Entra en --dur-enter con ease-out y sale en --dur-exit con ease-in (más
 // rápido), vía data-state de Radix; reduced-motion lo desactiva (admin.css).
 export function Sheet({ open, onOpenChange, title, description, children, footer }: SheetProps) {
+  const returnFocus = useReturnFocus(open)
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="a-sheet-overlay" />
-        <Dialog.Content className="a-sheet">
+        <Dialog.Content onCloseAutoFocus={returnFocus} className="a-sheet">
           <header className="a-sheet-head">
             <div>
               <Dialog.Title className="a-sheet-title">{title}</Dialog.Title>

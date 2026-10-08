@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { motionMs } from "@/lib/motion"
 
 export type ToastType = "success" | "error" | "warning" | "info"
 
@@ -49,7 +50,6 @@ const LABELS: Record<ToastType, string> = {
   info: "Información",
 }
 
-const EXIT_MS = 200
 
 // Toast del admin (DS v2.1.0, AA-2). Antes la "pausa" con hover solo congelaba
 // la barra de progreso: los timers seguían y el toast se cerraba igual (la
@@ -68,7 +68,7 @@ export default function AdminToast({ type, title, message, onClose, duration }: 
   const close = () => {
     if (timer.current) clearTimeout(timer.current)
     setLeaving(true)
-    timer.current = setTimeout(onClose, EXIT_MS)
+    timer.current = setTimeout(onClose, motionMs("--dur-exit"))
   }
 
   useEffect(() => {

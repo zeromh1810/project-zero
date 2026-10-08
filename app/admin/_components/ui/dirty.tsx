@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { usePresence } from "@/lib/motion"
 
 // Cambios sin guardar (DS v2.1.0, AM-3). Antes ningún tab los detectaba:
 // editar el Hero y pasar a otro tab descartaba todo en silencio.
@@ -102,9 +103,11 @@ export function UnsavedBar({ dirty, saving, onSave, onDiscard, saveLabel = "Guar
   onDiscard?: () => void
   saveLabel?: string
 }) {
-  if (!dirty && !saving) return null
+  // Entra con el primer cambio y baja al guardarse o descartarse (lib/motion).
+  const p = usePresence(dirty || !!saving)
+  if (!p.mounted) return null
   return (
-    <div className="a-unsaved" role="region" aria-label="Cambios sin guardar">
+    <div className={`a-unsaved${p.exiting ? " is-exiting" : ""}`} role="region" aria-label="Cambios sin guardar">
       <span className="a-unsaved-dot" aria-hidden="true" />
       <span className="a-unsaved-text">{saving ? "Guardando…" : "Tienes cambios sin guardar"}</span>
       {onDiscard && (

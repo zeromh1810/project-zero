@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { TrashIcon } from "@/components/portfolio/icons"
+import { leaveThen } from "@/lib/motion"
 
 interface ConfirmActionProps {
   /** Acción a confirmar (ej. borrar). Puede ser async. */
@@ -34,6 +35,7 @@ export function ConfirmAction({
   const [asking, setAsking] = useState(false)
   const [busy, setBusy] = useState(false)
   const cancelRef = useRef<HTMLButtonElement>(null)
+  const groupRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -48,7 +50,10 @@ export function ConfirmAction({
 
   const confirm = async () => {
     setBusy(true)
-    try { await onConfirm() } finally { setBusy(false); setAsking(false) }
+    // El ítem de la lista sale antes de que la acción lo elimine; si falla y
+    // sigue en la lista, vuelve a entrar (lib/motion → leaveThen).
+    const item = groupRef.current?.closest(".a-item, .a-brand-card, [data-m-item]") ?? null
+    try { await leaveThen(item, onConfirm) } finally { setBusy(false); setAsking(false) }
   }
 
   if (!asking) {
@@ -69,6 +74,7 @@ export function ConfirmAction({
 
   return (
     <div
+      ref={groupRef}
       className="a-confirm"
       role="group"
       aria-label={itemName ? `Confirmar: ${label.toLowerCase()} «${itemName}»` : "Confirmar acción"}

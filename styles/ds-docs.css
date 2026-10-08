@@ -506,7 +506,7 @@
 .doc-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (hover: hover) {
   .doc-card:hover { border-color: var(--border-h); }
-  .doc-card:hover .doc-card-title svg { translate: 3px 0; color: var(--txt); }
+  .doc-card:hover .doc-card-title svg { color: var(--txt); }
 }
 .doc-principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-6); }
 .doc-principle { border-top: 2px solid var(--txt); padding-top: var(--space-4); }
@@ -712,3 +712,148 @@
 .ds-public { padding-top: 64px; min-height: 100dvh; background: var(--bg); }
 .ds-public .doc-side { top: 64px; max-height: calc(100dvh - 64px); }
 .ds-public .doc-tabs { top: 64px; }
+
+/* ═══ Motion del Zero design system — rehecho con ui-ux-pro-max (v2.1.0) ═══
+   Cada regla cita la guía de la skill que la origina. Trazabilidad completa:
+   docs/motion-ds-ui-ux-pro-max.md. Vocabulario compartido en motion.css.
+
+   Lo que YA NO se anima (excessive-motion: 1–2 elementos clave por vista;
+   motion-meaning: toda animación expresa causa → efecto):
+   - La barra lateral al cargar, la cascada del encabezado, el «pop» de las
+     insignias «Nuevo» y el aviso de regla sin ejemplo: eran decorativos.
+   - El revelado ligado al scroll (scrub): dejaba contenido a opacidad
+     parcial mientras se leía (opacity-threshold). Ahora se dispara al
+     entrar en pantalla (preset Scroll Reveal). */
+
+/* tap-delay: sin la demora de doble toque en móviles */
+.doc-shell :is(button, a, select, input, summary) { touch-action: manipulation; }
+
+/* ── Indicadores que se deslizan (continuity, nav-state-active) ──────────
+   Un solo elemento viaja entre ítems: transform, no top/height
+   (transform-performance). Curva con resorte (spring-physics); el
+   indicador es fino, la sobreoscilación no ensucia la lectura. */
+.doc-nav { position: relative; }
+.doc-nav-item[aria-current="page"]::before { content: none; }
+.doc-nav-ink {
+  position: absolute; left: 0; top: 0; z-index: 1;
+  width: 3px; height: 1px; border-radius: 3px;
+  background: var(--accent);
+  transform-origin: top;
+  transform: translateY(var(--ink-y, 0px)) scaleY(var(--ink-h, 20));
+  transition: transform var(--dur-reveal-sm) var(--ease-spring), opacity var(--dur-hover) var(--ease-standard);
+  pointer-events: none;
+}
+.doc-tab.is-active { border-bottom-color: transparent; }
+.doc-tab-ink {
+  position: absolute; left: 0; bottom: 0; z-index: 1;
+  width: 1px; height: 2px;
+  background: var(--accent);
+  transform-origin: left;
+  transform: translateX(var(--ink-x, 0px)) scaleX(var(--ink-w, 0));
+  transition: transform var(--dur-reveal-sm) var(--ease-spring);
+  pointer-events: none;
+}
+
+/* ── Estados con transición (state-transition; checklist: hover 150–300ms) ─ */
+.doc-code-copy { transition: background-color var(--dur-hover) var(--ease-standard), scale var(--dur-hover) var(--ease-spring); }
+.doc-link { transition: text-decoration-thickness var(--dur-hover) var(--ease-standard), color var(--dur-hover) var(--ease-standard); }
+.doc-nav-item, .doc-tab, .doc-btn { transition-property: background-color, color, border-color, scale; transition-duration: var(--dur-hover); transition-timing-function: var(--ease-standard); }
+
+/* Hover de tarjetas: desplazamiento < 2px, 150–200ms, ease-out
+   (preset Hover Micro-interaction). */
+.doc-card { transition: border-color var(--dur-hover) var(--ease-out), translate var(--dur-hover) var(--ease-out), scale var(--dur-hover) var(--ease-spring); }
+.doc-card-title svg { transition: translate var(--dur-hover) var(--ease-out); }
+@media (hover: hover) {
+  .doc-card:hover { translate: 0 -1.5px; }
+  .doc-card:hover .doc-card-title svg { translate: 2px 0; }
+}
+
+/* Presionar: escala sutil 0.98 al instante y vuelve con resorte al soltar
+   (press-feedback, scale-feedback 0.95–1.05). */
+.doc-card:active, .doc-btn:active, .doc-code-copy:active, .doc-nav-item:active, .doc-tab:active {
+  scale: 0.98;
+  transition-duration: var(--dur-press);
+}
+
+/* ── Búsqueda: los resultados entran en cascada al cambiar el conjunto ──
+   (stagger-sequence 30–50ms; preset Scroll Reveal: no más de ~8 en cascada) */
+.doc-nav.is-filtered .doc-nav-list > li {
+  animation: m-rise-sm var(--dur-enter) var(--ease-out) both;
+  animation-delay: calc(var(--m-i, 0) * var(--stagger-step-sm));
+}
+.doc-nav.is-filtered .doc-nav-list > li:nth-child(2) { --m-i: 1; }
+.doc-nav.is-filtered .doc-nav-list > li:nth-child(3) { --m-i: 2; }
+.doc-nav.is-filtered .doc-nav-list > li:nth-child(4) { --m-i: 3; }
+.doc-nav.is-filtered .doc-nav-list > li:nth-child(5) { --m-i: 4; }
+.doc-nav.is-filtered .doc-nav-list > li:nth-child(6) { --m-i: 5; }
+.doc-nav.is-filtered .doc-nav-list > li:nth-child(7) { --m-i: 6; }
+.doc-nav.is-filtered .doc-nav-list > li:nth-child(n + 8) { --m-i: 7; }
+/* Sin resultados: se dice y se sugiere (No Results) */
+.doc-nav-empty { animation: m-rise-sm var(--dur-enter) var(--ease-out) both; font-size: var(--fs-small); color: var(--txt2); padding: var(--space-2); }
+.doc-nav-empty p + p { margin-top: var(--space-2); }
+.doc-nav-suggest { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin-top: var(--space-1); }
+.doc-nav-suggest .doc-link { font-size: var(--fs-small); min-height: 32px; }
+
+/* ── Revelado al entrar en pantalla (preset Scroll Reveal) ────────────────
+   Disparado al cruzar ~90% del viewport, 360ms, 12px, curva suave (≈power1.out
+   → --ease-standard), revierte al quedar de nuevo debajo. Solo con
+   data-reveal (lo pone useReveal): sin JS o con movimiento reducido el
+   contenido está visible. Lo que ya estaba en pantalla no anima
+   (is-instant): la página entra con su crossfade. */
+[data-reveal="on"] :is(.doc-section > :not(.doc-rules), .doc-rules > .doc-rule, .doc-changelog > li):not(.is-in) {
+  opacity: 0;
+  translate: 0 var(--reveal-distance);
+}
+[data-reveal="on"] :is(.doc-section > :not(.doc-rules), .doc-rules > .doc-rule, .doc-changelog > li).is-in:not(.is-instant) {
+  animation: m-rise var(--dur-reveal-sm) var(--ease-standard) both;
+}
+/* Grillas: el contenedor queda y sus hijos entran en cascada, máx. 8
+   escalonados (stagger-sequence + preset Stagger List; sin back.out: es UI
+   informativa). */
+[data-reveal="on"] .doc-section > :is(.doc-variants, .doc-color-grid, .doc-icons, .doc-cards, .doc-principles, .doc-stats, .doc-motion-grid, .doc-states, .doc-radius-grid, .doc-elev-grid) {
+  opacity: 1; translate: none; animation: none;
+}
+[data-reveal="on"] .doc-section > :is(.doc-variants, .doc-color-grid, .doc-icons, .doc-cards, .doc-principles, .doc-stats, .doc-motion-grid, .doc-states, .doc-radius-grid, .doc-elev-grid):not(.is-in) > * {
+  opacity: 0; translate: 0 var(--reveal-distance);
+}
+[data-reveal="on"] .doc-section > :is(.doc-variants, .doc-color-grid, .doc-icons, .doc-cards, .doc-principles, .doc-stats, .doc-motion-grid, .doc-states, .doc-radius-grid, .doc-elev-grid).is-in:not(.is-instant) > * {
+  animation: m-rise var(--dur-reveal-sm) var(--ease-standard) both;
+  animation-delay: calc(var(--m-i, 0) * var(--stagger-step-sm));
+}
+.doc-section > * > :nth-child(2) { --m-i: 1; }
+.doc-section > * > :nth-child(3) { --m-i: 2; }
+.doc-section > * > :nth-child(4) { --m-i: 3; }
+.doc-section > * > :nth-child(5) { --m-i: 4; }
+.doc-section > * > :nth-child(6) { --m-i: 5; }
+.doc-section > * > :nth-child(7) { --m-i: 6; }
+.doc-section > * > :nth-child(n + 8) { --m-i: 7; }
+
+/* ── Carga de capturas: esqueleto estable + fundido al llegar ───────────
+   (Loading Indicators: aria-busy y layout reservado por aspect-ratio) */
+.doc-capture-frame { position: relative; }
+.doc-capture-frame.is-loading::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--txt) 6%, transparent), transparent);
+  background-size: 200% 100%;
+  animation: doc-shimmer 1.4s linear infinite; /* continuo solo para carga (Continuous Animation) */
+}
+@keyframes doc-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+.doc-capture-frame img { opacity: 0; transition: opacity var(--dur-reveal) var(--ease-out); }
+.doc-capture-frame img.is-loaded { opacity: 1; }
+
+/* Copiar: el estado nuevo entra en el mismo botón (fade-crossfade) */
+.doc-copy-state { display: inline-flex; align-items: center; gap: 6px; animation: m-rise-sm var(--dur-enter) var(--ease-out) both; }
+
+/* Respeta prefers-reduced-motion (checklist de la skill) */
+@media (prefers-reduced-motion: reduce) {
+  .doc-nav-ink, .doc-tab-ink { transition: none; }
+  .doc-nav.is-filtered .doc-nav-list > li, .doc-nav-empty, .doc-copy-state { animation: none !important; }
+  .doc-capture-frame.is-loading::before { animation: none; }
+  .doc-capture-frame img { transition: none; }
+  .doc-card:hover, .doc-card:hover .doc-card-title svg { translate: none; }
+  .doc-card:active, .doc-btn:active, .doc-code-copy:active, .doc-nav-item:active, .doc-tab:active { scale: 1; }
+}
+
+.doc-x-presence { min-height: 128px; width: 100%; max-width: 320px; display: grid; align-items: center; }
+.doc-copy-state.is-error { color: var(--color-error-text); }
+.doc-mobile-nav select { cursor: pointer; } /* checklist ui-ux-pro-max: cursor-pointer en todo lo clickable */

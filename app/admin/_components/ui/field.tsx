@@ -1,6 +1,7 @@
 "use client"
 
 import { useId, type ReactNode } from "react"
+import { useLatest, usePresence } from "@/lib/motion"
 
 /** Props que Field inyecta en el control: conectan label, ayuda y error. */
 export interface FieldControlProps {
@@ -31,6 +32,10 @@ interface FieldProps {
 // El error se muestra BAJO el campo, no en un toast.
 export function Field({ label, hint, error, required, aside, className = "", children }: FieldProps) {
   const id = useId()
+  // El error entra al validar y se desvanece al corregirlo, con su texto
+  // hasta el final de la salida (lib/motion).
+  const err = usePresence(!!error)
+  const errText = useLatest(error, err.exiting)
   const hintId = hint ? `${id}-hint` : undefined
   const errorId = error ? `${id}-error` : undefined
   const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined
@@ -50,7 +55,9 @@ export function Field({ label, hint, error, required, aside, className = "", chi
         ...(error ? { "aria-invalid": true as const } : {}),
         ...(required ? { "aria-required": true as const } : {}),
       }, { labelId: `${id}-label`, invalid: !!error })}
-      {error && <p id={errorId} className="a-field-error">{error}</p>}
+      {err.mounted && (
+        <p id={err.exiting ? undefined : errorId} className={`a-field-error${err.exiting ? " is-exiting" : ""}`}>{errText}</p>
+      )}
       {hint && <p id={hintId} className="a-field-hint">{hint}</p>}
     </div>
   )
