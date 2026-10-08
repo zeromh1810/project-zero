@@ -6,7 +6,7 @@ import { useTheme } from "@/lib/context/theme-context"
 import * as Icons from "@/components/portfolio/icons"
 import { AlertIcon, ArrowRightIcon, TrashIcon } from "@/components/portfolio/icons"
 import {
-  A11yChecklist, ContrastTable, DocPage, Example, Prose, Rules, Section, TokenTable, UsageRule, WhenToUse,
+  A11yChecklist, CodeBlock, ContrastTable, DocPage, Example, Prose, Rules, Section, TokenTable, UsageRule, WhenToUse,
 } from "../ui/doc"
 import { PageCard, PageLink } from "../ui/nav"
 import { DS_VERSION } from "../lib/tokens"
@@ -708,6 +708,9 @@ export function PageMovimiento() {
             <Example code={`import { usePresence, Switch, leaveThen } from "@/lib/motion"\n\n// Salida de algo condicional\nconst p = usePresence(open)\n{p.mounted && <div className={p.exiting ? "m-exit" : "m-enter"} />}\n\n// Cambio de vista: la anterior sale y la nueva entra\n<Switch k={tab} render={(k) => <Seccion id={k} />} />\n\n// Eliminar con salida (vuelve si la acción falla)\nleaveThen(item, () => borrar(id))`}>
               <ListDemo />
             </Example>
+          </Section>
+          <Section title="Leer duraciones desde JS" intro={<p>Para animar con la Web Animations API o esperar con un timer, lee el token con <code>tokenMs()</code> (o <code>motionMs()</code>, que además da 0 con movimiento reducido). Nunca con <code>parseFloat</code> a secas: el CSS de producción se minifica y sirve <code>420ms</code> como <code>.42s</code>, así la animación duraría 0.42ms y parecería un corte.</p>}>
+            <CodeBlock code={`import { tokenMs, motionMs } from "@/lib/motion"\n\n// Siempre en ms, venga en ms o en s\nel.animate(frames, { duration: tokenMs("--dur-enter", 240), easing: "cubic-bezier(0.16, 1, 0.3, 1)" })\n\n// Timer de salida: 0 con movimiento reducido\nsetTimeout(unmount, motionMs("--dur-exit"))\n\n// ✗ parseFloat(getComputedStyle(root).getPropertyValue("--dur-enter")) → 0.24`} />
           </Section>
         </> },
       ]}
